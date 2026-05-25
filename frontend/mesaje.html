@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Mesaje - JobPart</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 font-sans">
+  <nav class="bg-white shadow-sm">
+    <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
+      <a href="/static/index.html" class="text-2xl font-bold text-blue-600">Job<span class="text-gray-800">Part</span></a>
+      <div class="flex items-center gap-4">
+        <a href="/static/notificari.html" id="nav-notif-bell" class="relative inline-flex items-center text-gray-600 hover:text-blue-600">
+          <span class="text-xl">🔔</span>
+          <span class="notif-badge hidden absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold min-w-[16px] h-4 rounded-full flex items-center justify-center px-1 leading-none"></span>
+        </a>
+        <span class="text-gray-700 font-medium" id="nav-username"></span>
+        <button onclick="logout()" class="px-4 py-2 rounded-lg bg-red-500 text-white hover:bg-red-600 font-medium">Ieșire</button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="max-w-5xl mx-auto px-4 py-8">
+    <h1 class="text-3xl font-bold text-gray-800 mb-6">Mesaje</h1>
+
+    <div class="grid md:grid-cols-3 gap-6">
+      <!-- Sidebar -->
+      <div class="space-y-3">
+        <button onclick="switchTab('inbox')" id="btn-inbox"
+          class="w-full text-left px-4 py-3 rounded-xl bg-blue-600 text-white font-semibold flex items-center justify-between">
+          <span>📥 Inbox</span>
+          <span id="badge-inbox" class="hidden bg-white text-blue-600 text-xs font-bold px-2 py-0.5 rounded-full"></span>
+        </button>
+        <button onclick="switchTab('trimise')" id="btn-trimise"
+          class="w-full text-left px-4 py-3 rounded-xl border border-gray-200 text-gray-600 font-semibold hover:bg-gray-50">
+          📤 Trimise
+        </button>
+        <button onclick="switchTab('nou')" id="btn-nou"
+          class="w-full text-left px-4 py-3 rounded-xl bg-green-600 text-white font-semibold hover:bg-green-700">
+          ✏️ Mesaj nou
+        </button>
+      </div>
+
+      <!-- Conținut -->
+      <div class="md:col-span-2">
+        <!-- Inbox -->
+        <div id="tab-inbox">
+          <div id="inbox-list"><div class="text-center py-10 text-gray-400">Se încarcă...</div></div>
+        </div>
+
+        <!-- Trimise -->
+        <div id="tab-trimise" class="hidden">
+          <div id="trimise-list"><div class="text-center py-10 text-gray-400">Se încarcă...</div></div>
+        </div>
+
+        <!-- Mesaj nou -->
+        <div id="tab-nou" class="hidden">
+          <div class="bg-white rounded-xl shadow-sm p-6">
+            <h2 class="text-xl font-bold text-gray-800 mb-5">Trimite un mesaj</h2>
+            <div id="msg-mesaj" class="hidden mb-4"></div>
+            <form id="msg-form" class="space-y-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">ID destinatar</label>
+                <input type="number" id="destinatar-id" placeholder="ID-ul utilizatorului"
+                  class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                <p class="text-xs text-gray-400 mt-1">Găsești ID-ul în URL-ul profilului utilizatorului</p>
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Subiect</label>
+                <input type="text" id="msg-subiect" placeholder="Subiectul mesajului"
+                  class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+              </div>
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Mesaj</label>
+                <textarea id="msg-continut" rows="6" placeholder="Scrie mesajul tău..."
+                  class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+              </div>
+              <button type="submit" class="bg-blue-600 text-white px-8 py-3 rounded-xl font-semibold hover:bg-blue-700">
+                Trimite mesajul
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/static/js/api.js"></script>
+  <script>
+    const user = getUser();
+    if (!user) window.location.href = "/static/login.html";
+    document.getElementById("nav-username").textContent = user?.nume || "";
+
+    function switchTab(tab) {
+      ["inbox","trimise","nou"].forEach(t => {
+        document.getElementById(`tab-${t}`).classList.toggle("hidden", t !== tab);
+        const btn = document.getElementById(`btn-${t}`);
+        if (t === tab) btn.className = "w-full text-left px-4 py-3 rounded-xl bg-blue-600 text-white font-semibold flex items-center justify-between";
+        else if (t === "nou") btn.className = "w-full text-left px-4 py-3 rounded-xl bg-green-600 text-white font-semibold hover:bg-green-700";
+        else btn.className = "w-full text-left px-4 py-3 rounded-xl border border-gray-200 text-gray-600 font-semibold hover:bg-gray-50";
+      });
+    }
+
+    function randMesaj(m, tip) {
+      const cine = tip === "inbox"
+        ? `De la: <strong>${escapeHtml(m.expeditor_nume)}</strong>`
+        : `Către: <strong>${escapeHtml(m.destinatar_nume)}</strong>`;
+      return `
+        <div class="bg-white rounded-xl shadow-sm p-5 mb-3 ${!m.citit && tip === 'inbox' ? 'border-l-4 border-blue-500' : ''} cursor-pointer hover:shadow-md transition"
+          onclick="deschideMesaj(${m.id}, '${tip}', this)">
+          <div class="flex justify-between items-start mb-1">
+            <p class="font-semibold text-gray-800 ${!m.citit && tip === 'inbox' ? 'text-blue-700' : ''}">${escapeHtml(m.subiect)}</p>
+            <span class="text-xs text-gray-400 whitespace-nowrap ml-3">${formatData(m.creat_la)}</span>
+          </div>
+          <p class="text-sm text-gray-500 mb-2">${cine}</p>
+          <p class="text-gray-600 text-sm line-clamp-2 hidden mesaj-continut" style="white-space:pre-wrap">${escapeHtml(m.continut)}</p>
+        </div>`;
+    }
+
+    async function deschideMesaj(id, tip, el) {
+      el.querySelector(".mesaj-continut").classList.toggle("hidden");
+      if (tip === "inbox") {
+        await apiFetch(`/mesaje/${id}/citit`, { method: "PUT" });
+        el.classList.remove("border-l-4", "border-blue-500");
+        el.querySelector("p").classList.remove("text-blue-700");
+        incarcaBadge();
+      }
+    }
+
+    async function incarcaInbox() {
+      const msgs = await apiFetch("/mesaje/inbox");
+      const c = document.getElementById("inbox-list");
+      c.innerHTML = msgs.length === 0
+        ? '<div class="text-center py-16 text-gray-400"><div class="text-5xl mb-3">📭</div><p>Inbox gol.</p></div>'
+        : msgs.map(m => randMesaj(m, "inbox")).join("");
+    }
+
+    async function incarcaTrimise() {
+      const msgs = await apiFetch("/mesaje/trimise");
+      const c = document.getElementById("trimise-list");
+      c.innerHTML = msgs.length === 0
+        ? '<div class="text-center py-16 text-gray-400"><div class="text-5xl mb-3">📤</div><p>Niciun mesaj trimis.</p></div>'
+        : msgs.map(m => randMesaj(m, "trimis")).join("");
+    }
+
+    async function incarcaBadge() {
+      const r = await apiFetch("/mesaje/necitite/count");
+      const badge = document.getElementById("badge-inbox");
+      if (r.count > 0) { badge.textContent = r.count; badge.classList.remove("hidden"); }
+      else badge.classList.add("hidden");
+    }
+
+    document.getElementById("msg-form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const mesajEl = document.getElementById("msg-mesaj");
+      mesajEl.classList.add("hidden");
+      try {
+        await apiFetch("/mesaje", {
+          method: "POST",
+          body: JSON.stringify({
+            destinatar_id: parseInt(document.getElementById("destinatar-id").value),
+            subiect: document.getElementById("msg-subiect").value,
+            continut: document.getElementById("msg-continut").value,
+          }),
+        });
+        mesajEl.className = "bg-green-50 border border-green-200 text-green-700 rounded-xl px-4 py-3 mb-4";
+        mesajEl.textContent = "Mesaj trimis cu succes!";
+        mesajEl.classList.remove("hidden");
+        document.getElementById("msg-form").reset();
+        incarcaTrimise();
+      } catch (err) {
+        mesajEl.className = "bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3 mb-4";
+        mesajEl.textContent = err.message;
+        mesajEl.classList.remove("hidden");
+      }
+    });
+
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("destinatar")) {
+      document.getElementById("destinatar-id").value = params.get("destinatar");
+      switchTab("nou");
+    }
+
+    incarcaInbox();
+    incarcaTrimise();
+    incarcaBadge();
+    initNotifBell();
+  </script>
+</body>
+</html>

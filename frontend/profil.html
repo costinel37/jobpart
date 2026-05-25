@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Profil - JobPart</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 font-sans">
+
+  <nav class="bg-white shadow-sm sticky top-0 z-50">
+    <div class="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
+      <a href="/static/index.html" class="text-2xl font-bold text-blue-600">Job<span class="text-gray-800">Part</span></a>
+      <div class="flex items-center gap-4">
+        <a href="/static/jobs.html" class="text-gray-600 hover:text-blue-600 font-medium">Joburi</a>
+        <div id="nav-auth" class="flex gap-2">
+          <a href="/static/login.html" class="px-4 py-2 rounded-lg border border-blue-600 text-blue-600 hover:bg-blue-50 font-medium">Login</a>
+        </div>
+        <div id="nav-user" class="hidden flex items-center gap-3">
+          <a id="nav-dashboard" href="#" class="text-gray-600 hover:text-blue-600 font-medium">Dashboard</a>
+          <span class="text-gray-700 font-medium" id="nav-username"></span>
+          <button onclick="logout()" class="px-4 py-2 rounded-lg bg-red-500 text-white hover:bg-red-600 font-medium">Ieșire</button>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <div class="max-w-4xl mx-auto px-4 py-10">
+    <!-- Profil header -->
+    <div id="profil-header" class="bg-white rounded-2xl shadow-sm p-8 mb-6">
+      <div class="text-center py-8 text-gray-400">Se încarcă...</div>
+    </div>
+
+    <!-- Rating sumar -->
+    <div id="rating-sumar" class="bg-white rounded-2xl shadow-sm p-6 mb-6 hidden">
+      <div class="flex items-center gap-6">
+        <div class="text-center">
+          <div id="rating-medie-mare" class="text-6xl font-bold text-blue-600"></div>
+          <div id="stele-mari" class="text-2xl my-1"></div>
+          <div id="rating-total" class="text-gray-500 text-sm"></div>
+        </div>
+        <div class="flex-1" id="rating-bare"></div>
+      </div>
+    </div>
+
+    <!-- Formular recenzie -->
+    <div id="formular-recenzie" class="hidden bg-white rounded-2xl shadow-sm p-6 mb-6 border-2 border-blue-100">
+      <h2 class="text-xl font-bold text-gray-800 mb-5">Lasă o recenzie</h2>
+      <div id="review-mesaj" class="hidden mb-4"></div>
+
+      <!-- Stele interactive -->
+      <div class="mb-5">
+        <label class="block text-sm font-medium text-gray-700 mb-2">Rating *</label>
+        <div id="stele-input" class="flex gap-2">
+          <span data-val="1" onclick="seteazaRating(1)" class="stea text-4xl cursor-pointer text-gray-300 hover:text-yellow-400 transition-colors">★</span>
+          <span data-val="2" onclick="seteazaRating(2)" class="stea text-4xl cursor-pointer text-gray-300 hover:text-yellow-400 transition-colors">★</span>
+          <span data-val="3" onclick="seteazaRating(3)" class="stea text-4xl cursor-pointer text-gray-300 hover:text-yellow-400 transition-colors">★</span>
+          <span data-val="4" onclick="seteazaRating(4)" class="stea text-4xl cursor-pointer text-gray-300 hover:text-yellow-400 transition-colors">★</span>
+          <span data-val="5" onclick="seteazaRating(5)" class="stea text-4xl cursor-pointer text-gray-300 hover:text-yellow-400 transition-colors">★</span>
+        </div>
+        <p id="rating-label" class="text-sm text-gray-500 mt-1">Selectează un rating</p>
+      </div>
+
+      <div class="mb-5">
+        <label class="block text-sm font-medium text-gray-700 mb-2">Comentariu (opțional)</label>
+        <textarea id="review-comentariu" rows="4"
+          placeholder="Descrie experiența ta cu acest utilizator..."
+          class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+      </div>
+
+      <button onclick="trimiteRecenzie()"
+        class="bg-blue-600 text-white px-8 py-3 rounded-xl font-semibold hover:bg-blue-700 transition">
+        Publică recenzia
+      </button>
+    </div>
+
+    <!-- Lista recenzii -->
+    <div>
+      <h2 class="text-xl font-bold text-gray-800 mb-4">Recenzii primite</h2>
+      <div id="recenzii-lista">
+        <div class="text-center py-8 text-gray-400">Se încarcă...</div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/static/js/api.js"></script>
+  <script>
+    updateNav();
+
+    const userId = new URLSearchParams(window.location.search).get("id");
+    const userCurent = getUser();
+    let ratingSelectat = 0;
+
+    const RATING_LABELS = ["", "Slab", "Sub medie", "Ok", "Bun", "Excelent"];
+
+    function stele(rating, size = "text-xl") {
+      return Array.from({length: 5}, (_, i) =>
+        `<span class="${size} ${i < rating ? 'text-yellow-400' : 'text-gray-300'}">★</span>`
+      ).join("");
+    }
+
+    function seteazaRating(val) {
+      ratingSelectat = val;
+      document.querySelectorAll(".stea").forEach((s, i) => {
+        s.classList.toggle("text-yellow-400", i < val);
+        s.classList.toggle("text-gray-300", i >= val);
+      });
+      document.getElementById("rating-label").textContent = RATING_LABELS[val];
+    }
+
+    async function incarcaProfil() {
+      try {
+        const profil = await apiFetch(`/auth/utilizator/${userId}`);
+        const rolLabel = profil.rol === "angajator" ? "🏢 Angajator" : profil.rol === "candidat" ? "👤 Candidat" : "⚙️ Admin";
+
+        document.getElementById("profil-header").innerHTML = `
+          <div class="flex flex-col md:flex-row items-center md:items-start gap-6">
+            <div class="w-20 h-20 rounded-full bg-blue-600 text-white text-3xl flex items-center justify-center font-bold flex-shrink-0">
+              ${profil.nume.charAt(0).toUpperCase()}
+            </div>
+            <div class="text-center md:text-left flex-1">
+              <h1 class="text-3xl font-bold text-gray-800 mb-1">${profil.nume}</h1>
+              <span class="inline-block bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm font-medium mb-3">${rolLabel}</span>
+              ${profil.oras ? `<p class="text-gray-500">📍 ${profil.oras}</p>` : ''}
+              ${profil.despre ? `<p class="text-gray-600 mt-3 max-w-lg">${profil.despre}</p>` : ''}
+              <p class="text-gray-400 text-sm mt-3">Membru din ${formatData(profil.creat_la)}</p>
+            </div>
+          </div>`;
+
+        document.title = `${profil.nume} - JobPart`;
+      } catch {
+        document.getElementById("profil-header").innerHTML =
+          '<p class="text-red-400 text-center">Profilul nu a putut fi încărcat.</p>';
+      }
+    }
+
+    async function incarcaRating() {
+      try {
+        const r = await apiFetch(`/recenzii/utilizator/${userId}/medie`);
+        if (r.total === 0) return;
+
+        document.getElementById("rating-sumar").classList.remove("hidden");
+        document.getElementById("rating-medie-mare").textContent = r.medie.toFixed(1);
+        document.getElementById("stele-mari").innerHTML = stele(Math.round(r.medie), "text-3xl");
+        document.getElementById("rating-total").textContent = `${r.total} recenzii`;
+      } catch {}
+    }
+
+    async function incarcaRecenzii() {
+      try {
+        const lista = await apiFetch(`/recenzii/utilizator/${userId}`);
+        const container = document.getElementById("recenzii-lista");
+
+        if (lista.length === 0) {
+          container.innerHTML = `
+            <div class="bg-white rounded-xl p-8 text-center text-gray-400">
+              <div class="text-4xl mb-3">💬</div>
+              <p>Nicio recenzie încă.</p>
+            </div>`;
+          return;
+        }
+
+        container.innerHTML = lista.map(r => `
+          <div class="bg-white rounded-xl shadow-sm p-5 mb-4">
+            <div class="flex justify-between items-start mb-3">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-gray-200 text-gray-600 text-lg flex items-center justify-center font-bold">
+                  ${r.autor_nume.charAt(0).toUpperCase()}
+                </div>
+                <div>
+                  <p class="font-semibold text-gray-800">${r.autor_nume}</p>
+                  <p class="text-gray-400 text-xs">${formatData(r.creat_la)}</p>
+                </div>
+              </div>
+              <div class="flex flex-col items-end gap-1">
+                <div>${stele(r.rating)}</div>
+                ${userCurent?.id == r.autor_id ? `
+                  <button onclick="stergeRecenzie(${r.id})"
+                    class="text-red-400 hover:text-red-600 text-xs hover:underline">Șterge</button>` : ''}
+              </div>
+            </div>
+            ${r.comentariu ? `<p class="text-gray-600 leading-relaxed">${r.comentariu}</p>` : ''}
+          </div>`).join("");
+      } catch {
+        document.getElementById("recenzii-lista").innerHTML =
+          '<p class="text-red-400 text-center py-4">Eroare la încărcarea recenziilor.</p>';
+      }
+    }
+
+    async function trimiteRecenzie() {
+      const mesajEl = document.getElementById("review-mesaj");
+      mesajEl.classList.add("hidden");
+
+      if (ratingSelectat === 0) {
+        mesajEl.className = "bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3 mb-4";
+        mesajEl.textContent = "Te rugăm să selectezi un rating (1-5 stele).";
+        mesajEl.classList.remove("hidden");
+        return;
+      }
+
+      try {
+        await apiFetch("/recenzii", {
+          method: "POST",
+          body: JSON.stringify({
+            subiect_id: parseInt(userId),
+            rating: ratingSelectat,
+            comentariu: document.getElementById("review-comentariu").value || null,
+          }),
+        });
+
+        mesajEl.className = "bg-green-50 border border-green-200 text-green-700 rounded-xl px-4 py-3 mb-4";
+        mesajEl.textContent = "Recenzia a fost publicată! Mulțumim.";
+        mesajEl.classList.remove("hidden");
+        document.getElementById("review-comentariu").value = "";
+        seteazaRating(0);
+        ratingSelectat = 0;
+        incarcaRating();
+        incarcaRecenzii();
+      } catch (err) {
+        mesajEl.className = "bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3 mb-4";
+        mesajEl.textContent = err.message;
+        mesajEl.classList.remove("hidden");
+      }
+    }
+
+    async function stergeRecenzie(id) {
+      if (!confirm("Ștergi această recenzie?")) return;
+      try {
+        await apiFetch(`/recenzii/${id}`, { method: "DELETE" });
+        incarcaRating();
+        incarcaRecenzii();
+      } catch (e) { alert(e.message); }
+    }
+
+    if (!userId) { window.location.href = "/static/index.html"; }
+    else {
+      incarcaProfil();
+      incarcaRating();
+      incarcaRecenzii();
+
+      // Arată formularul doar dacă e logat și nu e propriul profil
+      if (userCurent && userCurent.id != userId) {
+        document.getElementById("formular-recenzie").classList.remove("hidden");
+      }
+    }
+  </script>
+</body>
+</html>

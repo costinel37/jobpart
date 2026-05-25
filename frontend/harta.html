@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hartă Joburi - JobPart</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <style>
+    #map { height: calc(100vh - 130px); width: 100%; }
+    .leaflet-popup-content { font-family: Arial, sans-serif; min-width: 220px; }
+    .job-popup-titlu { font-weight: bold; font-size: 15px; margin-bottom: 4px; color: #1e40af; }
+    .job-popup-companie { color: #2563eb; margin-bottom: 6px; }
+    .job-popup-info { color: #6b7280; font-size: 13px; }
+    .autocomplete-list { position: absolute; z-index: 1000; background: white; border: 1px solid #d1d5db;
+      border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); max-height: 200px; overflow-y: auto; width: 100%; }
+    .autocomplete-item { padding: 8px 14px; cursor: pointer; font-size: 14px; }
+    .autocomplete-item:hover { background: #eff6ff; color: #2563eb; }
+  </style>
+</head>
+<body class="bg-gray-50 font-sans">
+
+  <nav class="bg-white shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+      <a href="/static/index.html" class="text-2xl font-bold text-blue-600">Job<span class="text-gray-800">Part</span></a>
+      <div class="flex items-center gap-3">
+        <a href="/static/jobs.html" class="text-gray-600 hover:text-blue-600 font-medium">Listă</a>
+        <span class="text-blue-600 font-semibold">🗺 Hartă</span>
+        <div id="nav-auth" class="flex gap-2">
+          <a href="/static/login.html" class="px-3 py-2 rounded-lg border border-blue-600 text-blue-600 hover:bg-blue-50 font-medium text-sm">Login</a>
+          <a href="/static/register.html" class="px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 font-medium text-sm">Înregistrare</a>
+        </div>
+        <div id="nav-user" class="hidden flex items-center gap-3">
+          <a id="nav-dashboard" href="#" class="text-gray-600 hover:text-blue-600 font-medium text-sm">Dashboard</a>
+          <span class="text-gray-700 font-medium text-sm" id="nav-username"></span>
+          <button onclick="logout()" class="px-3 py-2 rounded-lg bg-red-500 text-white hover:bg-red-600 font-medium text-sm">Ieșire</button>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Bara de control -->
+  <div class="bg-white border-b border-gray-200 px-4 py-2 flex flex-wrap items-center gap-3">
+
+    <!-- Autocomplete oraș -->
+    <div class="relative flex-1 min-w-48">
+      <input id="cauta-oras" type="text" placeholder="🔍 Caută după oraș..."
+        autocomplete="off"
+        class="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+        oninput="autocompleteOras(this.value)"
+        onkeydown="handleAutocompleteKey(event)" />
+      <div id="autocomplete-list" class="autocomplete-list hidden"></div>
+    </div>
+
+    <!-- Selector rază -->
+    <div class="flex items-center gap-2">
+      <label class="text-sm text-gray-600 whitespace-nowrap">Rază:</label>
+      <select id="raza" onchange="daca_gps_activ()"
+        class="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+        <option value="10">10 km</option>
+        <option value="25" selected>25 km</option>
+        <option value="50">50 km</option>
+        <option value="100">100 km</option>
+      </select>
+    </div>
+
+    <!-- Buton GPS -->
+    <button id="btn-langa-mine" onclick="joburi_langa_mine()"
+      class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 font-medium text-sm flex items-center gap-2 whitespace-nowrap">
+      📍 Lângă mine
+    </button>
+
+    <!-- Buton toate -->
+    <button onclick="incarcaToateJoburile()"
+      class="border border-gray-300 text-gray-600 px-4 py-2 rounded-lg hover:bg-gray-50 font-medium text-sm whitespace-nowrap">
+      Toate joburile
+    </button>
+
+    <!-- Counter -->
+    <span id="job-count" class="text-gray-500 text-sm whitespace-nowrap"></span>
+  </div>
+
+  <!-- Harta -->
+  <div id="map"></div>
+
+  <script src="/static/js/api.js"></script>
+  <script>
+    updateNav();
+
+    // ===== ORAȘE ROMÂNIA (autocomplete) =====
+    const ORASE_RO = [
+      "Alba Iulia","Alexandria","Arad","Bacău","Baia Mare","Bistrița","Botoșani",
+      "Brăila","Brașov","București","Buzău","Călărași","Cluj-Napoca","Constanța",
+      "Craiova","Deva","Drobeta-Turnu Severin","Deva","Focșani","Galați","Giurgiu",
+      "Iași","Miercurea Ciuc","Oradea","Piatra Neamț","Pitești","Ploiești","Râmnicu Vâlcea",
+      "Reșița","Satu Mare","Sfântu Gheorghe","Sibiu","Slatina","Slobozia","Suceava",
+      "Târgoviște","Târgu Jiu","Târgu Mureș","Timișoara","Tulcea","Vaslui","Zalău","Dej",
+      "Mediaș","Turda","Câmpina","Hunedoara","Petroșani","Roman","Lugoj","Odorheiu Secuiesc",
+    ].sort();
+
+    let harta, marcatori = [], pozitie_user = null, gps_activ = false;
+
+    function initHarta() {
+      harta = L.map("map").setView([45.9432, 24.9668], 7); // centrul României
+
+      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+        attribution: '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
+        maxZoom: 19,
+      }).addTo(harta);
+
+      incarcaToateJoburile();
+    }
+
+    const iconJob = L.divIcon({
+      html: `<div style="background:#2563eb;color:white;border-radius:50%;width:32px;height:32px;
+               display:flex;align-items:center;justify-content:center;font-size:16px;
+               box-shadow:0 2px 6px rgba(0,0,0,0.3);border:2px solid white;">💼</div>`,
+      className: "",
+      iconSize: [32, 32],
+      iconAnchor: [16, 32],
+    });
+
+    const iconUser = L.divIcon({
+      html: `<div style="background:#10b981;color:white;border-radius:50%;width:36px;height:36px;
+               display:flex;align-items:center;justify-content:center;font-size:18px;
+               box-shadow:0 2px 8px rgba(0,0,0,0.4);border:3px solid white;">📍</div>`,
+      className: "",
+      iconSize: [36, 36],
+      iconAnchor: [18, 36],
+    });
+
+    function curata_marcatori() {
+      marcatori.forEach(m => harta.removeLayer(m));
+      marcatori = [];
+    }
+
+    function adauga_job_pe_harta(job) {
+      if (!job.lat || !job.lng) return;
+      const salariu = job.salariu_min
+        ? `${job.salariu_min.toLocaleString()}${job.salariu_max ? '–' + job.salariu_max.toLocaleString() : '+'} RON`
+        : "Negociabil";
+      const m = L.marker([job.lat, job.lng], { icon: iconJob })
+        .bindPopup(`
+          <div class="job-popup-titlu">${job.titlu}</div>
+          <div class="job-popup-companie">${job.companie}</div>
+          <div class="job-popup-info">📍 ${job.oras}</div>
+          <div class="job-popup-info">💰 ${salariu}</div>
+          ${job.categorie ? `<div class="job-popup-info">🏷 ${job.categorie}</div>` : ''}
+          <a href="/static/job-detalii.html?id=${job.id}"
+            style="display:inline-block;margin-top:10px;background:#2563eb;color:white;
+                   padding:6px 14px;border-radius:8px;text-decoration:none;font-size:13px;font-weight:600;">
+            Vezi job →
+          </a>`)
+        .addTo(harta);
+      marcatori.push(m);
+    }
+
+    async function incarcaToateJoburile() {
+      gps_activ = false;
+      curata_marcatori();
+      try {
+        const jobs = await apiFetch("/jobs/harta");
+        jobs.forEach(adauga_job_pe_harta);
+        document.getElementById("job-count").textContent = `${jobs.length} joburi pe hartă`;
+        if (jobs.length > 0) harta.setView([45.9432, 24.9668], 7);
+      } catch {
+        document.getElementById("job-count").textContent = "Eroare la încărcare";
+      }
+    }
+
+    function joburi_langa_mine() {
+      const btn = document.getElementById("btn-langa-mine");
+      btn.textContent = "⏳ Se detectează...";
+      btn.disabled = true;
+
+      if (!navigator.geolocation) {
+        alert("Browserul tău nu suportă geolocation.");
+        btn.textContent = "📍 Lângă mine";
+        btn.disabled = false;
+        return;
+      }
+
+      navigator.geolocation.getCurrentPosition(
+        async (pos) => {
+          pozitie_user = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+          gps_activ = true;
+          await incarcaNearby(pozitie_user.lat, pozitie_user.lng);
+          btn.textContent = "📍 Lângă mine";
+          btn.disabled = false;
+        },
+        (err) => {
+          alert("Nu s-a putut detecta locația. Verifică permisiunile browserului.");
+          btn.textContent = "📍 Lângă mine";
+          btn.disabled = false;
+        },
+        { timeout: 10000, enableHighAccuracy: true }
+      );
+    }
+
+    async function daca_gps_activ() {
+      if (gps_activ && pozitie_user) {
+        await incarcaNearby(pozitie_user.lat, pozitie_user.lng);
+      }
+    }
+
+    async function incarcaNearby(lat, lng) {
+      curata_marcatori();
+      const raza = document.getElementById("raza").value;
+
+      // Marchează poziția utilizatorului
+      const mUser = L.marker([lat, lng], { icon: iconUser })
+        .bindPopup("<strong>📍 Poziția ta</strong>")
+        .addTo(harta);
+      marcatori.push(mUser);
+
+      // Cerc de rază
+      const cerc = L.circle([lat, lng], {
+        radius: raza * 1000,
+        color: "#2563eb",
+        fillColor: "#bfdbfe",
+        fillOpacity: 0.15,
+        weight: 2,
+      }).addTo(harta);
+      marcatori.push(cerc);
+      harta.fitBounds(cerc.getBounds());
+
+      try {
+        const jobs = await apiFetch(`/jobs/nearby?lat=${lat}&lng=${lng}&raza_km=${raza}`);
+        jobs.forEach(adauga_job_pe_harta);
+        document.getElementById("job-count").textContent =
+          jobs.length === 0
+            ? `Niciun job în ${raza} km`
+            : `${jobs.length} joburi în ${raza} km de tine`;
+      } catch {
+        document.getElementById("job-count").textContent = "Eroare la încărcare";
+      }
+    }
+
+    // ===== AUTOCOMPLETE ORAȘE =====
+    let autocompleteIndex = -1;
+
+    function autocompleteOras(val) {
+      const lista = document.getElementById("autocomplete-list");
+      if (!val || val.length < 2) { lista.classList.add("hidden"); return; }
+
+      const potriviri = ORASE_RO.filter(o => o.toLowerCase().startsWith(val.toLowerCase())).slice(0, 8);
+      if (potriviri.length === 0) { lista.classList.add("hidden"); return; }
+
+      lista.innerHTML = potriviri.map((o, i) =>
+        `<div class="autocomplete-item" data-index="${i}" onmousedown="selecteazaOras('${o}')">${o}</div>`
+      ).join("");
+      lista.classList.remove("hidden");
+      autocompleteIndex = -1;
+    }
+
+    function handleAutocompleteKey(e) {
+      const lista = document.getElementById("autocomplete-list");
+      const items = lista.querySelectorAll(".autocomplete-item");
+      if (e.key === "ArrowDown") {
+        autocompleteIndex = Math.min(autocompleteIndex + 1, items.length - 1);
+      } else if (e.key === "ArrowUp") {
+        autocompleteIndex = Math.max(autocompleteIndex - 1, -1);
+      } else if (e.key === "Enter" && autocompleteIndex >= 0) {
+        selecteazaOras(items[autocompleteIndex].textContent);
+        return;
+      } else if (e.key === "Escape") {
+        lista.classList.add("hidden");
+        return;
+      }
+      items.forEach((el, i) => el.classList.toggle("bg-blue-50", i === autocompleteIndex));
+    }
+
+    async function selecteazaOras(oras) {
+      document.getElementById("cauta-oras").value = oras;
+      document.getElementById("autocomplete-list").classList.add("hidden");
+      gps_activ = false;
+      curata_marcatori();
+
+      // Geocodare client-side via Nominatim pentru centrul hărții
+      try {
+        const r = await fetch(
+          `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(oras + ", Romania")}&format=json&limit=1&countrycodes=ro`,
+          { headers: { "User-Agent": "JobPart-App/1.0" } }
+        );
+        const d = await r.json();
+        if (d.length > 0) {
+          const lat = parseFloat(d[0].lat), lng = parseFloat(d[0].lon);
+          harta.setView([lat, lng], 12);
+        }
+      } catch {}
+
+      // Filtrează joburile după oraș
+      try {
+        const jobs = await apiFetch(`/jobs?oras=${encodeURIComponent(oras)}&per_pagina=100`);
+        jobs.forEach(adauga_job_pe_harta);
+        document.getElementById("job-count").textContent =
+          jobs.length === 0 ? `Niciun job în ${oras}` : `${jobs.length} joburi în ${oras}`;
+      } catch {}
+    }
+
+    // Ascunde lista autocomplete la click în afară
+    document.addEventListener("click", (e) => {
+      if (!e.target.closest("#cauta-oras") && !e.target.closest("#autocomplete-list")) {
+        document.getElementById("autocomplete-list").classList.add("hidden");
+      }
+    });
+
+    initHarta();
+  </script>
+</body>
+</html>

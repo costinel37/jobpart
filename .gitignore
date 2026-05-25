@@ -1,0 +1,9 @@
+.env
+__pycache__/
+*.pyc
+*.pyo
+backend/joburi.db
+backend/uploads/
+*.egg-info/
+.venv/
+venv/

@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>JobPart - Joburi Part-Time România</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 font-sans">
+
+  <!-- Navbar -->
+  <nav class="bg-white shadow-sm sticky top-0 z-50">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+      <a href="/static/index.html" class="text-2xl font-bold text-blue-600">Job<span class="text-gray-800">Part</span></a>
+      <div class="flex items-center gap-4">
+        <a href="/static/jobs.html" class="text-gray-600 hover:text-blue-600 font-medium">Joburi</a>
+        <a href="/static/harta.html" class="text-gray-600 hover:text-blue-600 font-medium">🗺 Hartă</a>
+        <div id="nav-auth" class="flex gap-2">
+          <a href="/static/login.html" class="px-4 py-2 rounded-lg border border-blue-600 text-blue-600 hover:bg-blue-50 font-medium">Login</a>
+          <a href="/static/register.html" class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 font-medium">Înregistrare</a>
+        </div>
+        <div id="nav-user" class="hidden flex items-center gap-3">
+          <a id="nav-dashboard" href="#" class="text-gray-600 hover:text-blue-600 font-medium">Dashboard</a>
+          <a href="/static/mesaje.html" class="text-gray-600 hover:text-blue-600 font-medium">✉️ Mesaje</a>
+          <a href="/static/notificari.html" id="nav-notif-bell" class="relative inline-flex items-center text-gray-600 hover:text-blue-600">
+            <span class="text-xl">🔔</span>
+            <span class="notif-badge hidden absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold min-w-[16px] h-4 rounded-full flex items-center justify-center px-1 leading-none"></span>
+          </a>
+          <span class="text-gray-700 font-medium" id="nav-username"></span>
+          <button onclick="logout()" class="px-4 py-2 rounded-lg bg-red-500 text-white hover:bg-red-600 font-medium">Ieșire</button>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <section class="bg-gradient-to-br from-blue-600 to-blue-800 text-white py-20 px-4">
+    <div class="max-w-4xl mx-auto text-center">
+      <h1 class="text-5xl font-bold mb-4">Găsește jobul part-time perfect</h1>
+      <p class="text-xl text-blue-100 mb-10">Sute de oportunități pentru studenți, pensionari și oricine caută flexibilitate</p>
+      <div class="bg-white rounded-2xl p-3 flex gap-2 max-w-2xl mx-auto shadow-xl">
+        <input id="search-input" type="text" placeholder="Caută job, companie sau oraș..."
+          class="flex-1 px-4 py-3 text-gray-800 outline-none rounded-xl text-lg" />
+        <button onclick="cauta()" class="bg-blue-600 text-white px-8 py-3 rounded-xl font-semibold hover:bg-blue-700 text-lg">Caută</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Categorii -->
+  <section class="max-w-6xl mx-auto px-4 py-12">
+    <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">Categorii populare</h2>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <button onclick="filtreazaCategorie('IT')" class="bg-white rounded-xl p-5 shadow-sm hover:shadow-md transition text-center border border-gray-100 hover:border-blue-300">
+        <div class="text-3xl mb-2">💻</div>
+        <div class="font-semibold text-gray-700">IT & Tech</div>
+      </button>
+      <button onclick="filtreazaCategorie('Retail')" class="bg-white rounded-xl p-5 shadow-sm hover:shadow-md transition text-center border border-gray-100 hover:border-blue-300">
+        <div class="text-3xl mb-2">🛒</div>
+        <div class="font-semibold text-gray-700">Retail</div>
+      </button>
+      <button onclick="filtreazaCategorie('Educatie')" class="bg-white rounded-xl p-5 shadow-sm hover:shadow-md transition text-center border border-gray-100 hover:border-blue-300">
+        <div class="text-3xl mb-2">📚</div>
+        <div class="font-semibold text-gray-700">Educație</div>
+      </button>
+      <button onclick="filtreazaCategorie('Livrari')" class="bg-white rounded-xl p-5 shadow-sm hover:shadow-md transition text-center border border-gray-100 hover:border-blue-300">
+        <div class="text-3xl mb-2">🚴</div>
+        <div class="font-semibold text-gray-700">Livrări</div>
+      </button>
+      <button onclick="filtreazaCategorie('HoReCa')" class="bg-white rounded-xl p-5 shadow-sm hover:shadow-md transition text-center border border-gray-100 hover:border-blue-300">
+        <div class="text-3xl mb-2">🍽️</div>
+        <div class="font-semibold text-gray-700">HoReCa</div>
+      </button>
+      <button onclick="filtreazaCategorie('Administrativ')" class="bg-white rounded-xl p-5 shadow-sm hover:shadow-md transition text-center border border-gray-100 hover:border-blue-300">
+        <div class="text-3xl mb-2">📋</div>
+        <div class="font-semibold text-gray-700">Administrativ</div>
+      </button>
+      <button onclick="filtreazaCategorie('Marketing')" class="bg-white rounded-xl p-5 shadow-sm hover:shadow-md transition text-center border border-gray-100 hover:border-blue-300">
+        <div class="text-3xl mb-2">📣</div>
+        <div class="font-semibold text-gray-700">Marketing</div>
+      </button>
+      <button onclick="filtreazaCategorie('Altele')" class="bg-white rounded-xl p-5 shadow-sm hover:shadow-md transition text-center border border-gray-100 hover:border-blue-300">
+        <div class="text-3xl mb-2">✨</div>
+        <div class="font-semibold text-gray-700">Altele</div>
+      </button>
+    </div>
+  </section>
+
+  <!-- Joburi recente -->
+  <section class="max-w-6xl mx-auto px-4 pb-16">
+    <div class="flex justify-between items-center mb-6">
+      <h2 class="text-2xl font-bold text-gray-800">Joburi recente</h2>
+      <a href="/static/jobs.html" class="text-blue-600 hover:underline font-medium">Vezi toate →</a>
+    </div>
+    <div id="joburi-recente" class="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
+      <div class="col-span-3 text-center py-10 text-gray-400">Se încarcă...</div>
+    </div>
+  </section>
+
+  <!-- CTA Hartă -->
+  <section class="max-w-6xl mx-auto px-4 pb-10">
+    <div class="bg-gradient-to-r from-green-50 to-blue-50 border border-green-200 rounded-2xl p-8 flex flex-col md:flex-row items-center justify-between gap-6">
+      <div>
+        <h2 class="text-2xl font-bold text-gray-800 mb-2">🗺 Caută joburi pe hartă</h2>
+        <p class="text-gray-600">Vizualizează toate joburile pe o hartă interactivă sau găsește joburi lângă tine cu GPS.</p>
+      </div>
+      <a href="/static/harta.html" class="bg-green-600 text-white px-8 py-4 rounded-xl font-bold text-lg hover:bg-green-700 transition whitespace-nowrap">
+        Deschide harta →
+      </a>
+    </div>
+  </section>
+
+  <!-- CTA Angajatori -->
+  <section class="bg-blue-600 text-white py-14 px-4">
+    <div class="max-w-3xl mx-auto text-center">
+      <h2 class="text-3xl font-bold mb-4">Ești angajator?</h2>
+      <p class="text-blue-100 mb-8 text-lg">Postează joburi part-time și găsește candidații potriviți rapid și ușor.</p>
+      <a href="/static/register.html?rol=angajator" class="bg-white text-blue-600 px-8 py-4 rounded-xl font-bold text-lg hover:bg-blue-50 transition">Înregistrează-te gratuit</a>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="bg-gray-800 text-gray-400 py-8 px-4 text-center">
+    <p class="text-lg font-semibold text-white mb-1">JobPart</p>
+    <p>© 2024 JobPart - Toate drepturile rezervate</p>
+  </footer>
+
+  <script src="/static/js/api.js"></script>
+  <script>
+    updateNav();
+
+    async function incarcaJoburi() {
+      try {
+        const jobs = await apiFetch("/jobs?");
+        const container = document.getElementById("joburi-recente");
+        const recente = jobs.slice(0, 6);
+        if (recente.length === 0) {
+          container.innerHTML = '<div class="col-span-3 text-center py-10 text-gray-400">Nu există joburi încă.</div>';
+          return;
+        }
+        container.innerHTML = recente.map(job => cardJob(job)).join("");
+      } catch (e) {
+        document.getElementById("joburi-recente").innerHTML =
+          '<div class="col-span-3 text-center py-10 text-red-400">Nu s-a putut conecta la server.</div>';
+      }
+    }
+
+    function cardJob(job) {
+      const salariu = job.salariu_min ? `${job.salariu_min}${job.salariu_max ? ' - ' + job.salariu_max : '+'} RON` : "Negociabil";
+      const promovatBadge = job.promovat
+        ? `<span class="text-xs bg-yellow-400 text-yellow-900 px-2 py-1 rounded-full font-bold">⭐ Promovat</span>`
+        : '';
+      return `
+        <a href="/static/job-detalii.html?id=${job.id}" class="bg-white rounded-xl p-5 shadow-sm hover:shadow-md transition border ${job.promovat ? 'border-yellow-300 ring-1 ring-yellow-200' : 'border-gray-100 hover:border-blue-300'} block">
+          <div class="flex justify-between items-start mb-3">
+            <div class="flex gap-2 flex-wrap">
+              <span class="text-xs bg-blue-100 text-blue-700 px-2 py-1 rounded-full font-medium">${job.categorie || 'Part-time'}</span>
+              ${promovatBadge}
+            </div>
+            <span class="text-xs text-gray-400 whitespace-nowrap ml-2">${formatData(job.creat_la)}</span>
+          </div>
+          <h3 class="font-bold text-gray-800 text-lg mb-1 line-clamp-2">${escapeHtml(job.titlu)}</h3>
+          <p class="text-blue-600 font-medium mb-2">${escapeHtml(job.companie)}</p>
+          <div class="flex items-center gap-3 text-sm text-gray-500">
+            <span>📍 ${escapeHtml(job.oras)}</span>
+            <span>💰 ${salariu}</span>
+          </div>
+        </a>`;
+    }
+
+    function cauta() {
+      const q = document.getElementById("search-input").value;
+      window.location.href = `/static/jobs.html?cauta=${encodeURIComponent(q)}`;
+    }
+
+    document.getElementById("search-input").addEventListener("keydown", e => {
+      if (e.key === "Enter") cauta();
+    });
+
+    function filtreazaCategorie(cat) {
+      window.location.href = `/static/jobs.html?categorie=${encodeURIComponent(cat)}`;
+    }
+
+    incarcaJoburi();
+  </script>
+</body>
+</html>

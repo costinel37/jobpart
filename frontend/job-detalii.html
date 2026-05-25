@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Detalii Job - JobPart</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 font-sans">
+
+  <nav class="bg-white shadow-sm sticky top-0 z-50">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+      <a href="/static/index.html" class="text-2xl font-bold text-blue-600">Job<span class="text-gray-800">Part</span></a>
+      <div class="flex items-center gap-4">
+        <a href="/static/jobs.html" class="text-gray-600 hover:text-blue-600 font-medium">Joburi</a>
+        <a href="/static/harta.html" class="text-gray-600 hover:text-blue-600 font-medium">🗺 Hartă</a>
+        <div id="nav-auth" class="flex gap-2">
+          <a href="/static/login.html" class="px-4 py-2 rounded-lg border border-blue-600 text-blue-600 hover:bg-blue-50 font-medium">Login</a>
+          <a href="/static/register.html" class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 font-medium">Înregistrare</a>
+        </div>
+        <div id="nav-user" class="hidden flex items-center gap-3">
+          <a id="nav-dashboard" href="#" class="text-gray-600 hover:text-blue-600 font-medium">Dashboard</a>
+          <span class="text-gray-700 font-medium" id="nav-username"></span>
+          <button onclick="logout()" class="px-4 py-2 rounded-lg bg-red-500 text-white hover:bg-red-600 font-medium">Ieșire</button>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <div class="max-w-4xl mx-auto px-4 py-10">
+    <a href="/static/jobs.html" class="text-blue-600 hover:underline mb-6 inline-block">← Înapoi la joburi</a>
+    <div id="job-container"><div class="text-center py-20 text-gray-400">Se încarcă...</div></div>
+
+    <!-- Formular aplicare (candidați autentificați) -->
+    <div id="aplica-section" class="hidden mt-8 bg-white rounded-xl shadow-sm p-6">
+      <h2 class="text-xl font-bold text-gray-800 mb-5">Aplică la acest job</h2>
+      <div id="aplica-mesaj" class="hidden mb-4"></div>
+
+      <!-- Upload CV -->
+      <div class="mb-5">
+        <label class="block text-sm font-medium text-gray-700 mb-2">CV (PDF, DOC, DOCX — max 5MB)</label>
+        <div id="cv-drop-zone"
+          class="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center cursor-pointer hover:border-blue-400 hover:bg-blue-50 transition"
+          onclick="document.getElementById('cv-input').click()"
+          ondragover="event.preventDefault(); this.classList.add('border-blue-400','bg-blue-50')"
+          ondragleave="this.classList.remove('border-blue-400','bg-blue-50')"
+          ondrop="handleDrop(event)">
+          <div id="cv-placeholder">
+            <div class="text-3xl mb-2">📄</div>
+            <p class="text-gray-500">Trage CV-ul aici sau <span class="text-blue-600 font-medium">click pentru a selecta</span></p>
+            <p class="text-gray-400 text-xs mt-1">PDF, DOC, DOCX — max 5MB</p>
+          </div>
+          <div id="cv-selectat" class="hidden">
+            <div class="text-3xl mb-2">✅</div>
+            <p id="cv-nume" class="text-gray-700 font-medium"></p>
+            <button type="button" onclick="event.stopPropagation(); stergeCV()"
+              class="text-red-500 text-sm hover:underline mt-1">Șterge</button>
+          </div>
+        </div>
+        <input type="file" id="cv-input" accept=".pdf,.doc,.docx" class="hidden" onchange="selecteazaCV(this)" />
+      </div>
+
+      <div id="cv-upload-progress" class="hidden mb-4">
+        <div class="bg-gray-200 rounded-full h-2">
+          <div class="bg-blue-600 h-2 rounded-full transition-all duration-300" id="progress-bar" style="width:0%"></div>
+        </div>
+        <p class="text-sm text-gray-500 mt-1">Se încarcă CV-ul...</p>
+      </div>
+
+      <div class="mb-5">
+        <label class="block text-sm font-medium text-gray-700 mb-2">Scrisoare de intenție (opțional)</label>
+        <textarea id="scrisoare" rows="5"
+          placeholder="Prezintă-te și explică de ce ești potrivit pentru acest job..."
+          class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+      </div>
+
+      <button id="btn-aplica" onclick="aplica()"
+        class="bg-blue-600 text-white px-8 py-3 rounded-xl font-semibold hover:bg-blue-700 transition">
+        Trimite aplicarea
+      </button>
+    </div>
+
+    <div id="login-prompt" class="hidden mt-8 bg-blue-50 rounded-xl p-6 text-center border border-blue-200">
+      <p class="text-gray-700 mb-4">Autentifică-te pentru a aplica la acest job.</p>
+      <a href="/static/login.html" class="bg-blue-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-blue-700 inline-block">Login</a>
+      <a href="/static/register.html" class="ml-3 border border-blue-600 text-blue-600 px-6 py-3 rounded-xl font-semibold hover:bg-blue-50 inline-block">Înregistrare</a>
+    </div>
+  </div>
+
+  <script src="/static/js/api.js"></script>
+  <script>
+    updateNav();
+    const jobId = new URLSearchParams(window.location.search).get("id");
+    const user = getUser();
+
+    let cvPath = null;
+    let cvNumeOriginal = null;
+
+    async function incarcaJob() {
+      try {
+        const job = await apiFetch(`/jobs/${jobId}`);
+        const salariu = job.salariu_min
+          ? `${job.salariu_min.toLocaleString()}${job.salariu_max ? ' - ' + job.salariu_max.toLocaleString() : '+'} RON/lună`
+          : "Negociabil";
+
+        document.getElementById("job-container").innerHTML = `
+          <div class="bg-white rounded-xl shadow-sm p-8">
+            <div class="flex justify-between items-start flex-wrap gap-4 mb-6">
+              <div>
+                <span class="text-xs bg-blue-100 text-blue-700 px-3 py-1 rounded-full font-medium">${job.categorie || 'Part-time'}</span>
+                <h1 class="text-3xl font-bold text-gray-800 mt-3 mb-1">${job.titlu}</h1>
+                <p class="text-blue-600 text-xl font-semibold">
+                  ${job.companie}
+                  <a href="/static/profil.html?id=${job.angajator_id}" class="ml-2 text-sm text-purple-600 hover:underline font-normal">
+                    ⭐ Vezi profil angajator
+                  </a>
+                </p>
+              </div>
+              <span class="text-sm text-gray-400">Postat la ${formatData(job.creat_la)}</span>
+            </div>
+            <div class="flex flex-wrap gap-5 mb-8 text-gray-600 bg-gray-50 rounded-xl p-4">
+              <span>📍 <strong>${job.oras}</strong></span>
+              <span>💰 <strong>${salariu}</strong></span>
+              <span>⏰ <strong>${job.tip_program}</strong></span>
+            </div>
+            <div class="space-y-6 text-gray-700 leading-relaxed">
+              <div>
+                <h2 class="text-xl font-bold text-gray-800 mb-3">Descrierea jobului</h2>
+                <p class="whitespace-pre-line">${job.descriere}</p>
+              </div>
+              ${job.cerinte ? `<div><h2 class="text-xl font-bold text-gray-800 mb-3">Cerințe</h2><p class="whitespace-pre-line">${job.cerinte}</p></div>` : ''}
+              ${job.beneficii ? `<div><h2 class="text-xl font-bold text-gray-800 mb-3">Beneficii</h2><p class="whitespace-pre-line">${job.beneficii}</p></div>` : ''}
+            </div>
+          </div>`;
+
+        if (user?.rol === "candidat") document.getElementById("aplica-section").classList.remove("hidden");
+        else if (!user) document.getElementById("login-prompt").classList.remove("hidden");
+      } catch {
+        document.getElementById("job-container").innerHTML =
+          '<div class="text-center py-20 text-red-400">Jobul nu a putut fi încărcat.</div>';
+      }
+    }
+
+    function handleDrop(e) {
+      e.preventDefault();
+      document.getElementById("cv-drop-zone").classList.remove("border-blue-400","bg-blue-50");
+      const file = e.dataTransfer.files[0];
+      if (file) proceseazaFisier(file);
+    }
+
+    function selecteazaCV(input) {
+      if (input.files[0]) proceseazaFisier(input.files[0]);
+    }
+
+    function proceseazaFisier(file) {
+      const tipuriAcceptate = ["application/pdf","application/msword",
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document"];
+      if (!tipuriAcceptate.includes(file.type)) {
+        alert("Tip de fișier invalid. Acceptăm PDF, DOC, DOCX.");
+        return;
+      }
+      if (file.size > 5 * 1024 * 1024) {
+        alert("Fișierul depășește 5MB.");
+        return;
+      }
+      document.getElementById("cv-placeholder").classList.add("hidden");
+      document.getElementById("cv-selectat").classList.remove("hidden");
+      document.getElementById("cv-nume").textContent = file.name;
+      document.getElementById("cv-input")._file = file;
+    }
+
+    function stergeCV() {
+      cvPath = null;
+      cvNumeOriginal = null;
+      document.getElementById("cv-placeholder").classList.remove("hidden");
+      document.getElementById("cv-selectat").classList.add("hidden");
+      document.getElementById("cv-input").value = "";
+      document.getElementById("cv-input")._file = null;
+    }
+
+    async function uploadCV(file) {
+      const progress = document.getElementById("cv-upload-progress");
+      const bar = document.getElementById("progress-bar");
+      progress.classList.remove("hidden");
+      bar.style.width = "30%";
+
+      const formData = new FormData();
+      formData.append("fisier", file);
+
+      const token = getToken();
+      const res = await fetch(API_BASE + "/upload/cv", {
+        method: "POST",
+        headers: { "Authorization": `Bearer ${token}` },
+        body: formData,
+      });
+      bar.style.width = "100%";
+
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.detail || "Eroare la upload CV");
+      }
+      const data = await res.json();
+      setTimeout(() => progress.classList.add("hidden"), 500);
+      return data;
+    }
+
+    async function aplica() {
+      const btn = document.getElementById("btn-aplica");
+      const mesajEl = document.getElementById("aplica-mesaj");
+      mesajEl.classList.add("hidden");
+      btn.disabled = true;
+      btn.textContent = "Se trimite...";
+
+      try {
+        const cvFile = document.getElementById("cv-input")._file;
+        if (cvFile) {
+          btn.textContent = "Se încarcă CV-ul...";
+          const cvData = await uploadCV(cvFile);
+          cvPath = cvData.cv_path;
+          cvNumeOriginal = cvData.cv_nume_original;
+        }
+
+        await apiFetch("/aplicari", {
+          method: "POST",
+          body: JSON.stringify({
+            job_id: parseInt(jobId),
+            scrisoare: document.getElementById("scrisoare").value || null,
+            cv_path: cvPath,
+            cv_nume_original: cvNumeOriginal,
+          }),
+        });
+
+        mesajEl.className = "bg-green-50 border border-green-200 text-green-700 rounded-xl px-4 py-3 mb-4";
+        mesajEl.textContent = "Aplicarea ta a fost trimisă cu succes! Vei primi un email de confirmare.";
+        mesajEl.classList.remove("hidden");
+        btn.textContent = "Aplicare trimisă ✓";
+        btn.className = "bg-green-600 text-white px-8 py-3 rounded-xl font-semibold cursor-default";
+      } catch (err) {
+        mesajEl.className = "bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3 mb-4";
+        mesajEl.textContent = err.message;
+        mesajEl.classList.remove("hidden");
+        btn.textContent = "Trimite aplicarea";
+        btn.disabled = false;
+      }
+    }
+
+    if (jobId) incarcaJob();
+    else window.location.href = "/static/jobs.html";
+  </script>
+</body>
+</html>

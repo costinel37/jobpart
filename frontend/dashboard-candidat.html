@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard Candidat - JobPart</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 font-sans">
+
+  <nav class="bg-white shadow-sm">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+      <a href="/static/index.html" class="text-2xl font-bold text-blue-600">Job<span class="text-gray-800">Part</span></a>
+      <div class="flex items-center gap-4">
+        <a href="/static/jobs.html" class="text-gray-600 hover:text-blue-600">Joburi</a>
+        <a href="/static/favorite.html" class="text-gray-600 hover:text-blue-600">❤️ Salvate</a>
+        <a href="/static/mesaje.html" class="text-gray-600 hover:text-blue-600">✉️ Mesaje</a>
+        <a href="/static/notificari.html" id="nav-notif-bell" class="relative inline-flex items-center text-gray-600 hover:text-blue-600">
+          <span class="text-xl">🔔</span>
+          <span class="notif-badge hidden absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold min-w-[16px] h-4 rounded-full flex items-center justify-center px-1 leading-none"></span>
+        </a>
+        <span id="nav-username" class="text-gray-700 font-medium"></span>
+        <button onclick="logout()" class="px-4 py-2 rounded-lg bg-red-500 text-white hover:bg-red-600 font-medium">Ieșire</button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="max-w-6xl mx-auto px-4 py-8">
+    <h1 class="text-3xl font-bold text-gray-800 mb-2">Dashboard Candidat</h1>
+    <p id="salut" class="text-gray-500 mb-8"></p>
+
+    <!-- Tab-uri -->
+    <div class="flex gap-2 mb-8 border-b border-gray-200 flex-wrap">
+      <button onclick="switchTab('aplicari')" id="tab-aplicari"
+        class="tab-btn px-5 py-3 font-semibold text-blue-600 border-b-2 border-blue-600">
+        Aplicările mele
+      </button>
+      <button onclick="switchTab('profil')" id="tab-profil"
+        class="tab-btn px-5 py-3 font-semibold text-gray-500 hover:text-gray-700 border-b-2 border-transparent">
+        Profilul meu
+      </button>
+      <a href="/api/export/cv-pdf" target="_blank"
+        class="ml-auto flex items-center gap-2 px-5 py-3 bg-indigo-600 text-white rounded-t-lg font-semibold hover:bg-indigo-700 transition">
+        📄 Export CV PDF
+      </a>
+    </div>
+
+    <!-- Tab Aplicari -->
+    <div id="content-aplicari">
+      <div class="flex justify-between items-center mb-5">
+        <h2 class="text-xl font-bold text-gray-700">Aplicările mele</h2>
+        <a href="/static/jobs.html" class="bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700 font-medium">+ Caută joburi</a>
+      </div>
+      <div id="aplicari-list">
+        <div class="text-center py-10 text-gray-400">Se încarcă...</div>
+      </div>
+    </div>
+
+    <!-- Tab Profil -->
+    <div id="content-profil" class="hidden">
+      <div class="bg-white rounded-xl shadow-sm p-6 max-w-xl">
+        <h2 class="text-xl font-bold text-gray-800 mb-6">Profilul meu</h2>
+        <div id="profil-mesaj" class="hidden mb-4"></div>
+        <form id="profil-form" class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Nume complet</label>
+            <input type="text" id="p-nume" class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Telefon</label>
+            <input type="tel" id="p-telefon" class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Oraș</label>
+            <input type="text" id="p-oras" class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Despre mine</label>
+            <textarea id="p-despre" rows="4" placeholder="Prezintă-te pe scurt..."
+              class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+          </div>
+          <button type="submit" class="bg-blue-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-blue-700 transition">
+            Salvează modificările
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script src="/static/js/api.js"></script>
+  <script>
+    const user = getUser();
+    if (!user || user.rol !== "candidat") {
+      window.location.href = "/static/login.html";
+    }
+
+    document.getElementById("nav-username").textContent = user?.nume || "";
+    document.getElementById("salut").textContent = `Bun venit, ${user?.nume}! Iată activitatea ta.`;
+
+    function switchTab(tab) {
+      ["aplicari", "profil"].forEach(t => {
+        document.getElementById(`content-${t}`).classList.toggle("hidden", t !== tab);
+        const btn = document.getElementById(`tab-${t}`);
+        if (t === tab) {
+          btn.className = "tab-btn px-5 py-3 font-semibold text-blue-600 border-b-2 border-blue-600";
+        } else {
+          btn.className = "tab-btn px-5 py-3 font-semibold text-gray-500 hover:text-gray-700 border-b-2 border-transparent";
+        }
+      });
+    }
+
+    async function incarcaAplicari() {
+      try {
+        const aplicari = await apiFetch("/aplicari/ale-mele");
+        const container = document.getElementById("aplicari-list");
+
+        if (aplicari.length === 0) {
+          container.innerHTML = `
+            <div class="text-center py-16 bg-white rounded-xl">
+              <div class="text-5xl mb-4">📋</div>
+              <p class="text-xl text-gray-500 mb-4">Nu ai aplicat la niciun job încă.</p>
+              <a href="/static/jobs.html" class="bg-blue-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-blue-700 inline-block">Caută joburi</a>
+            </div>`;
+          return;
+        }
+
+        container.innerHTML = aplicari.map(a => `
+          <div class="bg-white rounded-xl shadow-sm p-5 mb-4 flex justify-between items-start flex-wrap gap-4">
+            <div>
+              <h3 class="font-bold text-gray-800 text-lg">${a.job?.titlu || 'Job'}</h3>
+              <p class="text-blue-600 font-medium">${a.job?.companie || ''}</p>
+              <p class="text-gray-500 text-sm mt-1">📍 ${a.job?.oras || ''} · Aplicat la ${formatData(a.creat_la)}</p>
+              ${a.scrisoare ? `<p class="text-gray-500 text-sm mt-2 italic">"${escapeHtml(a.scrisoare.substring(0, 100))}${a.scrisoare.length > 100 ? '...' : ''}"</p>` : ''}
+              ${a.cv_nume_original ? `<p class="text-gray-500 text-sm mt-1">📎 <a href="${API_BASE}/upload/cv/${a.cv_path}" target="_blank" class="text-blue-600 hover:underline">${a.cv_nume_original}</a></p>` : ''}
+            </div>
+            <div class="flex flex-col items-end gap-2">
+              ${statusBadge(a.status)}
+              <a href="/static/job-detalii.html?id=${a.job_id}" class="text-blue-600 hover:underline text-sm">Vezi job →</a>
+              <a href="/static/profil.html?id=${a.job?.angajator_id}" class="text-purple-600 hover:underline text-sm">⭐ Recenzează angajatorul</a>
+              ${a.status === 'trimisa' ? `<button onclick="retrage(${a.id}, this)" class="text-red-500 hover:underline text-sm">Retrage aplicarea</button>` : ''}
+            </div>
+          </div>`).join("");
+      } catch (e) {
+        document.getElementById("aplicari-list").innerHTML =
+          '<div class="text-center py-10 text-red-400">Eroare la încărcarea aplicărilor.</div>';
+      }
+    }
+
+    async function retrage(id, btn) {
+      if (!confirm("Ești sigur că vrei să retragi această aplicare?")) return;
+      try {
+        await apiFetch(`/aplicari/${id}`, { method: "DELETE" });
+        incarcaAplicari();
+      } catch (e) {
+        alert(e.message);
+      }
+    }
+
+    async function incarcaProfil() {
+      try {
+        const profil = await apiFetch("/auth/me");
+        document.getElementById("p-nume").value = profil.nume || "";
+        document.getElementById("p-telefon").value = profil.telefon || "";
+        document.getElementById("p-oras").value = profil.oras || "";
+        document.getElementById("p-despre").value = profil.despre || "";
+      } catch (e) {}
+    }
+
+    document.getElementById("profil-form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const mesajEl = document.getElementById("profil-mesaj");
+      try {
+        await apiFetch("/auth/me", {
+          method: "PUT",
+          body: JSON.stringify({
+            nume: document.getElementById("p-nume").value,
+            telefon: document.getElementById("p-telefon").value || null,
+            oras: document.getElementById("p-oras").value || null,
+            despre: document.getElementById("p-despre").value || null,
+          }),
+        });
+        mesajEl.className = "bg-green-50 border border-green-200 text-green-700 rounded-xl px-4 py-3";
+        mesajEl.textContent = "Profilul a fost actualizat cu succes!";
+        mesajEl.classList.remove("hidden");
+        setTimeout(() => mesajEl.classList.add("hidden"), 3000);
+      } catch (err) {
+        mesajEl.className = "bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3";
+        mesajEl.textContent = err.message;
+        mesajEl.classList.remove("hidden");
+      }
+    });
+
+    incarcaAplicari();
+    incarcaProfil();
+    initNotifBell();
+  </script>
+</body>
+</html>

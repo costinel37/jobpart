@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Înregistrare - JobPart</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 min-h-screen flex items-center justify-center py-10">
+
+  <div class="bg-white rounded-2xl shadow-lg p-8 w-full max-w-md">
+    <a href="/static/index.html" class="text-2xl font-bold text-blue-600 block text-center mb-8">Job<span class="text-gray-800">Part</span></a>
+    <h1 class="text-2xl font-bold text-gray-800 mb-2 text-center">Creează un cont</h1>
+    <p class="text-gray-500 text-center mb-6">Alege rolul tău și înregistrează-te gratuit</p>
+
+    <!-- Selector rol -->
+    <div class="flex gap-3 mb-6">
+      <button id="btn-candidat" onclick="selecteazaRol('candidat')"
+        class="flex-1 py-3 rounded-xl border-2 border-blue-600 bg-blue-600 text-white font-semibold transition">
+        👤 Candidat
+      </button>
+      <button id="btn-angajator" onclick="selecteazaRol('angajator')"
+        class="flex-1 py-3 rounded-xl border-2 border-gray-200 text-gray-600 font-semibold hover:border-blue-400 transition">
+        🏢 Angajator
+      </button>
+    </div>
+
+    <div id="eroare" class="hidden bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3 mb-5 text-sm"></div>
+
+    <form id="register-form" class="space-y-4">
+      <input type="hidden" id="rol" value="candidat" />
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Nume complet</label>
+        <input type="text" id="nume" required placeholder="Ion Popescu"
+          class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+        <input type="email" id="email" required placeholder="exemplu@email.com"
+          class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Parolă</label>
+        <input type="password" id="parola" required placeholder="Minim 6 caractere"
+          class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Oraș</label>
+        <input type="text" id="oras" placeholder="București, Cluj-Napoca..."
+          class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Telefon (opțional)</label>
+        <input type="tel" id="telefon" placeholder="07xx xxx xxx"
+          class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+      </div>
+      <button type="submit" id="btn-register"
+        class="w-full bg-blue-600 text-white py-3 rounded-xl font-semibold hover:bg-blue-700 transition text-lg mt-2">
+        Înregistrează-te
+      </button>
+    </form>
+
+    <p class="text-center text-gray-500 mt-6">
+      Ai deja cont?
+      <a href="/static/login.html" class="text-blue-600 hover:underline font-medium">Autentifică-te</a>
+    </p>
+  </div>
+
+  <script src="/static/js/api.js"></script>
+  <script>
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("rol") === "angajator") selecteazaRol("angajator");
+
+    function selecteazaRol(rol) {
+      document.getElementById("rol").value = rol;
+      const btnC = document.getElementById("btn-candidat");
+      const btnA = document.getElementById("btn-angajator");
+      if (rol === "candidat") {
+        btnC.className = "flex-1 py-3 rounded-xl border-2 border-blue-600 bg-blue-600 text-white font-semibold transition";
+        btnA.className = "flex-1 py-3 rounded-xl border-2 border-gray-200 text-gray-600 font-semibold hover:border-blue-400 transition";
+      } else {
+        btnA.className = "flex-1 py-3 rounded-xl border-2 border-blue-600 bg-blue-600 text-white font-semibold transition";
+        btnC.className = "flex-1 py-3 rounded-xl border-2 border-gray-200 text-gray-600 font-semibold hover:border-blue-400 transition";
+      }
+    }
+
+    document.getElementById("register-form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById("btn-register");
+      const eroare = document.getElementById("eroare");
+      eroare.classList.add("hidden");
+
+      const parola = document.getElementById("parola").value;
+      if (parola.length < 6) {
+        eroare.textContent = "Parola trebuie să aibă cel puțin 6 caractere.";
+        eroare.classList.remove("hidden");
+        return;
+      }
+
+      btn.textContent = "Se înregistrează...";
+      btn.disabled = true;
+
+      try {
+        const data = await apiFetch("/auth/register", {
+          method: "POST",
+          body: JSON.stringify({
+            nume: document.getElementById("nume").value,
+            email: document.getElementById("email").value,
+            parola: parola,
+            rol: document.getElementById("rol").value,
+            oras: document.getElementById("oras").value || null,
+            telefon: document.getElementById("telefon").value || null,
+          }),
+        });
+        saveSession(data);
+        if (data.rol === "candidat") window.location.href = "/static/dashboard-candidat.html";
+        else window.location.href = "/static/dashboard-angajator.html";
+      } catch (err) {
+        eroare.textContent = err.message;
+        eroare.classList.remove("hidden");
+        btn.textContent = "Înregistrează-te";
+        btn.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>

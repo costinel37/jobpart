@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login - JobPart</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 min-h-screen flex items-center justify-center">
+
+  <div class="bg-white rounded-2xl shadow-lg p-8 w-full max-w-md">
+    <a href="/static/index.html" class="text-2xl font-bold text-blue-600 block text-center mb-8">Job<span class="text-gray-800">Part</span></a>
+    <h1 class="text-2xl font-bold text-gray-800 mb-2 text-center">Bun venit înapoi!</h1>
+    <p class="text-gray-500 text-center mb-8">Autentifică-te în contul tău</p>
+
+    <div id="eroare" class="hidden bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3 mb-5 text-sm"></div>
+
+    <form id="login-form" class="space-y-5">
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+        <input type="email" id="email" required placeholder="exemplu@email.com"
+          class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+      </div>
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Parolă</label>
+        <input type="password" id="parola" required placeholder="••••••••"
+          class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+      </div>
+      <button type="submit" id="btn-login"
+        class="w-full bg-blue-600 text-white py-3 rounded-xl font-semibold hover:bg-blue-700 transition text-lg">
+        Autentificare
+      </button>
+    </form>
+
+    <p class="text-center text-gray-500 mt-6">
+      Nu ai cont?
+      <a href="/static/register.html" class="text-blue-600 hover:underline font-medium">Înregistrează-te</a>
+    </p>
+  </div>
+
+  <script src="/static/js/api.js"></script>
+  <script>
+    if (getToken()) {
+      const user = getUser();
+      if (user?.rol === "candidat") window.location.href = "/static/dashboard-candidat.html";
+      else if (user?.rol === "angajator") window.location.href = "/static/dashboard-angajator.html";
+      else if (user?.rol === "admin") window.location.href = "/static/admin.html";
+    }
+
+    document.getElementById("login-form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById("btn-login");
+      const eroare = document.getElementById("eroare");
+      eroare.classList.add("hidden");
+      btn.textContent = "Se autentifică...";
+      btn.disabled = true;
+
+      try {
+        const data = await apiFetch("/auth/login", {
+          method: "POST",
+          body: JSON.stringify({
+            email: document.getElementById("email").value,
+            parola: document.getElementById("parola").value,
+          }),
+        });
+        saveSession(data);
+        if (data.rol === "candidat") window.location.href = "/static/dashboard-candidat.html";
+        else if (data.rol === "angajator") window.location.href = "/static/dashboard-angajator.html";
+        else if (data.rol === "admin") window.location.href = "/static/admin.html";
+      } catch (err) {
+        eroare.textContent = err.message;
+        eroare.classList.remove("hidden");
+        btn.textContent = "Autentificare";
+        btn.disabled = false;
+      }
+    });
+  </script>
+</body>
+</html>

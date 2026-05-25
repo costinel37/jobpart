@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Panel - JobPart</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 font-sans">
+
+  <nav class="bg-gray-900 text-white">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <span class="text-2xl font-bold text-blue-400">Job<span class="text-white">Part</span></span>
+        <span class="bg-red-600 text-xs px-2 py-1 rounded font-bold">ADMIN</span>
+      </div>
+      <div class="flex items-center gap-4">
+        <span id="admin-name" class="text-gray-300"></span>
+        <button onclick="logout()" class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg font-medium">Ieșire</button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="max-w-7xl mx-auto px-4 py-8">
+    <h1 class="text-3xl font-bold text-gray-800 mb-8">Panou de administrare</h1>
+
+    <!-- Statistici -->
+    <div id="statistici" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-10">
+      <div class="text-center py-8 text-gray-400 col-span-6">Se încarcă statisticile...</div>
+    </div>
+
+    <!-- Tab-uri -->
+    <div class="flex gap-2 mb-8 border-b border-gray-200">
+      <button onclick="switchTab('utilizatori')" id="tab-utilizatori"
+        class="tab-btn px-5 py-3 font-semibold text-blue-600 border-b-2 border-blue-600">Utilizatori</button>
+      <button onclick="switchTab('joburi')" id="tab-joburi"
+        class="tab-btn px-5 py-3 font-semibold text-gray-500 hover:text-gray-700 border-b-2 border-transparent">Joburi</button>
+    </div>
+
+    <!-- Tab: Utilizatori -->
+    <div id="content-utilizatori">
+      <div id="utilizatori-list"><div class="text-center py-10 text-gray-400">Se încarcă...</div></div>
+    </div>
+
+    <!-- Tab: Joburi -->
+    <div id="content-joburi" class="hidden">
+      <div id="toate-joburi-list"><div class="text-center py-10 text-gray-400">Se încarcă...</div></div>
+    </div>
+  </div>
+
+  <script src="/static/js/api.js"></script>
+  <script>
+    const user = getUser();
+    if (!user || user.rol !== "admin") window.location.href = "/static/login.html";
+    document.getElementById("admin-name").textContent = user?.nume || "";
+
+    function switchTab(tab) {
+      ["utilizatori", "joburi"].forEach(t => {
+        document.getElementById(`content-${t}`).classList.toggle("hidden", t !== tab);
+        const btn = document.getElementById(`tab-${t}`);
+        if (t === tab) btn.className = "tab-btn px-5 py-3 font-semibold text-blue-600 border-b-2 border-blue-600";
+        else btn.className = "tab-btn px-5 py-3 font-semibold text-gray-500 hover:text-gray-700 border-b-2 border-transparent";
+      });
+      if (tab === "joburi") incarcaToateJoburile();
+    }
+
+    async function incarcaStatistici() {
+      try {
+        const s = await apiFetch("/admin/statistici");
+        const statItems = [
+          { label: "Utilizatori totali", value: s.utilizatori, icon: "👥", color: "blue" },
+          { label: "Candidați", value: s.candidati, icon: "👤", color: "indigo" },
+          { label: "Angajatori", value: s.angajatori, icon: "🏢", color: "purple" },
+          { label: "Joburi active", value: s.joburi_active, icon: "💼", color: "green" },
+          { label: "Aplicări totale", value: s.total_aplicari, icon: "📋", color: "yellow" },
+          { label: "Aplicări acceptate", value: s.aplicari_acceptate, icon: "✅", color: "emerald" },
+        ];
+        document.getElementById("statistici").innerHTML = statItems.map(s => `
+          <div class="bg-white rounded-xl shadow-sm p-5 text-center">
+            <div class="text-3xl mb-2">${s.icon}</div>
+            <div class="text-3xl font-bold text-gray-800">${s.value}</div>
+            <div class="text-sm text-gray-500 mt-1">${s.label}</div>
+          </div>`).join("");
+      } catch (e) {
+        document.getElementById("statistici").innerHTML =
+          '<div class="col-span-6 text-red-400 text-center">Eroare la încărcarea statisticilor.</div>';
+      }
+    }
+
+    async function incarcaUtilizatori() {
+      try {
+        const users = await apiFetch("/admin/utilizatori");
+        const rolColors = {
+          candidat: "bg-blue-100 text-blue-700",
+          angajator: "bg-purple-100 text-purple-700",
+          admin: "bg-red-100 text-red-700"
+        };
+        document.getElementById("utilizatori-list").innerHTML = `
+          <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+            <table class="w-full">
+              <thead class="bg-gray-50 text-gray-600 text-sm">
+                <tr>
+                  <th class="text-left px-5 py-3">ID</th>
+                  <th class="text-left px-5 py-3">Nume</th>
+                  <th class="text-left px-5 py-3">Email</th>
+                  <th class="text-left px-5 py-3">Rol</th>
+                  <th class="text-left px-5 py-3">Status</th>
+                  <th class="text-left px-5 py-3">Înregistrat</th>
+                  <th class="text-left px-5 py-3">Acțiuni</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-100">
+                ${users.map(u => `
+                  <tr class="hover:bg-gray-50">
+                    <td class="px-5 py-3 text-gray-500 text-sm">#${u.id}</td>
+                    <td class="px-5 py-3 font-medium text-gray-800">${u.nume}</td>
+                    <td class="px-5 py-3 text-gray-600 text-sm">${u.email}</td>
+                    <td class="px-5 py-3">
+                      <span class="px-2 py-1 rounded-full text-xs font-semibold ${rolColors[u.rol] || 'bg-gray-100'}">${u.rol}</span>
+                    </td>
+                    <td class="px-5 py-3">
+                      <span class="px-2 py-1 rounded-full text-xs font-semibold ${u.activ ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}">${u.activ ? 'Activ' : 'Inactiv'}</span>
+                    </td>
+                    <td class="px-5 py-3 text-gray-500 text-sm">${formatData(u.creat_la)}</td>
+                    <td class="px-5 py-3">
+                      <div class="flex gap-2">
+                        <button onclick="toggleActiv(${u.id})"
+                          class="text-xs px-3 py-1 rounded-lg border ${u.activ ? 'border-red-300 text-red-600 hover:bg-red-50' : 'border-green-300 text-green-600 hover:bg-green-50'}">
+                          ${u.activ ? 'Dezactivează' : 'Activează'}
+                        </button>
+                        <select onchange="schimbaRol(${u.id}, this.value)"
+                          class="text-xs border border-gray-300 rounded-lg px-2 py-1 focus:outline-none">
+                          <option value="" disabled selected>Schimbă rol</option>
+                          <option value="candidat">Candidat</option>
+                          <option value="angajator">Angajator</option>
+                          <option value="admin">Admin</option>
+                        </select>
+                      </div>
+                    </td>
+                  </tr>`).join("")}
+              </tbody>
+            </table>
+          </div>`;
+      } catch (e) {
+        document.getElementById("utilizatori-list").innerHTML = '<div class="text-red-400 py-10 text-center">Eroare.</div>';
+      }
+    }
+
+    async function incarcaToateJoburile() {
+      try {
+        const jobs = await apiFetch("/admin/toate-joburile");
+        document.getElementById("toate-joburi-list").innerHTML = `
+          <div class="bg-white rounded-xl shadow-sm overflow-hidden">
+            <table class="w-full">
+              <thead class="bg-gray-50 text-gray-600 text-sm">
+                <tr>
+                  <th class="text-left px-5 py-3">Titlu</th>
+                  <th class="text-left px-5 py-3">Companie</th>
+                  <th class="text-left px-5 py-3">Oraș</th>
+                  <th class="text-left px-5 py-3">Status</th>
+                  <th class="text-left px-5 py-3">Promovat</th>
+                  <th class="text-left px-5 py-3">Acțiuni</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-100">
+                ${jobs.map(j => `
+                  <tr class="hover:bg-gray-50 ${j.promovat ? 'bg-yellow-50' : ''}">
+                    <td class="px-5 py-3 font-medium text-gray-800">${escapeHtml(j.titlu)}</td>
+                    <td class="px-5 py-3 text-gray-600">${escapeHtml(j.companie)}</td>
+                    <td class="px-5 py-3 text-gray-600">${escapeHtml(j.oras)}</td>
+                    <td class="px-5 py-3">
+                      <span class="px-2 py-1 rounded-full text-xs font-semibold ${j.activ ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}">${j.activ ? 'Activ' : 'Inactiv'}</span>
+                    </td>
+                    <td class="px-5 py-3">
+                      ${j.promovat
+                        ? `<span class="text-xs bg-yellow-400 text-yellow-900 px-2 py-1 rounded-full font-bold">⭐ Da</span>
+                           <button onclick="anuleazaPromovare(${j.id})" class="ml-2 text-xs text-gray-400 hover:text-red-500">✕</button>`
+                        : `<button onclick="promoveazaJobAdmin(${j.id})" class="text-xs px-3 py-1 rounded-lg border border-yellow-400 text-yellow-700 hover:bg-yellow-50">⭐ Promovează</button>`}
+                    </td>
+                    <td class="px-5 py-3">
+                      ${j.activ ? `<button onclick="dezactiveazaJob(${j.id})" class="text-xs px-3 py-1 rounded-lg border border-red-300 text-red-600 hover:bg-red-50">Dezactivează</button>` : '<span class="text-gray-400 text-xs">Dezactivat</span>'}
+                    </td>
+                  </tr>`).join("")}
+              </tbody>
+            </table>
+          </div>`;
+      } catch (e) {
+        document.getElementById("toate-joburi-list").innerHTML = '<div class="text-red-400 py-10 text-center">Eroare.</div>';
+      }
+    }
+
+    async function promoveazaJobAdmin(jobId) {
+      const zile = prompt("Câte zile să fie promovat? (implicit 7)", "7");
+      if (!zile) return;
+      try {
+        const r = await apiFetch(`/jobs/${jobId}/promoveaza?zile=${parseInt(zile)}`, { method: "POST" });
+        alert(r.mesaj);
+        incarcaToateJoburile();
+      } catch (e) { alert(e.message); }
+    }
+
+    async function anuleazaPromovare(jobId) {
+      if (!confirm("Anulezi promovarea acestui job?")) return;
+      try {
+        await apiFetch(`/jobs/${jobId}/promoveaza`, { method: "DELETE" });
+        incarcaToateJoburile();
+      } catch (e) { alert(e.message); }
+    }
+
+    async function toggleActiv(userId) {
+      try {
+        const r = await apiFetch(`/admin/utilizatori/${userId}/toggle-activ`, { method: "PUT" });
+        alert(r.mesaj);
+        incarcaUtilizatori();
+        incarcaStatistici();
+      } catch (e) { alert(e.message); }
+    }
+
+    async function schimbaRol(userId, rol) {
+      if (!rol) return;
+      if (!confirm(`Schimbi rolul utilizatorului la "${rol}"?`)) return;
+      try {
+        const r = await apiFetch(`/admin/utilizatori/${userId}/schimba-rol?rol_nou=${rol}`, { method: "PUT" });
+        alert(r.mesaj);
+        incarcaUtilizatori();
+      } catch (e) { alert(e.message); }
+    }
+
+    async function dezactiveazaJob(jobId) {
+      if (!confirm("Dezactivezi acest job?")) return;
+      try {
+        await apiFetch(`/admin/joburi/${jobId}`, { method: "DELETE" });
+        incarcaToateJoburile();
+        incarcaStatistici();
+      } catch (e) { alert(e.message); }
+    }
+
+    incarcaStatistici();
+    incarcaUtilizatori();
+  </script>
+</body>
+</html>
