@@ -9,15 +9,15 @@ services:
       - key: ENVIRONMENT
         value: production
       - key: SECRET_KEY
-        value: 27e08ac3e00a4640cc4e6ccbf82347619270102e35def5eb9b85d178459169c480a7a26e7e8f6caa2bd521e05ca17f966a19682245ba243758958a81cf29803e
+        sync: false
       - key: DATABASE_URL
         sync: false
       - key: MAIL_USERNAME
-        value: costinelzala40@gmail.com
+        sync: false
       - key: MAIL_PASSWORD
-        value: mjrpjoctrrjhcssz
+        sync: false
       - key: MAIL_FROM
-        value: costinelzala40@gmail.com
+        sync: false
       - key: MAIL_SERVER
         value: smtp.gmail.com
       - key: MAIL_PORT
