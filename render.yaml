@@ -1,0 +1,28 @@
+services:
+  - type: web
+    name: jobpart
+    runtime: python
+    buildCommand: pip install -r backend/requirements.txt
+    startCommand: cd backend && uvicorn main:app --host 0.0.0.0 --port $PORT
+    plan: free
+    envVars:
+      - key: ENVIRONMENT
+        value: production
+      - key: SECRET_KEY
+        value: 27e08ac3e00a4640cc4e6ccbf82347619270102e35def5eb9b85d178459169c480a7a26e7e8f6caa2bd521e05ca17f966a19682245ba243758958a81cf29803e
+      - key: DATABASE_URL
+        sync: false
+      - key: MAIL_USERNAME
+        value: costinelzala40@gmail.com
+      - key: MAIL_PASSWORD
+        value: mjrpjoctrrjhcssz
+      - key: MAIL_FROM
+        value: costinelzala40@gmail.com
+      - key: MAIL_SERVER
+        value: smtp.gmail.com
+      - key: MAIL_PORT
+        value: "587"
+      - key: MAIL_STARTTLS
+        value: "True"
+      - key: FRONTEND_URL
+        sync: false
