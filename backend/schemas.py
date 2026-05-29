@@ -20,6 +20,7 @@ class UserRegister(BaseModel):
     telefon: Optional[str] = None
     oras: Optional[str] = None
     gdpr_consimtit: bool = False
+    newsletter_consimtit: bool = False
     data_nasterii: Optional[date] = None
 
     @field_validator('gdpr_consimtit')

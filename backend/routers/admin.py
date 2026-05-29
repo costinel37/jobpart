@@ -1,12 +1,14 @@
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
-from typing import List
+from typing import List, Optional
 from datetime import datetime
+from pydantic import BaseModel
 from database import get_db
 import models, schemas
 from auth import require_rol
-import os
+import os, threading
 from config import UPLOAD_DIR
+from email_service import _trimite_email
 
 router = APIRouter(prefix="/api/admin", tags=["Admin"])
 
@@ -225,3 +227,31 @@ def audit_log(
             for i in intrari
         ]
     }
+
+
+class NewsletterBody(BaseModel):
+    subiect: str
+    corp_html: str
+    doar_abonati: bool = True
+
+
+@router.post("/trimite-newsletter")
+def trimite_newsletter(
+    body: NewsletterBody,
+    db: Session = Depends(get_db),
+    current_user=Depends(require_rol("admin"))
+):
+    query = db.query(models.User).filter(models.User.activ == True)
+    if body.doar_abonati:
+        query = query.filter(models.User.newsletter_consimtit == True)
+    utilizatori = query.all()
+
+    if not utilizatori:
+        return {"mesaj": "Niciun utilizator de notificat.", "trimise": 0}
+
+    def trimite_bulk():
+        for u in utilizatori:
+            _trimite_email(u.email, body.subiect, body.corp_html)
+
+    threading.Thread(target=trimite_bulk, daemon=True).start()
+    return {"mesaj": f"Se trimit {len(utilizatori)} emailuri în fundal.", "trimise": len(utilizatori)}

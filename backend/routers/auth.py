@@ -39,6 +39,7 @@ def register(request: Request, user_data: schemas.UserRegister, db: Session = De
         telefon=user_data.telefon,
         oras=user_data.oras,
         email_confirmat=False,
+        newsletter_consimtit=user_data.newsletter_consimtit,
         gdpr_consimtit_la=datetime.utcnow(),
         data_nasterii=user_data.data_nasterii,
     )

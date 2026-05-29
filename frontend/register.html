@@ -71,6 +71,13 @@
           Sunt de acord cu prelucrarea datelor mele personale. <span class="text-red-500">*</span>
         </label>
       </div>
+      <div class="flex items-start gap-3 bg-gray-50 border border-gray-200 rounded-xl p-4">
+        <input type="checkbox" id="newsletter-consimtit"
+          class="mt-0.5 w-4 h-4 text-blue-600 border-gray-300 rounded flex-shrink-0" />
+        <label for="newsletter-consimtit" class="text-sm text-gray-600">
+          📬 Vreau să primesc noutăți, oferte și joburi recomandate de la JobPart. Mă pot dezabona oricând.
+        </label>
+      </div>
       <button type="submit" id="btn-register"
         class="w-full bg-blue-600 text-white py-3 rounded-xl font-semibold hover:bg-blue-700 transition text-lg mt-2">
         Înregistrează-te
@@ -147,6 +154,7 @@
             oras: document.getElementById("oras").value || null,
             telefon: document.getElementById("telefon").value || null,
             gdpr_consimtit: true,
+            newsletter_consimtit: document.getElementById("newsletter-consimtit").checked,
             data_nasterii: dataNasterii,
           }),
         });

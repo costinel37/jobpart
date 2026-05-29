@@ -31,6 +31,7 @@ class User(Base):
     despre = Column(Text, nullable=True)
     activ = Column(Boolean, default=True)
     email_confirmat = Column(Boolean, default=False)
+    newsletter_consimtit = Column(Boolean, default=False)
     gdpr_consimtit_la = Column(DateTime, nullable=True)
     data_nasterii = Column(Date, nullable=True)
     parola_schimbata_la = Column(DateTime, nullable=True)

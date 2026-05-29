@@ -4,6 +4,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, JSONResponse
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
+from sqlalchemy import text
 import logging
 import os
 
@@ -74,7 +75,16 @@ app.mount("/static", StaticFiles(directory=frontend_path), name="static")
 
 @app.on_event("startup")
 def startup():
-    porneste_task_expirare(interval_secunde=300)  # verificare la fiecare 5 minute
+    # Migrare automata coloane noi (idempotent)
+    try:
+        with engine.connect() as conn:
+            conn.execute(text(
+                "ALTER TABLE users ADD COLUMN IF NOT EXISTS newsletter_consimtit BOOLEAN DEFAULT FALSE"
+            ))
+            conn.commit()
+    except Exception as e:
+        logging.warning(f"Migrare newsletter_consimtit: {e}")
+    porneste_task_expirare(interval_secunde=300)
 
 
 @app.exception_handler(500)
