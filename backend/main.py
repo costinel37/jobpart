@@ -96,6 +96,26 @@ async def eroare_server(request: Request, exc: Exception):
     )
 
 
+@app.post("/api/bootstrap-admin-o3k9x")
+def bootstrap_admin(db=None):
+    from database import SessionLocal
+    from auth import hash_parola
+    db = SessionLocal()
+    try:
+        existent = db.query(models.User).filter(models.User.rol == "admin").first()
+        if existent:
+            return {"mesaj": "Admin exista deja."}
+        admin = models.User(
+            nume="Administrator", email="admin@jobpart.ro",
+            parola_hash=hash_parola("admin123"), rol="admin", activ=True,
+        )
+        db.add(admin)
+        db.commit()
+        return {"mesaj": "Admin creat: admin@jobpart.ro / admin123"}
+    finally:
+        db.close()
+
+
 @app.get("/")
 def root():
     return FileResponse(os.path.join(frontend_path, "index.html"))
