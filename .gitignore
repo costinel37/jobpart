@@ -2,8 +2,13 @@
 __pycache__/
 *.pyc
 *.pyo
+*.pyd
 backend/joburi.db
+joburi.db
 backend/uploads/
 *.egg-info/
 .venv/
 venv/
+.idea/
+.vscode/
+*.log

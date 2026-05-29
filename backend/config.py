@@ -5,6 +5,9 @@ import sys
 load_dotenv(os.path.join(os.path.dirname(__file__), "..", ".env"))
 
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./joburi.db")
+# Railway livreaza postgres:// dar SQLAlchemy 2.0 necesita postgresql://
+if DATABASE_URL.startswith("postgres://"):
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
 FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:8000")
 
 _SECRET_KEY = os.getenv("SECRET_KEY", "")
