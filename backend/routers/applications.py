@@ -15,6 +15,13 @@ def _email_async(fn, *args):
     threading.Thread(target=fn, args=args, daemon=True).start()
 
 
+def _to_out(aplicare: models.Application) -> schemas.ApplicationOut:
+    out = schemas.ApplicationOut.model_validate(aplicare)
+    if aplicare.candidat:
+        out.candidat_nume = aplicare.candidat.nume
+    return out
+
+
 @router.post("", response_model=schemas.ApplicationOut)
 def aplica_la_job(
     data: schemas.ApplicationCreate,
@@ -50,7 +57,7 @@ def aplica_la_job(
         creeaza_notificare(db, angajator.id, "aplicare_noua",
                            f"{current_user.nume} a aplicat la '{job.titlu}'",
                            "/static/dashboard-angajator.html")
-    return aplicare
+    return _to_out(aplicare)
 
 
 @router.get("/ale-mele", response_model=List[schemas.ApplicationOut])
@@ -58,9 +65,10 @@ def aplicarile_mele(
     db: Session = Depends(get_db),
     current_user=Depends(require_rol("candidat"))
 ):
-    return db.query(models.Application).filter(
+    aplicari = db.query(models.Application).filter(
         models.Application.candidat_id == current_user.id
     ).order_by(models.Application.creat_la.desc()).all()
+    return [_to_out(a) for a in aplicari]
 
 
 @router.get("/pentru-job/{job_id}", response_model=List[schemas.ApplicationOut])
@@ -75,9 +83,10 @@ def aplicari_pentru_job(
     if job.angajator_id != current_user.id and current_user.rol != "admin":
         raise HTTPException(status_code=403, detail="Nu ai acces la aplicările acestui job.")
 
-    return db.query(models.Application).filter(
+    aplicari = db.query(models.Application).filter(
         models.Application.job_id == job_id
     ).order_by(models.Application.creat_la.desc()).all()
+    return [_to_out(a) for a in aplicari]
 
 
 @router.put("/{aplicare_id}/status")

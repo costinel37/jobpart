@@ -18,9 +18,17 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         response = await call_next(request)
         response.headers["X-Content-Type-Options"] = "nosniff"
         response.headers["X-Frame-Options"] = "DENY"
-        response.headers["X-XSS-Protection"] = "1; mode=block"
         response.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
-        response.headers["Permissions-Policy"] = "geolocation=(), microphone=(), camera=()"
+        response.headers["Permissions-Policy"] = "geolocation=(self), microphone=(), camera=()"
+        response.headers["Content-Security-Policy"] = (
+            "default-src 'self'; "
+            "script-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://unpkg.com; "
+            "style-src 'self' 'unsafe-inline' https://cdn.tailwindcss.com https://unpkg.com; "
+            "img-src 'self' data: https://*.tile.openstreetmap.org https://nominatim.openstreetmap.org; "
+            "connect-src 'self' https://nominatim.openstreetmap.org; "
+            "font-src 'self' data:; "
+            "frame-ancestors 'none';"
+        )
         if ENV == "production":
             response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
         return response

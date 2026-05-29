@@ -28,7 +28,10 @@ async function apiFetch(path, options = {}) {
   if (token) headers["Authorization"] = `Bearer ${token}`;
 
   const res = await fetch(API_BASE + path, { ...options, headers });
-  if (res.status === 401) { logout(); return; }
+  if (res.status === 401) {
+    if (token) { logout(); return; }
+    throw new Error("Trebuie să fii autentificat.");
+  }
 
   const data = await res.json();
   if (!res.ok) throw new Error(data.detail || "Eroare la server");

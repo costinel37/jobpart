@@ -14,11 +14,15 @@
       <div class="flex items-center gap-4">
         <a href="/static/jobs.html" class="text-gray-600 hover:text-blue-600 font-medium">Joburi</a>
         <a href="/static/harta.html" class="text-gray-600 hover:text-blue-600 font-medium">🗺 Hartă</a>
+        <a href="/static/promotii.html" class="text-yellow-600 hover:text-yellow-700 font-medium">⭐ Promovează</a>
+        <a href="/static/dashboard-angajator.html" class="px-4 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700 font-medium text-sm">+ Publică anunț</a>
+        <!-- Butoane login/register — vizibile când nu e logat -->
         <div id="nav-auth" class="flex gap-2">
           <a href="/static/login.html" class="px-4 py-2 rounded-lg border border-blue-600 text-blue-600 hover:bg-blue-50 font-medium">Login</a>
           <a href="/static/register.html" class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 font-medium">Înregistrare</a>
         </div>
-        <div id="nav-user" class="hidden flex items-center gap-3">
+        <!-- Zona utilizator logat — ascunsă implicit, afișată de updateNav() -->
+        <div id="nav-user" class="items-center gap-3" style="display:none;">
           <a id="nav-dashboard" href="#" class="text-gray-600 hover:text-blue-600 font-medium">Dashboard</a>
           <span class="text-gray-700 font-medium" id="nav-username"></span>
           <button onclick="logout()" class="px-4 py-2 rounded-lg bg-red-500 text-white hover:bg-red-600 font-medium">Ieșire</button>
@@ -29,9 +33,13 @@
 
   <div class="max-w-4xl mx-auto px-4 py-10">
     <a href="/static/jobs.html" class="text-blue-600 hover:underline mb-6 inline-block">← Înapoi la joburi</a>
-    <div id="job-container"><div class="text-center py-20 text-gray-400">Se încarcă...</div></div>
 
-    <!-- Formular aplicare (candidați autentificați) -->
+    <!-- Conținutul jobului — vizibil pentru toată lumea -->
+    <div id="job-container">
+      <div class="text-center py-20 text-gray-400">Se încarcă...</div>
+    </div>
+
+    <!-- Formular aplicare — vizibil DOAR pentru candidați autentificați -->
     <div id="aplica-section" class="hidden mt-8 bg-white rounded-xl shadow-sm p-6">
       <h2 class="text-xl font-bold text-gray-800 mb-5">Aplică la acest job</h2>
       <div id="aplica-mesaj" class="hidden mb-4"></div>
@@ -80,25 +88,53 @@
       </button>
     </div>
 
+    <!-- Banner autentificare — vizibil DOAR pentru utilizatori neautentificați -->
     <div id="login-prompt" class="hidden mt-8 bg-blue-50 rounded-xl p-6 text-center border border-blue-200">
-      <p class="text-gray-700 mb-4">Autentifică-te pentru a aplica la acest job.</p>
-      <a href="/static/login.html" class="bg-blue-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-blue-700 inline-block">Login</a>
-      <a href="/static/register.html" class="ml-3 border border-blue-600 text-blue-600 px-6 py-3 rounded-xl font-semibold hover:bg-blue-50 inline-block">Înregistrare</a>
+      <p class="text-lg font-semibold text-gray-800 mb-1">Vrei să aplici la acest job?</p>
+      <p class="text-gray-600 mb-5">Autentifică-te pentru a trimite aplicarea ta.</p>
+      <a href="/static/login.html" class="bg-blue-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-blue-700 inline-block transition">Login</a>
+      <a href="/static/register.html" class="ml-3 border border-blue-600 text-blue-600 px-6 py-3 rounded-xl font-semibold hover:bg-blue-100 inline-block transition">Înregistrare</a>
     </div>
   </div>
 
   <script src="/static/js/api.js"></script>
   <script>
-    updateNav();
     const jobId = new URLSearchParams(window.location.search).get("id");
-    const user = getUser();
 
     let cvPath = null;
     let cvNumeOriginal = null;
 
+    // Inițializează bara de navigare cu suport corect pentru display:flex.
+    // Nu apelăm updateNav() direct deoarece aceea folosește classList care
+    // în Tailwind ar seta display:block în loc de display:flex pe nav-user.
+    (function initNav() {
+      const navUser = document.getElementById("nav-user");
+      const navAuth = document.getElementById("nav-auth");
+      const user = getUser();
+      if (user) {
+        navAuth.classList.add("hidden");
+        navUser.style.display = "flex";
+        const nameEl = document.getElementById("nav-username");
+        if (nameEl) nameEl.textContent = user.nume;
+        const dashLink = document.getElementById("nav-dashboard");
+        if (dashLink) {
+          if (user.rol === "candidat") dashLink.href = "/static/dashboard-candidat.html";
+          else if (user.rol === "angajator") dashLink.href = "/static/dashboard-angajator.html";
+          else if (user.rol === "admin") dashLink.href = "/static/admin.html";
+        }
+        // Inițializează notificările dacă clopotelul există în pagină
+        if (typeof initNotifBell === "function") initNotifBell();
+      } else {
+        navAuth.classList.remove("hidden");
+        navUser.style.display = "none";
+      }
+    })();
+
     async function incarcaJob() {
       try {
+        // Endpointul GET /api/jobs/{id} este PUBLIC — funcționează fără token
         const job = await apiFetch(`/jobs/${jobId}`);
+
         const salariu = job.salariu_min
           ? `${job.salariu_min.toLocaleString()}${job.salariu_max ? ' - ' + job.salariu_max.toLocaleString() : '+'} RON/lună`
           : "Negociabil";
@@ -107,11 +143,11 @@
           <div class="bg-white rounded-xl shadow-sm p-8">
             <div class="flex justify-between items-start flex-wrap gap-4 mb-6">
               <div>
-                <span class="text-xs bg-blue-100 text-blue-700 px-3 py-1 rounded-full font-medium">${job.categorie || 'Part-time'}</span>
-                <h1 class="text-3xl font-bold text-gray-800 mt-3 mb-1">${job.titlu}</h1>
+                <span class="text-xs bg-blue-100 text-blue-700 px-3 py-1 rounded-full font-medium">${escapeHtml(job.categorie) || 'Part-time'}</span>
+                <h1 class="text-3xl font-bold text-gray-800 mt-3 mb-1">${escapeHtml(job.titlu)}</h1>
                 <p class="text-blue-600 text-xl font-semibold">
-                  ${job.companie}
-                  <a href="/static/profil.html?id=${job.angajator_id}" class="ml-2 text-sm text-purple-600 hover:underline font-normal">
+                  ${escapeHtml(job.companie)}
+                  <a href="/static/profil.html?id=${encodeURIComponent(job.angajator_id)}" class="ml-2 text-sm text-purple-600 hover:underline font-normal">
                     ⭐ Vezi profil angajator
                   </a>
                 </p>
@@ -119,25 +155,35 @@
               <span class="text-sm text-gray-400">Postat la ${formatData(job.creat_la)}</span>
             </div>
             <div class="flex flex-wrap gap-5 mb-8 text-gray-600 bg-gray-50 rounded-xl p-4">
-              <span>📍 <strong>${job.oras}</strong></span>
-              <span>💰 <strong>${salariu}</strong></span>
-              <span>⏰ <strong>${job.tip_program}</strong></span>
+              <span>📍 <strong>${escapeHtml(job.oras)}</strong></span>
+              <span>💰 <strong>${escapeHtml(salariu)}</strong></span>
+              <span>⏰ <strong>${escapeHtml(job.tip_program)}</strong></span>
             </div>
             <div class="space-y-6 text-gray-700 leading-relaxed">
               <div>
                 <h2 class="text-xl font-bold text-gray-800 mb-3">Descrierea jobului</h2>
-                <p class="whitespace-pre-line">${job.descriere}</p>
+                <p class="whitespace-pre-line">${escapeHtml(job.descriere)}</p>
               </div>
-              ${job.cerinte ? `<div><h2 class="text-xl font-bold text-gray-800 mb-3">Cerințe</h2><p class="whitespace-pre-line">${job.cerinte}</p></div>` : ''}
-              ${job.beneficii ? `<div><h2 class="text-xl font-bold text-gray-800 mb-3">Beneficii</h2><p class="whitespace-pre-line">${job.beneficii}</p></div>` : ''}
+              ${job.cerinte ? `<div><h2 class="text-xl font-bold text-gray-800 mb-3">Cerințe</h2><p class="whitespace-pre-line">${escapeHtml(job.cerinte)}</p></div>` : ''}
+              ${job.beneficii ? `<div><h2 class="text-xl font-bold text-gray-800 mb-3">Beneficii</h2><p class="whitespace-pre-line">${escapeHtml(job.beneficii)}</p></div>` : ''}
             </div>
           </div>`;
 
-        if (user?.rol === "candidat") document.getElementById("aplica-section").classList.remove("hidden");
-        else if (!user) document.getElementById("login-prompt").classList.remove("hidden");
-      } catch {
+        // Citim userul din nou după ce jobul s-a încărcat (pentru consistență)
+        const user = getUser();
+
+        if (user && user.rol === "candidat") {
+          // Candidat autentificat — afișează formularul de aplicare
+          document.getElementById("aplica-section").classList.remove("hidden");
+        } else if (!user) {
+          // Vizitator neautentificat — afișează bannerul de login
+          document.getElementById("login-prompt").classList.remove("hidden");
+        }
+        // Angajatorul autentificat — nu vede nici formularul, nici bannerul (comportament corect)
+
+      } catch (err) {
         document.getElementById("job-container").innerHTML =
-          '<div class="text-center py-20 text-red-400">Jobul nu a putut fi încărcat.</div>';
+          `<div class="text-center py-20 text-red-400">Jobul nu a putut fi încărcat.<br><span class="text-sm">${escapeHtml(err.message)}</span></div>`;
       }
     }
 
@@ -153,8 +199,11 @@
     }
 
     function proceseazaFisier(file) {
-      const tipuriAcceptate = ["application/pdf","application/msword",
-        "application/vnd.openxmlformats-officedocument.wordprocessingml.document"];
+      const tipuriAcceptate = [
+        "application/pdf",
+        "application/msword",
+        "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+      ];
       if (!tipuriAcceptate.includes(file.type)) {
         alert("Tip de fișier invalid. Acceptăm PDF, DOC, DOCX.");
         return;
@@ -244,8 +293,11 @@
       }
     }
 
-    if (jobId) incarcaJob();
-    else window.location.href = "/static/jobs.html";
+    if (jobId) {
+      incarcaJob();
+    } else {
+      window.location.href = "/static/jobs.html";
+    }
   </script>
 </body>
 </html>

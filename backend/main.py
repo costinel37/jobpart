@@ -9,11 +9,12 @@ import os
 
 from database import engine
 import models
-from routers import auth, jobs, applications, admin, upload, reviews, favorite, mesaje, notificari, export
+from routers import auth, jobs, applications, admin, upload, reviews, favorite, mesaje, notificari, export, promotii
 from security import (
     limiter, SecurityHeadersMiddleware,
     RequestLoggingMiddleware, eroare_rate_limit
 )
+from expirare_jobs import porneste_task_expirare
 
 logging.basicConfig(
     level=logging.INFO,
@@ -64,9 +65,15 @@ app.include_router(favorite.router)
 app.include_router(mesaje.router)
 app.include_router(notificari.router)
 app.include_router(export.router)
+app.include_router(promotii.router)
 
 frontend_path = os.path.join(os.path.dirname(__file__), "..", "frontend")
 app.mount("/static", StaticFiles(directory=frontend_path), name="static")
+
+
+@app.on_event("startup")
+def startup():
+    porneste_task_expirare(interval_secunde=300)  # verificare la fiecare 5 minute
 
 
 @app.exception_handler(500)

@@ -35,6 +35,8 @@
         class="tab-btn px-5 py-3 font-semibold text-blue-600 border-b-2 border-blue-600">Utilizatori</button>
       <button onclick="switchTab('joburi')" id="tab-joburi"
         class="tab-btn px-5 py-3 font-semibold text-gray-500 hover:text-gray-700 border-b-2 border-transparent">Joburi</button>
+      <button onclick="switchTab('promotii')" id="tab-promotii"
+        class="tab-btn px-5 py-3 font-semibold text-gray-500 hover:text-gray-700 border-b-2 border-transparent">⭐ Promovări</button>
     </div>
 
     <!-- Tab: Utilizatori -->
@@ -46,6 +48,56 @@
     <div id="content-joburi" class="hidden">
       <div id="toate-joburi-list"><div class="text-center py-10 text-gray-400">Se încarcă...</div></div>
     </div>
+
+    <!-- Tab: Promovări -->
+    <div id="content-promotii" class="hidden">
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+        <div class="bg-white rounded-xl shadow-sm p-5">
+          <p class="text-sm text-gray-500">În așteptare</p>
+          <p id="stat-in-asteptare" class="text-2xl font-bold text-yellow-600">—</p>
+        </div>
+        <div class="bg-white rounded-xl shadow-sm p-5">
+          <p class="text-sm text-gray-500">Aprobate total</p>
+          <p id="stat-aprobate" class="text-2xl font-bold text-green-600">—</p>
+        </div>
+        <div class="bg-white rounded-xl shadow-sm p-5">
+          <p class="text-sm text-gray-500">Venituri totale</p>
+          <p id="stat-venituri-total" class="text-2xl font-bold text-blue-600">— RON</p>
+        </div>
+        <div class="bg-white rounded-xl shadow-sm p-5">
+          <p class="text-sm text-gray-500">Venituri luna asta</p>
+          <p id="stat-venituri-luna" class="text-2xl font-bold text-purple-600">— RON</p>
+        </div>
+      </div>
+      <div class="flex gap-3 mb-4 flex-wrap">
+        <button onclick="filtreazaPromo('in_asteptare')" id="filtru-in_asteptare"
+          class="px-4 py-2 rounded-lg bg-yellow-500 text-white font-medium text-sm">În așteptare</button>
+        <button onclick="filtreazaPromo('aprobata')" id="filtru-aprobata"
+          class="px-4 py-2 rounded-lg bg-gray-100 text-gray-600 font-medium text-sm hover:bg-gray-200">Aprobate</button>
+        <button onclick="filtreazaPromo('respinsa')" id="filtru-respinsa"
+          class="px-4 py-2 rounded-lg bg-gray-100 text-gray-600 font-medium text-sm hover:bg-gray-200">Respinse</button>
+        <button onclick="filtreazaPromo('toate')" id="filtru-toate"
+          class="px-4 py-2 rounded-lg bg-gray-100 text-gray-600 font-medium text-sm hover:bg-gray-200">Toate</button>
+      </div>
+      <div class="bg-white rounded-xl shadow-sm overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead class="bg-gray-50 border-b">
+            <tr>
+              <th class="text-left px-4 py-3 text-gray-600 font-medium">Job</th>
+              <th class="text-left px-4 py-3 text-gray-600 font-medium">Angajator</th>
+              <th class="text-left px-4 py-3 text-gray-600 font-medium">Plan</th>
+              <th class="text-left px-4 py-3 text-gray-600 font-medium">Preț</th>
+              <th class="text-left px-4 py-3 text-gray-600 font-medium">Status</th>
+              <th class="text-left px-4 py-3 text-gray-600 font-medium">Data</th>
+              <th class="text-left px-4 py-3 text-gray-600 font-medium">Acțiuni</th>
+            </tr>
+          </thead>
+          <tbody id="tabel-promotii">
+            <tr><td colspan="7" class="text-center py-8 text-gray-400">Se încarcă...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
   </div>
 
   <script src="/static/js/api.js"></script>
@@ -55,13 +107,14 @@
     document.getElementById("admin-name").textContent = user?.nume || "";
 
     function switchTab(tab) {
-      ["utilizatori", "joburi"].forEach(t => {
+      ["utilizatori", "joburi", "promotii"].forEach(t => {
         document.getElementById(`content-${t}`).classList.toggle("hidden", t !== tab);
         const btn = document.getElementById(`tab-${t}`);
         if (t === tab) btn.className = "tab-btn px-5 py-3 font-semibold text-blue-600 border-b-2 border-blue-600";
         else btn.className = "tab-btn px-5 py-3 font-semibold text-gray-500 hover:text-gray-700 border-b-2 border-transparent";
       });
       if (tab === "joburi") incarcaToateJoburile();
+      if (tab === "promotii") { incarcaCereriPromo(filtruPromoActiv); incarcaStatisticiPromo(); }
     }
 
     async function incarcaStatistici() {
@@ -87,9 +140,31 @@
       }
     }
 
-    async function incarcaUtilizatori() {
+    let paginaUtilizatori = 1, totalUtilizatori = 0;
+    let paginaJoburi = 1, totalJoburi = 0;
+    const PER_PAGINA = 50;
+
+    function renderPaginare(pagina, total, onSchimba) {
+      const totalPagini = Math.ceil(total / PER_PAGINA);
+      if (totalPagini <= 1) return '';
+      const btnCls = "px-3 py-1 rounded-lg border text-sm font-medium";
+      return `<div class="flex items-center gap-2 mt-4 justify-end">
+        <button onclick="${onSchimba}(${pagina - 1})" ${pagina === 1 ? 'disabled' : ''}
+          class="${btnCls} ${pagina === 1 ? 'border-gray-200 text-gray-300 cursor-not-allowed' : 'border-gray-300 text-gray-600 hover:bg-gray-50'}">← Anterior</button>
+        <span class="text-sm text-gray-500">Pagina ${pagina} din ${totalPagini} (${total} total)</span>
+        <button onclick="${onSchimba}(${pagina + 1})" ${pagina >= totalPagini ? 'disabled' : ''}
+          class="${btnCls} ${pagina >= totalPagini ? 'border-gray-200 text-gray-300 cursor-not-allowed' : 'border-gray-300 text-gray-600 hover:bg-gray-50'}">Următor →</button>
+      </div>`;
+    }
+
+    async function incarcaUtilizatori(pagina = 1) {
+      paginaUtilizatori = pagina;
       try {
-        const users = await apiFetch("/admin/utilizatori");
+        const [users, countR] = await Promise.all([
+          apiFetch(`/admin/utilizatori?pagina=${pagina}&per_pagina=${PER_PAGINA}`),
+          apiFetch("/admin/utilizatori/count"),
+        ]);
+        totalUtilizatori = countR.total;
         const rolColors = {
           candidat: "bg-blue-100 text-blue-700",
           angajator: "bg-purple-100 text-purple-700",
@@ -113,8 +188,8 @@
                 ${users.map(u => `
                   <tr class="hover:bg-gray-50">
                     <td class="px-5 py-3 text-gray-500 text-sm">#${u.id}</td>
-                    <td class="px-5 py-3 font-medium text-gray-800">${u.nume}</td>
-                    <td class="px-5 py-3 text-gray-600 text-sm">${u.email}</td>
+                    <td class="px-5 py-3 font-medium text-gray-800">${escapeHtml(u.nume)}</td>
+                    <td class="px-5 py-3 text-gray-600 text-sm">${escapeHtml(u.email)}</td>
                     <td class="px-5 py-3">
                       <span class="px-2 py-1 rounded-full text-xs font-semibold ${rolColors[u.rol] || 'bg-gray-100'}">${u.rol}</span>
                     </td>
@@ -140,15 +215,21 @@
                   </tr>`).join("")}
               </tbody>
             </table>
-          </div>`;
+          </div>
+          ${renderPaginare(pagina, totalUtilizatori, 'incarcaUtilizatori')}`;
       } catch (e) {
         document.getElementById("utilizatori-list").innerHTML = '<div class="text-red-400 py-10 text-center">Eroare.</div>';
       }
     }
 
-    async function incarcaToateJoburile() {
+    async function incarcaToateJoburile(pagina = 1) {
+      paginaJoburi = pagina;
       try {
-        const jobs = await apiFetch("/admin/toate-joburile");
+        const [jobs, countR] = await Promise.all([
+          apiFetch(`/admin/toate-joburile?pagina=${pagina}&per_pagina=${PER_PAGINA}`),
+          apiFetch("/admin/toate-joburile/count"),
+        ]);
+        totalJoburi = countR.total;
         document.getElementById("toate-joburi-list").innerHTML = `
           <div class="bg-white rounded-xl shadow-sm overflow-hidden">
             <table class="w-full">
@@ -183,7 +264,8 @@
                   </tr>`).join("")}
               </tbody>
             </table>
-          </div>`;
+          </div>
+          ${renderPaginare(pagina, totalJoburi, 'incarcaToateJoburile')}`;
       } catch (e) {
         document.getElementById("toate-joburi-list").innerHTML = '<div class="text-red-400 py-10 text-center">Eroare.</div>';
       }
@@ -234,6 +316,86 @@
         incarcaStatistici();
       } catch (e) { alert(e.message); }
     }
+
+    // ===== PROMOTII =====
+    let filtruPromoActiv = 'in_asteptare';
+
+    async function incarcaStatisticiPromo() {
+      try {
+        const s = await apiFetch("/promotii/statistici");
+        document.getElementById("stat-in-asteptare").textContent = s.in_asteptare;
+        document.getElementById("stat-aprobate").textContent = s.aprobate;
+        document.getElementById("stat-venituri-total").textContent = s.venituri_totale_ron + " RON";
+        document.getElementById("stat-venituri-luna").textContent = s.venituri_luna_curenta_ron + " RON";
+      } catch(e) {}
+    }
+
+    async function incarcaCereriPromo(status) {
+      const tbody = document.getElementById("tabel-promotii");
+      tbody.innerHTML = '<tr><td colspan="7" class="text-center py-8 text-gray-400">Se încarcă...</td></tr>';
+      try {
+        const statusParam = (status === 'toate') ? '' : `&status=${status}`;
+        const r = await apiFetch(`/promotii/cereri?per_pagina=100${statusParam}`);
+        if (!r.cereri || r.cereri.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="7" class="text-center py-8 text-gray-400">Nicio cerere găsită.</td></tr>';
+          return;
+        }
+        tbody.innerHTML = r.cereri.map(c => {
+          const statusBadge = {
+            'in_asteptare': '<span class="bg-yellow-100 text-yellow-700 px-2 py-1 rounded-full text-xs font-medium">În așteptare</span>',
+            'aprobata': '<span class="bg-green-100 text-green-700 px-2 py-1 rounded-full text-xs font-medium">Aprobată</span>',
+            'respinsa': '<span class="bg-red-100 text-red-700 px-2 py-1 rounded-full text-xs font-medium">Respinsă</span>',
+          }[c.status] || c.status;
+          const planLabel = {'7zile': 'Starter 7z', '14zile': 'Standard 14z', '30zile': 'Premium 30z'}[c.plan] || c.plan;
+          const actiuni = c.status === 'in_asteptare'
+            ? `<button onclick="aprobaPromo(${c.id})" class="bg-green-600 text-white px-3 py-1 rounded-lg text-xs hover:bg-green-700 font-medium mr-1">✓ Aprobă</button>
+               <button onclick="respingePromo(${c.id})" class="bg-red-500 text-white px-3 py-1 rounded-lg text-xs hover:bg-red-600 font-medium">✗ Respinge</button>`
+            : '<span class="text-gray-400 text-xs">Procesată</span>';
+          return `<tr class="border-b hover:bg-gray-50">
+            <td class="px-4 py-3 font-medium text-gray-800 max-w-[160px] truncate">${escapeHtml(c.job_titlu || 'Job #' + c.job_id)}</td>
+            <td class="px-4 py-3 text-gray-600">${escapeHtml(c.angajator_nume || '#' + c.angajator_id)}</td>
+            <td class="px-4 py-3 text-gray-600 text-xs">${planLabel}</td>
+            <td class="px-4 py-3 font-semibold text-blue-600">${c.pret} RON</td>
+            <td class="px-4 py-3">${statusBadge}</td>
+            <td class="px-4 py-3 text-gray-500 text-xs">${new Date(c.creat_la).toLocaleDateString('ro-RO')}</td>
+            <td class="px-4 py-3">${actiuni}</td>
+          </tr>`;
+        }).join('');
+      } catch(e) {
+        tbody.innerHTML = `<tr><td colspan="7" class="text-center py-8 text-red-500">${escapeHtml(e.message)}</td></tr>`;
+      }
+    }
+
+    function filtreazaPromo(status) {
+      filtruPromoActiv = status;
+      ['in_asteptare','aprobata','respinsa','toate'].forEach(s => {
+        const btn = document.getElementById(`filtru-${s}`);
+        if (btn) btn.className = s === status
+          ? 'px-4 py-2 rounded-lg bg-yellow-500 text-white font-medium text-sm'
+          : 'px-4 py-2 rounded-lg bg-gray-100 text-gray-600 font-medium text-sm hover:bg-gray-200';
+      });
+      incarcaCereriPromo(status);
+    }
+
+    async function aprobaPromo(id) {
+      if (!confirm("Aprobi această cerere? Jobul va fi marcat ca promovat.")) return;
+      try {
+        await apiFetch(`/promotii/cereri/${id}/aproba`, { method: "PUT", body: JSON.stringify({}) });
+        incarcaCereriPromo(filtruPromoActiv);
+        incarcaStatisticiPromo();
+      } catch(e) { alert("Eroare: " + e.message); }
+    }
+
+    async function respingePromo(id) {
+      const motiv = prompt("Motiv respingere (opțional):");
+      if (motiv === null) return;
+      try {
+        await apiFetch(`/promotii/cereri/${id}/respinge`, { method: "PUT", body: JSON.stringify({ mesaj: motiv || null }) });
+        incarcaCereriPromo(filtruPromoActiv);
+        incarcaStatisticiPromo();
+      } catch(e) { alert("Eroare: " + e.message); }
+    }
+    // ===== FIN PROMOTII =====
 
     incarcaStatistici();
     incarcaUtilizatori();

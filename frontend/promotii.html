@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Promovează-ți Jobul - JobPart</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 font-sans">
+
+  <nav class="bg-white shadow-sm sticky top-0 z-50">
+    <div class="max-w-5xl mx-auto px-4 py-3 flex items-center justify-between">
+      <a href="/static/index.html" class="text-2xl font-bold text-blue-600">Job<span class="text-gray-800">Part</span></a>
+      <div class="flex items-center gap-4">
+        <a href="/static/dashboard-angajator.html" class="text-sm text-gray-500 hover:text-blue-600">Dashboard</a>
+        <a href="/static/index.html" class="text-sm text-gray-500 hover:text-blue-600">← Joburi</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <section class="bg-gradient-to-br from-blue-600 to-blue-800 text-white py-16 px-4 text-center">
+    <p class="text-blue-200 font-medium mb-2 text-sm uppercase tracking-wide">Angajatori</p>
+    <h1 class="text-4xl font-bold mb-4">Promovează-ți jobul</h1>
+    <p class="text-blue-100 text-lg max-w-xl mx-auto">
+      Joburile promovate apar primul în lista de căutare și sunt marcate cu ⭐, atrăgând de 3× mai mulți candidați.
+    </p>
+  </section>
+
+  <!-- Planuri -->
+  <section class="max-w-5xl mx-auto px-4 py-14">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+      <!-- Starter -->
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 flex flex-col">
+        <p class="text-gray-500 font-medium text-sm mb-2">Starter</p>
+        <p class="text-4xl font-bold text-gray-900 mb-1">25 <span class="text-xl font-normal text-gray-500">RON</span></p>
+        <p class="text-gray-400 text-sm mb-6">7 zile promovare</p>
+        <ul class="space-y-3 text-sm text-gray-600 mb-8 flex-1">
+          <li class="flex items-center gap-2"><span class="text-green-500 font-bold">✓</span> Apare primul în lista de joburi</li>
+          <li class="flex items-center gap-2"><span class="text-green-500 font-bold">✓</span> Badge ⭐ vizibil pentru candidați</li>
+          <li class="flex items-center gap-2"><span class="text-green-500 font-bold">✓</span> Ideal pentru joburi urgente</li>
+        </ul>
+        <a href="/static/dashboard-angajator.html"
+          class="block text-center border-2 border-blue-600 text-blue-600 py-3 rounded-xl font-semibold hover:bg-blue-50 transition">
+          Alege Starter
+        </a>
+      </div>
+
+      <!-- Standard (popular) -->
+      <div class="bg-blue-600 rounded-2xl shadow-lg p-8 flex flex-col relative">
+        <span class="absolute -top-3 left-1/2 -translate-x-1/2 bg-yellow-400 text-yellow-900 text-xs font-bold px-4 py-1 rounded-full">
+          Cel mai popular
+        </span>
+        <p class="text-blue-200 font-medium text-sm mb-2">Standard</p>
+        <p class="text-4xl font-bold text-white mb-1">40 <span class="text-xl font-normal text-blue-200">RON</span></p>
+        <p class="text-blue-200 text-sm mb-6">14 zile promovare</p>
+        <ul class="space-y-3 text-sm text-blue-100 mb-8 flex-1">
+          <li class="flex items-center gap-2"><span class="text-yellow-300 font-bold">✓</span> Tot ce include Starter</li>
+          <li class="flex items-center gap-2"><span class="text-yellow-300 font-bold">✓</span> 2× mai multă vizibilitate</li>
+          <li class="flex items-center gap-2"><span class="text-yellow-300 font-bold">✓</span> 14 zile de promovare</li>
+          <li class="flex items-center gap-2"><span class="text-yellow-300 font-bold">✓</span> Recomandat pentru angajatori activi</li>
+        </ul>
+        <a href="/static/dashboard-angajator.html"
+          class="block text-center bg-white text-blue-600 py-3 rounded-xl font-bold hover:bg-blue-50 transition">
+          Alege Standard
+        </a>
+      </div>
+
+      <!-- Premium -->
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 flex flex-col">
+        <p class="text-gray-500 font-medium text-sm mb-2">Premium</p>
+        <p class="text-4xl font-bold text-gray-900 mb-1">70 <span class="text-xl font-normal text-gray-500">RON</span></p>
+        <p class="text-gray-400 text-sm mb-6">30 zile promovare</p>
+        <ul class="space-y-3 text-sm text-gray-600 mb-8 flex-1">
+          <li class="flex items-center gap-2"><span class="text-green-500 font-bold">✓</span> Tot ce include Standard</li>
+          <li class="flex items-center gap-2"><span class="text-green-500 font-bold">✓</span> Vizibilitate maximă 30 de zile</li>
+          <li class="flex items-center gap-2"><span class="text-green-500 font-bold">✓</span> Prioritate maximă în căutări</li>
+          <li class="flex items-center gap-2"><span class="text-green-500 font-bold">✓</span> Ideal pentru poziții senior</li>
+        </ul>
+        <a href="/static/dashboard-angajator.html"
+          class="block text-center border-2 border-blue-600 text-blue-600 py-3 rounded-xl font-semibold hover:bg-blue-50 transition">
+          Alege Premium
+        </a>
+      </div>
+
+    </div>
+
+    <!-- Cum funcționează -->
+    <div class="mt-14 text-center mb-10">
+      <h2 class="text-2xl font-bold text-gray-800 mb-2">Cum funcționează?</h2>
+      <p class="text-gray-500">3 pași simpli</p>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-14">
+      <div class="text-center">
+        <div class="w-12 h-12 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-xl font-bold mx-auto mb-4">1</div>
+        <h3 class="font-semibold text-gray-800 mb-1">Alegi planul</h3>
+        <p class="text-sm text-gray-500">Din dashboard-ul tău, apasă ⭐ Promovează pe jobul dorit și selectezi planul.</p>
+      </div>
+      <div class="text-center">
+        <div class="w-12 h-12 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-xl font-bold mx-auto mb-4">2</div>
+        <h3 class="font-semibold text-gray-800 mb-1">Transferi suma</h3>
+        <p class="text-sm text-gray-500">Trimiți suma prin transfer bancar sau Revolut la IBAN-ul indicat, cu referința cererii tale.</p>
+      </div>
+      <div class="text-center">
+        <div class="w-12 h-12 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-xl font-bold mx-auto mb-4">3</div>
+        <h3 class="font-semibold text-gray-800 mb-1">Jobul apare primul</h3>
+        <p class="text-sm text-gray-500">Imediat după confirmarea plății, jobul tău apare în fruntea listei cu badge ⭐.</p>
+      </div>
+    </div>
+
+    <!-- FAQ -->
+    <div class="max-w-2xl mx-auto">
+      <h2 class="text-2xl font-bold text-gray-800 mb-6 text-center">Întrebări frecvente</h2>
+      <div class="space-y-4">
+        <details class="bg-white rounded-xl border border-gray-200 p-5 cursor-pointer">
+          <summary class="font-semibold text-gray-800">Când intră în vigoare promovarea?</summary>
+          <p class="mt-3 text-sm text-gray-600">În maxim 24h după ce transferul bancar este confirmat de echipa JobPart. Vei primi o notificare în platformă când jobul este activat.</p>
+        </details>
+        <details class="bg-white rounded-xl border border-gray-200 p-5 cursor-pointer">
+          <summary class="font-semibold text-gray-800">Cum plătesc?</summary>
+          <p class="mt-3 text-sm text-gray-600">Plata se face prin <strong>transfer bancar sau Revolut</strong> la IBAN-ul <strong>RO14REVO0000190057488530</strong>. După ce trimiți cererea din dashboard, primești referința de plată. Promovarea se activează în maxim 24h după confirmarea transferului.</p>
+        </details>
+        <details class="bg-white rounded-xl border border-gray-200 p-5 cursor-pointer">
+          <summary class="font-semibold text-gray-800">Pot promova mai multe joburi simultan?</summary>
+          <p class="mt-3 text-sm text-gray-600">Da! Poți trimite cereri de promovare pentru fiecare job activ din dashboard-ul tău.</p>
+        </details>
+        <details class="bg-white rounded-xl border border-gray-200 p-5 cursor-pointer">
+          <summary class="font-semibold text-gray-800">Există rambursare?</summary>
+          <p class="mt-3 text-sm text-gray-600">Nu, odată activată, promovarea nu este rambursabilă. Poți anula o cerere înainte de aprobare contactând echipa la contact@jobpart.ro.</p>
+        </details>
+      </div>
+    </div>
+  </section>
+
+  <footer class="bg-gray-800 text-gray-400 py-6 px-4 text-center text-sm">
+    <p>© 2025 JobPart — <a href="/static/termeni.html" class="hover:text-white">Termeni</a> · <a href="/static/confidentialitate.html" class="hover:text-white">Confidențialitate</a> · <a href="mailto:contact@jobpart.ro" class="hover:text-white">Contact</a></p>
+  </footer>
+
+</body>
+</html>

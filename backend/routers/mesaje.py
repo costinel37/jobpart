@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 from pydantic import BaseModel, field_validator
 from typing import List, Optional
@@ -56,6 +56,26 @@ class MesajOut(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+@router.get("/cauta-utilizatori")
+def cauta_utilizatori(
+    q: str = Query(..., min_length=2),
+    db: Session = Depends(get_db),
+    current_user=Depends(get_user_curent)
+):
+    """Caută utilizatori după nume pentru formularul de mesaj nou."""
+    users = (
+        db.query(models.User)
+        .filter(
+            models.User.activ == True,
+            models.User.id != current_user.id,
+            models.User.nume.ilike(f"%{q}%"),
+        )
+        .limit(10)
+        .all()
+    )
+    return [{"id": u.id, "nume": u.nume, "rol": u.rol} for u in users]
 
 
 @router.post("", response_model=MesajOut)

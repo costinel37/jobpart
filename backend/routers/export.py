@@ -15,6 +15,124 @@ from auth import get_user_curent
 router = APIRouter(prefix="/api/export", tags=["Export"])
 
 
+@router.get("/date-personale")
+def export_date_personale(db: Session = Depends(get_db), current_user=Depends(get_user_curent)):
+    """Export complet al datelor personale în format JSON (GDPR Art. 20 — dreptul la portabilitate)."""
+    user = current_user
+
+    aplicari = db.query(models.Application).filter(
+        models.Application.candidat_id == user.id
+    ).all()
+
+    mesaje_trimise = db.query(models.Message).filter(
+        models.Message.expeditor_id == user.id
+    ).order_by(models.Message.creat_la.desc()).all()
+
+    mesaje_primite = db.query(models.Message).filter(
+        models.Message.destinatar_id == user.id
+    ).order_by(models.Message.creat_la.desc()).all()
+
+    favorite = db.query(models.Favorite).filter(
+        models.Favorite.user_id == user.id
+    ).all()
+
+    recenzii_date = db.query(models.Review).filter(
+        models.Review.autor_id == user.id
+    ).all()
+
+    recenzii_primite = db.query(models.Review).filter(
+        models.Review.subiect_id == user.id
+    ).all()
+
+    def dt(v):
+        return v.isoformat() if v else None
+
+    data = {
+        "export_gdpr": {
+            "data_export": __import__("datetime").datetime.utcnow().isoformat(),
+            "nota": "Export date personale conform GDPR Art. 20 — JobPart"
+        },
+        "profil": {
+            "id": user.id,
+            "nume": user.nume,
+            "email": user.email,
+            "rol": user.rol,
+            "telefon": user.telefon,
+            "oras": user.oras,
+            "despre": user.despre,
+            "creat_la": dt(user.creat_la),
+            "email_confirmat": user.email_confirmat,
+            "gdpr_consimtit_la": dt(user.gdpr_consimtit_la),
+        },
+        "aplicari": [
+            {
+                "id": a.id,
+                "job_id": a.job_id,
+                "job_titlu": a.job.titlu if a.job else None,
+                "job_companie": a.job.companie if a.job else None,
+                "status": a.status,
+                "scrisoare": a.scrisoare,
+                "cv_nume_original": a.cv_nume_original,
+                "creat_la": dt(a.creat_la),
+            }
+            for a in aplicari
+        ],
+        "mesaje_trimise": [
+            {
+                "id": m.id,
+                "destinatar_id": m.destinatar_id,
+                "subiect": m.subiect,
+                "continut": m.continut,
+                "creat_la": dt(m.creat_la),
+            }
+            for m in mesaje_trimise
+        ],
+        "mesaje_primite": [
+            {
+                "id": m.id,
+                "expeditor_id": m.expeditor_id,
+                "subiect": m.subiect,
+                "continut": m.continut,
+                "citit": m.citit,
+                "creat_la": dt(m.creat_la),
+            }
+            for m in mesaje_primite
+        ],
+        "favorite_joburi": [
+            {"job_id": f.job_id, "creat_la": dt(f.creat_la)}
+            for f in favorite
+        ],
+        "recenzii_date": [
+            {
+                "id": r.id,
+                "subiect_id": r.subiect_id,
+                "rating": r.rating,
+                "comentariu": r.comentariu,
+                "creat_la": dt(r.creat_la),
+            }
+            for r in recenzii_date
+        ],
+        "recenzii_primite": [
+            {
+                "id": r.id,
+                "autor_id": r.autor_id,
+                "rating": r.rating,
+                "comentariu": r.comentariu,
+                "creat_la": dt(r.creat_la),
+            }
+            for r in recenzii_primite
+        ],
+    }
+
+    import json
+    continut = json.dumps(data, ensure_ascii=False, indent=2)
+    return StreamingResponse(
+        iter([continut]),
+        media_type="application/json",
+        headers={"Content-Disposition": f"attachment; filename=date_personale_jobpart_{user.id}.json"}
+    )
+
+
 @router.get("/cv-pdf")
 def export_cv_pdf(db: Session = Depends(get_db), current_user=Depends(get_user_curent)):
     user = db.query(models.User).filter(models.User.id == current_user.id).first()

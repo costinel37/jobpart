@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Text, Boolean, DateTime, ForeignKey, Enum, Float, UniqueConstraint
+from sqlalchemy import Column, Integer, String, Text, Boolean, DateTime, Date, ForeignKey, Enum, Float, UniqueConstraint
 from sqlalchemy.orm import relationship
 from datetime import datetime
 import enum
@@ -30,6 +30,10 @@ class User(Base):
     oras = Column(String(100), nullable=True)
     despre = Column(Text, nullable=True)
     activ = Column(Boolean, default=True)
+    email_confirmat = Column(Boolean, default=False)
+    gdpr_consimtit_la = Column(DateTime, nullable=True)
+    data_nasterii = Column(Date, nullable=True)
+    parola_schimbata_la = Column(DateTime, nullable=True)
     creat_la = Column(DateTime, default=datetime.utcnow)
 
     joburi_postate = relationship("Job", back_populates="angajator")
@@ -126,6 +130,31 @@ class Notification(Base):
     user = relationship("User", back_populates="notificari")
 
 
+class EmailVerification(Base):
+    __tablename__ = "email_verifications"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    token = Column(String(64), unique=True, nullable=False, index=True)
+    creat_la = Column(DateTime, default=datetime.utcnow)
+    expira_la = Column(DateTime, nullable=False)
+
+    user = relationship("User")
+
+
+class PasswordReset(Base):
+    __tablename__ = "password_resets"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    token = Column(String(64), unique=True, nullable=False, index=True)
+    creat_la = Column(DateTime, default=datetime.utcnow)
+    expira_la = Column(DateTime, nullable=False)
+    folosit = Column(Boolean, default=False)
+
+    user = relationship("User")
+
+
 class Application(Base):
     __tablename__ = "applications"
 
@@ -140,3 +169,34 @@ class Application(Base):
 
     candidat = relationship("User", back_populates="aplicari")
     job = relationship("Job", back_populates="aplicari")
+
+
+class AuditLog(Base):
+    __tablename__ = "audit_log"
+
+    id = Column(Integer, primary_key=True, index=True)
+    admin_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    actiune = Column(String(100), nullable=False)
+    target_type = Column(String(50), nullable=True)
+    target_id = Column(Integer, nullable=True)
+    detalii = Column(Text, nullable=True)
+    creat_la = Column(DateTime, default=datetime.utcnow)
+
+    admin = relationship("User", foreign_keys=[admin_id])
+
+
+class PromovareCerere(Base):
+    __tablename__ = "promotii_cereri"
+
+    id = Column(Integer, primary_key=True, index=True)
+    job_id = Column(Integer, ForeignKey("jobs.id"), nullable=False)
+    angajator_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    plan = Column(String(20), nullable=False)       # "7zile", "14zile", "30zile"
+    pret = Column(Integer, nullable=False)           # RON
+    status = Column(String(20), default="in_asteptare")  # in_asteptare / aprobata / respinsa
+    mesaj_admin = Column(Text, nullable=True)
+    creat_la = Column(DateTime, default=datetime.utcnow)
+    procesata_la = Column(DateTime, nullable=True)
+
+    job = relationship("Job")
+    angajator = relationship("User", foreign_keys=[angajator_id])

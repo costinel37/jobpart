@@ -1,5 +1,6 @@
 from datetime import datetime, timedelta
 from typing import Optional
+import time
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 from fastapi import Depends, HTTPException, status
@@ -10,8 +11,6 @@ import models
 
 from config import SECRET_KEY
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 60 * 24  # 24 ore
-
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/api/auth/login")
 
@@ -24,8 +23,7 @@ def verifica_parola(parola: str, hash: str) -> bool:
 
 def creeaza_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
     to_encode = data.copy()
-    expire = datetime.utcnow() + (expires_delta or timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES))
-    to_encode.update({"exp": expire})
+    to_encode.update({"iat": int(time.time())})  # time.time() = Unix epoch corect indiferent de tz
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
 def get_user_curent(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):
@@ -37,6 +35,7 @@ def get_user_curent(token: str = Depends(oauth2_scheme), db: Session = Depends(g
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         user_id: int = payload.get("sub")
+        token_iat: int = payload.get("iat")
         if user_id is None:
             raise credentials_exception
     except JWTError:
@@ -45,6 +44,15 @@ def get_user_curent(token: str = Depends(oauth2_scheme), db: Session = Depends(g
     user = db.query(models.User).filter(models.User.id == int(user_id)).first()
     if user is None or not user.activ:
         raise credentials_exception
+
+    # Revocă tokenul dacă parola a fost schimbată după emiterea lui.
+    # +1s grace period: iat e integer (secunde), parola_schimbata_la are microsecunde —
+    # fără grace, un login imediat după reset pare emis "înainte" de schimbare.
+    if user.parola_schimbata_la and token_iat:
+        token_emis_la = datetime.utcfromtimestamp(token_iat)
+        if user.parola_schimbata_la > token_emis_la + timedelta(seconds=1):
+            raise credentials_exception
+
     return user
 
 def require_rol(*roluri):

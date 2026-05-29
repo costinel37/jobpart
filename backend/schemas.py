@@ -1,6 +1,6 @@
 from pydantic import BaseModel, EmailStr, field_validator
 from typing import Optional
-from datetime import datetime
+from datetime import datetime, date
 import re
 
 _TAG_RE = re.compile(r'<[^>]+>')
@@ -19,6 +19,26 @@ class UserRegister(BaseModel):
     rol: str = "candidat"
     telefon: Optional[str] = None
     oras: Optional[str] = None
+    gdpr_consimtit: bool = False
+    data_nasterii: Optional[date] = None
+
+    @field_validator('gdpr_consimtit')
+    @classmethod
+    def valideaza_gdpr(cls, v: bool) -> bool:
+        if not v:
+            raise ValueError('Trebuie să accepți Politica de Confidențialitate pentru a te înregistra.')
+        return v
+
+    @field_validator('data_nasterii')
+    @classmethod
+    def valideaza_varsta(cls, v: Optional[date]) -> Optional[date]:
+        if v is None:
+            raise ValueError('Data nașterii este obligatorie.')
+        from datetime import date as date_type
+        varsta = (date_type.today() - v).days // 365
+        if varsta < 16:
+            raise ValueError('Trebuie să ai cel puțin 16 ani pentru a te înregistra.')
+        return v
 
 class UserLogin(BaseModel):
     email: EmailStr
@@ -40,7 +60,18 @@ class UserOut(BaseModel):
     oras: Optional[str]
     despre: Optional[str]
     activ: bool
+    email_confirmat: bool = False
     creat_la: datetime
+
+    class Config:
+        from_attributes = True
+
+class PublicUserOut(BaseModel):
+    id: int
+    nume: str
+    rol: str
+    despre: Optional[str]
+    membru_din: Optional[str] = None
 
     class Config:
         from_attributes = True
@@ -120,6 +151,7 @@ class ApplicationOut(BaseModel):
     status: str
     creat_la: datetime
     candidat_id: int
+    candidat_nume: str = ""
     job_id: int
     job: Optional[JobOut] = None
 

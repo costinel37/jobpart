@@ -27,6 +27,8 @@
       <div class="flex items-center gap-3">
         <a href="/static/jobs.html" class="text-gray-600 hover:text-blue-600 font-medium">Listă</a>
         <span class="text-blue-600 font-semibold">🗺 Hartă</span>
+        <a href="/static/promotii.html" class="text-yellow-600 hover:text-yellow-700 font-medium">⭐ Promovează</a>
+        <a href="/static/dashboard-angajator.html" class="px-4 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700 font-medium text-sm">+ Publică anunț</a>
         <div id="nav-auth" class="flex gap-2">
           <a href="/static/login.html" class="px-3 py-2 rounded-lg border border-blue-600 text-blue-600 hover:bg-blue-50 font-medium text-sm">Login</a>
           <a href="/static/register.html" class="px-3 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 font-medium text-sm">Înregistrare</a>
@@ -142,11 +144,11 @@
         : "Negociabil";
       const m = L.marker([job.lat, job.lng], { icon: iconJob })
         .bindPopup(`
-          <div class="job-popup-titlu">${job.titlu}</div>
-          <div class="job-popup-companie">${job.companie}</div>
-          <div class="job-popup-info">📍 ${job.oras}</div>
+          <div class="job-popup-titlu">${escapeHtml(job.titlu)}</div>
+          <div class="job-popup-companie">${escapeHtml(job.companie)}</div>
+          <div class="job-popup-info">📍 ${escapeHtml(job.oras)}</div>
           <div class="job-popup-info">💰 ${salariu}</div>
-          ${job.categorie ? `<div class="job-popup-info">🏷 ${job.categorie}</div>` : ''}
+          ${job.categorie ? `<div class="job-popup-info">🏷 ${escapeHtml(job.categorie)}</div>` : ''}
           <a href="/static/job-detalii.html?id=${job.id}"
             style="display:inline-block;margin-top:10px;background:#2563eb;color:white;
                    padding:6px 14px;border-radius:8px;text-decoration:none;font-size:13px;font-weight:600;">

@@ -8,11 +8,6 @@ from database import get_db
 import models, schemas
 from auth import get_user_curent, require_rol
 from geocoding import geocodeaza_oras, distanta_km
-from notificari_service import creeaza_notificare
-from email_service import (
-    email_promovare_expirata, email_promovare_expira_curand,
-    email_job_expira_curand, email_job_expirat,
-)
 
 ZILE_GRATUIT = 30
 
@@ -74,112 +69,6 @@ def lista_joburi(
     if postate_in:
         de_la = datetime.utcnow() - timedelta(days=postate_in)
         query = query.filter(models.Job.creat_la >= de_la)
-
-    now = datetime.utcnow()
-
-    # Avertisment job cu 3 zile înainte de expirare
-    prag_job = now + timedelta(days=3)
-    joburi_job_expira = db.query(models.Job).filter(
-        models.Job.activ == True,
-        models.Job.expira_la != None,
-        models.Job.expira_la > now,
-        models.Job.expira_la <= prag_job,
-        models.Job.avertisment_job == False,
-    ).all()
-    for job in joburi_job_expira:
-        zile = max(1, (job.expira_la - now).days)
-        angajator = db.query(models.User).filter(models.User.id == job.angajator_id).first()
-        if angajator:
-            creeaza_notificare(
-                db, angajator.id,
-                tip="job_expira",
-                mesaj=f"⚠️ Anunțul '{job.titlu}' expiră în {zile} {'zi' if zile == 1 else 'zile'}! Reînnoiește-l.",
-                link="/static/dashboard-angajator.html",
-            )
-            threading.Thread(
-                target=email_job_expira_curand,
-                args=(angajator.email, job.titlu, zile),
-                daemon=True
-            ).start()
-        job.avertisment_job = True
-    if joburi_job_expira:
-        db.commit()
-
-    # Expiră joburile și notifică angajatorul
-    joburi_job_expirate = db.query(models.Job).filter(
-        models.Job.activ == True,
-        models.Job.expira_la != None,
-        models.Job.expira_la <= now,
-    ).all()
-    for job in joburi_job_expirate:
-        angajator = db.query(models.User).filter(models.User.id == job.angajator_id).first()
-        if angajator:
-            creeaza_notificare(
-                db, angajator.id,
-                tip="job_expirat",
-                mesaj=f"📋 Anunțul '{job.titlu}' a expirat și nu mai este vizibil. Reînnoiește-l gratuit!",
-                link="/static/dashboard-angajator.html",
-            )
-            threading.Thread(
-                target=email_job_expirat,
-                args=(angajator.email, job.titlu),
-                daemon=True
-            ).start()
-        job.activ = False
-    if joburi_job_expirate:
-        db.commit()
-
-    # Avertisment cu 24h înainte de expirare
-    prag_avertisment = now + timedelta(hours=24)
-    joburi_expira_curand = db.query(models.Job).filter(
-        models.Job.promovat == True,
-        models.Job.promovat_pana > now,
-        models.Job.promovat_pana <= prag_avertisment,
-        models.Job.avertisment_expirare == False,
-    ).all()
-    for job in joburi_expira_curand:
-        ore = max(1, int((job.promovat_pana - now).total_seconds() // 3600))
-        angajator = db.query(models.User).filter(models.User.id == job.angajator_id).first()
-        if angajator:
-            creeaza_notificare(
-                db, angajator.id,
-                tip="promovare_expira",
-                mesaj=f"⚠️ Promovarea jobului '{job.titlu}' expiră în {ore} ore!",
-                link="/static/dashboard-angajator.html",
-            )
-            threading.Thread(
-                target=email_promovare_expira_curand,
-                args=(angajator.email, job.titlu, ore),
-                daemon=True
-            ).start()
-        job.avertisment_expirare = True
-    if joburi_expira_curand:
-        db.commit()
-
-    # Expiră promovările și notifică angajatorul
-    joburi_expirate = db.query(models.Job).filter(
-        models.Job.promovat == True,
-        models.Job.promovat_pana < now,
-    ).all()
-    for job in joburi_expirate:
-        angajator = db.query(models.User).filter(models.User.id == job.angajator_id).first()
-        if angajator:
-            creeaza_notificare(
-                db, angajator.id,
-                tip="promovare_expirata",
-                mesaj=f"📋 Promovarea jobului '{job.titlu}' a expirat. Reînnoiește pentru mai multă vizibilitate.",
-                link="/static/dashboard-angajator.html",
-            )
-            threading.Thread(
-                target=email_promovare_expirata,
-                args=(angajator.email, job.titlu),
-                daemon=True
-            ).start()
-        job.promovat = False
-        job.promovat_pana = None
-        job.avertisment_expirare = False
-    if joburi_expirate:
-        db.commit()
 
     # Promovate întotdeauna primele
     promovat_col = case((models.Job.promovat == True, 0), else_=1)

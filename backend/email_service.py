@@ -131,6 +131,42 @@ def email_promovare_expirata(email_angajator: str, titlu_job: str):
     _trimite_email(email_angajator, subiect, corp)
 
 
+def email_confirmare_cont(email: str, token: str):
+    link = f"{FRONTEND_URL}/static/confirmare-email.html?token={token}"
+    subiect = "Confirmă-ți contul JobPart"
+    corp = f"""
+    <div style="font-family:Arial,sans-serif;max-width:600px;margin:auto;padding:20px">
+      <h2 style="color:#2563eb">Bun venit pe JobPart!</h2>
+      <p>Confirmă adresa de email pentru a-ți activa contul:</p>
+      <a href="{link}"
+         style="display:inline-block;background:#2563eb;color:white;padding:14px 28px;
+                border-radius:8px;text-decoration:none;font-weight:bold;margin:16px 0">
+        Confirmă contul
+      </a>
+      <p style="color:#94a3b8;font-size:13px">Link-ul expiră în 24 de ore. Dacă nu ai creat un cont, ignoră acest email.</p>
+      <p style="color:#94a3b8;font-size:12px;margin-top:24px">JobPart - Platforma de joburi part-time</p>
+    </div>"""
+    _trimite_email(email, subiect, corp)
+
+
+def email_resetare_parola(email: str, token: str):
+    link = f"{FRONTEND_URL}/static/resetare-parola.html?token={token}"
+    subiect = "Resetare parolă JobPart"
+    corp = f"""
+    <div style="font-family:Arial,sans-serif;max-width:600px;margin:auto;padding:20px">
+      <h2 style="color:#2563eb">Resetare parolă</h2>
+      <p>Ai solicitat resetarea parolei. Apasă butonul de mai jos:</p>
+      <a href="{link}"
+         style="display:inline-block;background:#2563eb;color:white;padding:14px 28px;
+                border-radius:8px;text-decoration:none;font-weight:bold;margin:16px 0">
+        Resetează parola
+      </a>
+      <p style="color:#94a3b8;font-size:13px">Link-ul expiră în 1 oră. Dacă nu tu ai solicitat, ignoră acest email.</p>
+      <p style="color:#94a3b8;font-size:12px;margin-top:24px">JobPart - Platforma de joburi part-time</p>
+    </div>"""
+    _trimite_email(email, subiect, corp)
+
+
 def email_status_schimbat(email_candidat: str, titlu_job: str, companie: str, status_nou: str):
     status_labels = {
         "vizualizata": ("Aplicarea ta a fost vizualizată", "#f59e0b", "👀"),

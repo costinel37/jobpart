@@ -1,9 +1,12 @@
 from fastapi import APIRouter, UploadFile, File, HTTPException, Depends, Request
 from fastapi.responses import FileResponse
+from sqlalchemy.orm import Session
 import os, uuid
 from config import UPLOAD_DIR
+from database import get_db
 from auth import get_user_curent
 from security import limiter, verifica_tip_fisier
+import models
 
 router = APIRouter(prefix="/api/upload", tags=["Upload"])
 
@@ -44,7 +47,11 @@ async def upload_cv(
 
 
 @router.get("/cv/{nume_fisier}")
-async def descarca_cv(nume_fisier: str, current_user=Depends(get_user_curent)):
+async def descarca_cv(
+    nume_fisier: str,
+    db: Session = Depends(get_db),
+    current_user=Depends(get_user_curent)
+):
     # Previne path traversal (../../etc/passwd)
     if ".." in nume_fisier or "/" in nume_fisier or "\\" in nume_fisier:
         raise HTTPException(status_code=400, detail="Nume fișier invalid.")
@@ -53,4 +60,32 @@ async def descarca_cv(nume_fisier: str, current_user=Depends(get_user_curent)):
     if not os.path.exists(cale):
         raise HTTPException(status_code=404, detail="Fișierul nu există.")
 
-    return FileResponse(cale, filename=nume_fisier)
+    # Admin poate descărca orice CV
+    if current_user.rol == "admin":
+        return FileResponse(cale, filename=nume_fisier)
+
+    # Candidatul care a uploadat CV-ul (filename începe cu {user_id}_)
+    if nume_fisier.startswith(f"{current_user.id}_"):
+        return FileResponse(cale, filename=nume_fisier)
+
+    # Angajatorul care a primit o aplicare cu acest CV (doar dacă nu e respinsă)
+    if current_user.rol == "angajator":
+        from datetime import datetime, timedelta
+        aplicare = (
+            db.query(models.Application)
+            .join(models.Job, models.Application.job_id == models.Job.id)
+            .filter(
+                models.Application.cv_path == nume_fisier,
+                models.Job.angajator_id == current_user.id,
+            )
+            .first()
+        )
+        if aplicare:
+            # Blochează accesul la CV-ul candidaților respinși (GDPR Art. 5(1)(b))
+            if aplicare.status == "respinsa":
+                limita = aplicare.creat_la + timedelta(days=30)
+                if datetime.utcnow() > limita:
+                    raise HTTPException(status_code=403, detail="Accesul la CV a expirat conform politicii GDPR (30 zile după respingere).")
+            return FileResponse(cale, filename=nume_fisier)
+
+    raise HTTPException(status_code=403, detail="Nu ai acces la acest fișier.")

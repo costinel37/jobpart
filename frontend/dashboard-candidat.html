@@ -83,6 +83,17 @@
             Salvează modificările
           </button>
         </form>
+
+        <div class="mt-8 pt-6 border-t border-red-100">
+          <h3 class="text-base font-semibold text-red-700 mb-2">Zonă periculoasă</h3>
+          <p class="text-sm text-gray-500 mb-4">
+            Ștergerea contului este ireversibilă. Datele personale vor fi anonimizate, iar CV-urile vor fi șterse permanent.
+          </p>
+          <button onclick="stergeContul()"
+            class="bg-red-600 text-white px-6 py-2 rounded-xl font-semibold hover:bg-red-700 transition text-sm">
+            Șterge contul meu
+          </button>
+        </div>
       </div>
     </div>
   </div>
@@ -189,6 +200,19 @@
         mesajEl.classList.remove("hidden");
       }
     });
+
+    async function stergeContul() {
+      const confirmare1 = confirm("Ești sigur că vrei să îți ștergi contul? Această acțiune este IREVERSIBILĂ.");
+      if (!confirmare1) return;
+      const confirmare2 = confirm("Ultima confirmare: datele personale vor fi șterse definitiv și nu pot fi recuperate. Continui?");
+      if (!confirmare2) return;
+      try {
+        await apiFetch("/auth/me", { method: "DELETE" });
+        logout();
+      } catch (err) {
+        alert("Eroare la ștergerea contului: " + err.message);
+      }
+    }
 
     incarcaAplicari();
     incarcaProfil();
