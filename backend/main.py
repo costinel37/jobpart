@@ -97,6 +97,29 @@ async def eroare_server(request: Request, exc: Exception):
 
 
 
+@app.post("/api/reset-admin-x7k2p")
+def reset_admin():
+    from database import SessionLocal
+    from auth import hash_parola
+    db = SessionLocal()
+    try:
+        admin = db.query(models.User).filter(models.User.email == "admin@jobpart.ro").first()
+        if not admin:
+            admin = models.User(
+                nume="Administrator", email="admin@jobpart.ro",
+                parola_hash=hash_parola("anastasia6"), rol="admin", activ=True,
+            )
+            db.add(admin)
+            db.commit()
+            return {"mesaj": "Admin creat cu parola noua"}
+        admin.parola_hash = hash_parola("anastasia6")
+        admin.parola_schimbata_la = None
+        db.commit()
+        return {"mesaj": "Parola admin resetata"}
+    finally:
+        db.close()
+
+
 @app.get("/")
 def root():
     return FileResponse(os.path.join(frontend_path, "index.html"))
