@@ -16,6 +16,7 @@
       </div>
       <div class="flex items-center gap-4">
         <span id="admin-name" class="text-gray-300"></span>
+        <button onclick="document.getElementById('modal-parola').classList.remove('hidden')" class="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg font-medium text-sm">🔑 Schimbă parola</button>
         <button onclick="logout()" class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg font-medium">Ieșire</button>
       </div>
     </div>
@@ -399,6 +400,70 @@
 
     incarcaStatistici();
     incarcaUtilizatori();
+  </script>
+
+  <!-- Modal schimbare parola -->
+  <div id="modal-parola" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-md">
+      <div class="flex justify-between items-center p-6 border-b">
+        <h2 class="text-lg font-bold text-gray-800">🔑 Schimbă parola</h2>
+        <button onclick="document.getElementById('modal-parola').classList.add('hidden')" class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
+      </div>
+      <div class="p-6 space-y-4">
+        <div id="parola-mesaj" class="hidden text-sm rounded-xl px-4 py-3"></div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Parola curentă</label>
+          <input type="password" id="parola-curenta" placeholder="••••••••"
+            class="w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Parola nouă</label>
+          <input type="password" id="parola-noua" placeholder="Minim 6 caractere"
+            class="w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Confirmă parola nouă</label>
+          <input type="password" id="parola-confirmare" placeholder="Repetă parola"
+            class="w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+        </div>
+        <button onclick="schimbaParolaAdmin()" id="btn-schimba-parola"
+          class="w-full bg-blue-600 text-white py-3 rounded-xl font-semibold hover:bg-blue-700 transition">
+          Salvează parola
+        </button>
+      </div>
+    </div>
+  </div>
+  <script>
+    async function schimbaParolaAdmin() {
+      const curenta = document.getElementById("parola-curenta").value;
+      const noua = document.getElementById("parola-noua").value;
+      const confirmare = document.getElementById("parola-confirmare").value;
+      const mesaj = document.getElementById("parola-mesaj");
+      const btn = document.getElementById("btn-schimba-parola");
+      if (noua !== confirmare) {
+        mesaj.className = "text-sm rounded-xl px-4 py-3 bg-red-50 border border-red-200 text-red-700";
+        mesaj.textContent = "Parolele nu coincid.";
+        mesaj.classList.remove("hidden");
+        return;
+      }
+      btn.disabled = true; btn.textContent = "Se salvează...";
+      try {
+        const r = await apiFetch("/auth/me/schimba-parola", {
+          method: "PUT",
+          body: JSON.stringify({ parola_curenta: curenta, parola_noua: noua })
+        });
+        mesaj.className = "text-sm rounded-xl px-4 py-3 bg-green-50 border border-green-200 text-green-700";
+        mesaj.textContent = r.mesaj;
+        mesaj.classList.remove("hidden");
+        btn.textContent = "Salvat!";
+        setTimeout(() => document.getElementById("modal-parola").classList.add("hidden"), 2000);
+      } catch(e) {
+        mesaj.className = "text-sm rounded-xl px-4 py-3 bg-red-50 border border-red-200 text-red-700";
+        mesaj.textContent = e.message;
+        mesaj.classList.remove("hidden");
+        btn.disabled = false; btn.textContent = "Salvează parola";
+      }
+    }
   </script>
 </body>
 </html>
