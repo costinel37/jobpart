@@ -202,6 +202,23 @@ def update_me(data: schemas.UserUpdate, db: Session = Depends(get_db), current_u
     return current_user
 
 
+class SchimbaParolaDate(BaseModel):
+    parola_curenta: str
+    parola_noua: str
+
+
+@router.put("/me/schimba-parola")
+def schimba_parola(data: SchimbaParolaDate, db: Session = Depends(get_db), current_user=Depends(get_user_curent)):
+    if len(data.parola_noua) < 6:
+        raise HTTPException(status_code=400, detail="Parola trebuie să aibă minim 6 caractere.")
+    if not verifica_parola(data.parola_curenta, current_user.parola_hash):
+        raise HTTPException(status_code=400, detail="Parola curentă este incorectă.")
+    current_user.parola_hash = hash_parola(data.parola_noua)
+    current_user.parola_schimbata_la = datetime.utcnow()
+    db.commit()
+    return {"mesaj": "Parola a fost schimbată cu succes!"}
+
+
 @router.delete("/me")
 def sterge_cont(db: Session = Depends(get_db), current_user=Depends(get_user_curent)):
     import os as _os
