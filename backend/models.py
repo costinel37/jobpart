@@ -200,3 +200,38 @@ class PromovareCerere(Base):
 
     job = relationship("Job")
     angajator = relationship("User", foreign_keys=[angajator_id])
+
+
+class Precontract(Base):
+    __tablename__ = "precontracte"
+
+    id = Column(Integer, primary_key=True, index=True)
+    aplicare_id = Column(Integer, ForeignKey("applications.id"), nullable=False)
+    job_id = Column(Integer, ForeignKey("jobs.id"), nullable=False)
+    angajator_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    candidat_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+
+    # Detalii job la momentul semnarii
+    titlu_job = Column(String(200), nullable=False)
+    companie = Column(String(150), nullable=False)
+    oras = Column(String(100), nullable=False)
+    program = Column(String(100), nullable=False)
+    salariu = Column(String(100), nullable=False)
+    data_inceput = Column(String(50), nullable=False)
+    durata = Column(String(100), nullable=False)
+    descriere_scurta = Column(Text, nullable=True)
+    disclaimer = Column(Text, nullable=True)
+
+    # Semnaturi
+    semnat_angajator = Column(Boolean, default=False)
+    semnat_angajator_la = Column(DateTime, nullable=True)
+    semnat_candidat = Column(Boolean, default=False)
+    semnat_candidat_la = Column(DateTime, nullable=True)
+
+    status = Column(String(20), default="in_asteptare")  # in_asteptare / semnat / refuzat
+    creat_la = Column(DateTime, default=datetime.utcnow)
+
+    aplicare = relationship("Application")
+    job = relationship("Job")
+    angajator = relationship("User", foreign_keys=[angajator_id])
+    candidat = relationship("User", foreign_keys=[candidat_id])

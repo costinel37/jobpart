@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Precontract - JobPart</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 font-sans min-h-screen">
+
+  <nav class="bg-white shadow-sm sticky top-0 z-50">
+    <div class="max-w-3xl mx-auto px-4 py-3 flex items-center justify-between">
+      <a href="/static/index.html" class="text-2xl font-bold text-blue-600">Job<span class="text-gray-800">Part</span></a>
+      <a href="#" onclick="history.back()" class="text-sm text-gray-500 hover:text-blue-600">← Înapoi</a>
+    </div>
+  </nav>
+
+  <div class="max-w-3xl mx-auto px-4 py-10">
+
+    <!-- Loading -->
+    <div id="loading" class="text-center py-20 text-gray-400">Se încarcă...</div>
+
+    <!-- Precontract -->
+    <div id="continut" class="hidden">
+
+      <!-- Status banner -->
+      <div id="banner-asteptare" class="hidden bg-yellow-50 border border-yellow-200 rounded-xl px-5 py-4 mb-6 flex items-center gap-3">
+        <span class="text-2xl">⏳</span>
+        <div>
+          <p class="font-semibold text-yellow-800">Așteaptă semnătura candidatului</p>
+          <p class="text-sm text-yellow-600">Candidatul a fost notificat și urmează să semneze.</p>
+        </div>
+      </div>
+      <div id="banner-semnat" class="hidden bg-green-50 border border-green-200 rounded-xl px-5 py-4 mb-6 flex items-center gap-3">
+        <span class="text-2xl">✅</span>
+        <div>
+          <p class="font-semibold text-green-800">Precontract semnat de ambele părți!</p>
+          <p class="text-sm text-green-600">Puteți descărca documentul PDF mai jos.</p>
+        </div>
+      </div>
+      <div id="banner-refuzat" class="hidden bg-red-50 border border-red-200 rounded-xl px-5 py-4 mb-6 flex items-center gap-3">
+        <span class="text-2xl">❌</span>
+        <div>
+          <p class="font-semibold text-red-800">Precontractul a fost refuzat de candidat.</p>
+        </div>
+      </div>
+      <div id="banner-candidat" class="hidden bg-blue-50 border border-blue-200 rounded-xl px-5 py-4 mb-6 flex items-center gap-3">
+        <span class="text-2xl">📄</span>
+        <div>
+          <p class="font-semibold text-blue-800">Ai primit un precontract spre semnare</p>
+          <p class="text-sm text-blue-600">Citește cu atenție condițiile înainte să semnezi.</p>
+        </div>
+      </div>
+
+      <!-- Document -->
+      <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-8">
+
+        <div class="text-center mb-8">
+          <h1 class="text-2xl font-bold text-gray-800">PRECONTRACT DE COLABORARE</h1>
+          <p class="text-gray-400 text-sm mt-1">Înțelegere informală — JobPart</p>
+          <div class="border-t border-gray-100 mt-4"></div>
+        </div>
+
+        <!-- Parti -->
+        <div class="mb-6">
+          <h2 class="text-sm font-bold text-blue-600 uppercase tracking-wide mb-3">1. Părțile</h2>
+          <div class="grid grid-cols-2 gap-4">
+            <div class="bg-gray-50 rounded-xl p-4">
+              <p class="text-xs text-gray-500 mb-1">Angajator</p>
+              <p class="font-semibold text-gray-800" id="angajator-nume">—</p>
+              <p class="text-sm text-gray-500" id="angajator-companie">—</p>
+            </div>
+            <div class="bg-gray-50 rounded-xl p-4">
+              <p class="text-xs text-gray-500 mb-1">Candidat</p>
+              <p class="font-semibold text-gray-800" id="candidat-nume">—</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Job -->
+        <div class="mb-6">
+          <h2 class="text-sm font-bold text-blue-600 uppercase tracking-wide mb-3">2. Detalii job</h2>
+          <div class="space-y-2">
+            <div class="flex border-b border-gray-50 py-2">
+              <span class="text-gray-500 w-40 text-sm flex-shrink-0">Poziție</span>
+              <span class="font-medium text-gray-800" id="job-titlu">—</span>
+            </div>
+            <div class="flex border-b border-gray-50 py-2">
+              <span class="text-gray-500 w-40 text-sm flex-shrink-0">Companie / Oraș</span>
+              <span class="font-medium text-gray-800" id="job-companie-oras">—</span>
+            </div>
+            <div class="flex border-b border-gray-50 py-2">
+              <span class="text-gray-500 w-40 text-sm flex-shrink-0">Program de lucru</span>
+              <span class="font-medium text-gray-800" id="job-program">—</span>
+            </div>
+            <div class="flex border-b border-gray-50 py-2">
+              <span class="text-gray-500 w-40 text-sm flex-shrink-0">Remunerație</span>
+              <span class="font-medium text-gray-800" id="job-salariu">—</span>
+            </div>
+            <div class="flex border-b border-gray-50 py-2">
+              <span class="text-gray-500 w-40 text-sm flex-shrink-0">Data de început</span>
+              <span class="font-medium text-gray-800" id="job-data">—</span>
+            </div>
+            <div class="flex py-2">
+              <span class="text-gray-500 w-40 text-sm flex-shrink-0">Durată estimată</span>
+              <span class="font-medium text-gray-800" id="job-durata">—</span>
+            </div>
+          </div>
+          <div id="note-bloc" class="hidden mt-3 bg-gray-50 rounded-xl p-4">
+            <p class="text-xs text-gray-500 mb-1">Note suplimentare</p>
+            <p class="text-sm text-gray-700" id="job-note">—</p>
+          </div>
+        </div>
+
+        <!-- Disclaimer -->
+        <div class="mb-6 bg-amber-50 border border-amber-200 rounded-xl p-4">
+          <h2 class="text-sm font-bold text-amber-700 uppercase tracking-wide mb-2">⚠️ Avertisment legal</h2>
+          <p class="text-xs text-amber-700 leading-relaxed" id="disclaimer-text">—</p>
+        </div>
+
+        <!-- Semnaturi -->
+        <div class="mb-2">
+          <h2 class="text-sm font-bold text-blue-600 uppercase tracking-wide mb-3">3. Semnături</h2>
+          <div class="grid grid-cols-2 gap-4">
+            <div class="border-2 border-blue-100 rounded-xl p-4">
+              <p class="text-xs text-gray-500 mb-2">Angajator</p>
+              <p class="font-semibold text-gray-800" id="semn-angajator-nume">—</p>
+              <div id="semn-angajator-ok" class="hidden mt-2">
+                <span class="text-green-600 font-semibold text-sm">✓ Semnat electronic</span>
+                <p class="text-xs text-gray-400 mt-1" id="semn-angajator-data">—</p>
+              </div>
+            </div>
+            <div class="border-2 border-blue-100 rounded-xl p-4">
+              <p class="text-xs text-gray-500 mb-2">Candidat</p>
+              <p class="font-semibold text-gray-800" id="semn-candidat-nume">—</p>
+              <div id="semn-candidat-ok" class="hidden mt-2">
+                <span class="text-green-600 font-semibold text-sm">✓ Semnat electronic</span>
+                <p class="text-xs text-gray-400 mt-1" id="semn-candidat-data">—</p>
+              </div>
+              <div id="semn-candidat-asteptare" class="hidden mt-2">
+                <span class="text-yellow-500 text-sm">⏳ În așteptare</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="border-t border-gray-100 mt-6 pt-4 text-center">
+          <p class="text-xs text-gray-400" id="doc-footer">—</p>
+        </div>
+      </div>
+
+      <!-- Actiuni candidat -->
+      <div id="actiuni-candidat" class="hidden mt-6 bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+        <h3 class="font-semibold text-gray-800 mb-4">Acțiunea ta</h3>
+        <div class="flex items-start gap-3 mb-5">
+          <input type="checkbox" id="acord-checkbox" class="mt-1 w-4 h-4 accent-blue-600" />
+          <label for="acord-checkbox" class="text-sm text-gray-700">
+            Am citit și sunt de acord cu condițiile de mai sus. Înțeleg că acest document
+            <strong>nu înlocuiește un contract individual de muncă</strong> și că angajarea
+            legală necesită semnarea unui CIM.
+          </label>
+        </div>
+        <div class="flex gap-3">
+          <button onclick="semneaza()" id="btn-semneaza"
+            class="flex-1 bg-blue-600 text-white py-3 rounded-xl font-semibold hover:bg-blue-700 transition disabled:opacity-50">
+            ✍️ Semnez și accept
+          </button>
+          <button onclick="refuza()" class="px-6 border border-gray-300 text-gray-600 py-3 rounded-xl hover:bg-gray-50 transition">
+            Refuz
+          </button>
+        </div>
+        <div id="mesaj-semn" class="hidden mt-4 rounded-xl px-4 py-3 text-sm"></div>
+      </div>
+
+      <!-- Descarcare PDF -->
+      <div id="btn-pdf-bloc" class="hidden mt-6 text-center">
+        <a id="btn-pdf" href="#" target="_blank"
+          class="inline-flex items-center gap-2 bg-green-600 text-white px-8 py-3 rounded-xl font-semibold hover:bg-green-700 transition">
+          📄 Descarcă PDF semnat
+        </a>
+      </div>
+
+    </div>
+  </div>
+
+  <script src="/static/js/api.js"></script>
+  <script>
+    const precontractId = new URLSearchParams(window.location.search).get("id");
+    let datePrecontract = null;
+    let userCurent = null;
+
+    async function init() {
+      if (!precontractId) {
+        document.getElementById("loading").textContent = "ID lipsă.";
+        return;
+      }
+      try {
+        userCurent = await apiFetch("/auth/me");
+        datePrecontract = await apiFetch(`/precontracte/${precontractId}`);
+        afiseaza(datePrecontract);
+      } catch (e) {
+        document.getElementById("loading").textContent = "Eroare: " + e.message;
+      }
+    }
+
+    function afiseaza(p) {
+      document.getElementById("loading").classList.add("hidden");
+      document.getElementById("continut").classList.remove("hidden");
+
+      // Banner status
+      if (p.status === "semnat") {
+        document.getElementById("banner-semnat").classList.remove("hidden");
+        document.getElementById("btn-pdf-bloc").classList.remove("hidden");
+        document.getElementById("btn-pdf").href = `/api/precontracte/${p.id}/pdf`;
+      } else if (p.status === "refuzat") {
+        document.getElementById("banner-refuzat").classList.remove("hidden");
+      } else if (userCurent && userCurent.id === p.angajator_id) {
+        document.getElementById("banner-asteptare").classList.remove("hidden");
+      } else if (userCurent && userCurent.id === p.candidat_id) {
+        document.getElementById("banner-candidat").classList.remove("hidden");
+        document.getElementById("actiuni-candidat").classList.remove("hidden");
+      }
+
+      // Date
+      document.getElementById("angajator-nume").textContent = p.angajator_nume || "—";
+      document.getElementById("angajator-companie").textContent = p.companie;
+      document.getElementById("candidat-nume").textContent = p.candidat_nume || "—";
+      document.getElementById("job-titlu").textContent = p.titlu_job;
+      document.getElementById("job-companie-oras").textContent = `${p.companie} — ${p.oras}`;
+      document.getElementById("job-program").textContent = p.program;
+      document.getElementById("job-salariu").textContent = p.salariu;
+      document.getElementById("job-data").textContent = p.data_inceput;
+      document.getElementById("job-durata").textContent = p.durata;
+      document.getElementById("disclaimer-text").textContent = p.disclaimer;
+      document.getElementById("doc-footer").textContent = `Document JobPart · ID #${p.id} · ${new Date(p.creat_la).toLocaleDateString("ro-RO")}`;
+
+      if (p.descriere_scurta) {
+        document.getElementById("note-bloc").classList.remove("hidden");
+        document.getElementById("job-note").textContent = p.descriere_scurta;
+      }
+
+      // Semnaturi
+      document.getElementById("semn-angajator-nume").textContent = p.angajator_nume || "—";
+      document.getElementById("semn-candidat-nume").textContent = p.candidat_nume || "—";
+
+      if (p.semnat_angajator) {
+        document.getElementById("semn-angajator-ok").classList.remove("hidden");
+        document.getElementById("semn-angajator-data").textContent = new Date(p.semnat_angajator_la).toLocaleString("ro-RO");
+      }
+      if (p.semnat_candidat) {
+        document.getElementById("semn-candidat-ok").classList.remove("hidden");
+        document.getElementById("semn-candidat-data").textContent = new Date(p.semnat_candidat_la).toLocaleString("ro-RO");
+      } else if (p.status === "in_asteptare") {
+        document.getElementById("semn-candidat-asteptare").classList.remove("hidden");
+      }
+    }
+
+    async function semneaza() {
+      if (!document.getElementById("acord-checkbox").checked) {
+        afiseazaMesaj("Bifează caseta de acord înainte să semnezi.", "error");
+        return;
+      }
+      const btn = document.getElementById("btn-semneaza");
+      btn.disabled = true;
+      btn.textContent = "Se procesează...";
+      try {
+        const r = await apiFetch(`/precontracte/${precontractId}/semneaza`, { method: "POST" });
+        afiseazaMesaj(r.mesaj, "success");
+        setTimeout(() => location.reload(), 1500);
+      } catch (e) {
+        afiseazaMesaj(e.message, "error");
+        btn.disabled = false;
+        btn.textContent = "✍️ Semnez și accept";
+      }
+    }
+
+    async function refuza() {
+      if (!confirm("Ești sigur că vrei să refuzi precontractul?")) return;
+      try {
+        await apiFetch(`/precontracte/${precontractId}/refuza`, { method: "POST" });
+        location.reload();
+      } catch (e) {
+        alert(e.message);
+      }
+    }
+
+    function afiseazaMesaj(text, tip) {
+      const el = document.getElementById("mesaj-semn");
+      el.className = tip === "success"
+        ? "mt-4 rounded-xl px-4 py-3 text-sm bg-green-50 border border-green-200 text-green-700"
+        : "mt-4 rounded-xl px-4 py-3 text-sm bg-red-50 border border-red-200 text-red-700";
+      el.textContent = text;
+      el.classList.remove("hidden");
+    }
+
+    init();
+  </script>
+</body>
+</html>

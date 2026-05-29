@@ -9,7 +9,7 @@ import os
 
 from database import engine
 import models
-from routers import auth, jobs, applications, admin, upload, reviews, favorite, mesaje, notificari, export, promotii
+from routers import auth, jobs, applications, admin, upload, reviews, favorite, mesaje, notificari, export, promotii, precontracte
 from security import (
     limiter, SecurityHeadersMiddleware,
     RequestLoggingMiddleware, eroare_rate_limit
@@ -66,6 +66,7 @@ app.include_router(mesaje.router)
 app.include_router(notificari.router)
 app.include_router(export.router)
 app.include_router(promotii.router)
+app.include_router(precontracte.router)
 
 frontend_path = os.path.join(os.path.dirname(__file__), "..", "frontend")
 app.mount("/static", StaticFiles(directory=frontend_path), name="static")
