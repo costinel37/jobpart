@@ -5,12 +5,31 @@ from datetime import datetime
 from pydantic import BaseModel
 from database import get_db
 import models, schemas
-from auth import require_rol
+from auth import require_rol, hash_parola
 import os, threading
 from config import UPLOAD_DIR
 from email_service import _trimite_email
 
 router = APIRouter(prefix="/api/admin", tags=["Admin"])
+
+
+@router.post("/bootstrap")
+def bootstrap_admin(db: Session = Depends(get_db)):
+    """Creeaza contul admin daca nu exista niciunul. Se dezactiveaza automat dupa primul use."""
+    exista_admin = db.query(models.User).filter(models.User.rol == "admin").first()
+    if exista_admin:
+        raise HTTPException(status_code=400, detail="Contul admin exista deja.")
+    admin = models.User(
+        nume="Administrator",
+        email="admin@jobpart.ro",
+        parola_hash=hash_parola("admin123"),
+        rol="admin",
+        activ=True,
+        email_confirmat=True,
+    )
+    db.add(admin)
+    db.commit()
+    return {"mesaj": "Cont admin creat! Email: admin@jobpart.ro / Parola: admin123"}
 
 
 def _log_audit(db: Session, admin_id: int, actiune: str, target_type: str = None, target_id: int = None, detalii: str = None):
