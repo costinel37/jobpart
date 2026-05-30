@@ -13,18 +13,6 @@ from email_service import _trimite_email
 router = APIRouter(prefix="/api/admin", tags=["Admin"])
 
 
-@router.post("/reset-admin-parola")
-def reset_admin_parola(db: Session = Depends(get_db)):
-    """Reseteaza parola adminului. Endpoint temporar - de sters dupa folosire."""
-    from datetime import datetime as dt
-    import time
-    admin = db.query(models.User).filter(models.User.rol == "admin").first()
-    if not admin:
-        raise HTTPException(status_code=404, detail="Admin negasit.")
-    admin.parola_hash = hash_parola("anastasia6")
-    admin.parola_schimbata_la = dt.utcfromtimestamp(time.time())
-    db.commit()
-    return {"mesaj": "Parola admin resetata la: anastasia6"}
 
 
 def _log_audit(db: Session, admin_id: int, actiune: str, target_type: str = None, target_id: int = None, detalii: str = None):
