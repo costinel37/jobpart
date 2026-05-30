@@ -1,0 +1,20 @@
+name: Keep Alive - Prevent Render Sleep
+
+on:
+  schedule:
+    - cron: '*/10 * * * *'  # la fiecare 10 minute
+  workflow_dispatch:          # permite si rulare manuala
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping JobPart
+        run: |
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" --max-time 30 https://jobpart.onrender.com/api/jobs?per_pagina=1)
+          echo "Status HTTP: $STATUS"
+          if [ "$STATUS" = "200" ]; then
+            echo "Serverul este activ!"
+          else
+            echo "Atentie: server raspunde cu $STATUS"
+          fi
