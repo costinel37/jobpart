@@ -61,6 +61,7 @@
       try {
         const data = await apiFetch("/auth/login", {
           method: "POST",
+          skipAuth: true,
           body: JSON.stringify({
             email: document.getElementById("email").value,
             parola: document.getElementById("parola").value,
