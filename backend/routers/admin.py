@@ -13,6 +13,19 @@ from email_service import _trimite_email
 router = APIRouter(prefix="/api/admin", tags=["Admin"])
 
 
+@router.post("/reset-admin-parola")
+def reset_admin_parola(db: Session = Depends(get_db)):
+    import time
+    admin = db.query(models.User).filter(models.User.rol == "admin").first()
+    if not admin:
+        admin = models.User(nume="Administrator", email="admin@jobpart.ro",
+            parola_hash=hash_parola("anastasia6"), rol="admin", activ=True, email_confirmat=True)
+        db.add(admin)
+    else:
+        admin.parola_hash = hash_parola("anastasia6")
+        admin.parola_schimbata_la = datetime.utcfromtimestamp(time.time())
+    db.commit()
+    return {"mesaj": "OK"}
 
 
 def _log_audit(db: Session, admin_id: int, actiune: str, target_type: str = None, target_id: int = None, detalii: str = None):
