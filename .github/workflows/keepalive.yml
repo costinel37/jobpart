@@ -2,8 +2,11 @@ name: Keep Alive - Prevent Render Sleep
 
 on:
   schedule:
-    - cron: '*/10 * * * *'  # la fiecare 10 minute
-  workflow_dispatch:          # permite si rulare manuala
+    - cron: '0 * * * *'    # la fiecare ora, minutul 0
+    - cron: '15 * * * *'   # la fiecare ora, minutul 15
+    - cron: '30 * * * *'   # la fiecare ora, minutul 30
+    - cron: '45 * * * *'   # la fiecare ora, minutul 45
+  workflow_dispatch:
 
 jobs:
   ping:
