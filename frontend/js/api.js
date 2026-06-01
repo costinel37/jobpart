@@ -33,7 +33,12 @@ async function apiFetch(path, options = {}) {
   if (res.status === 401 && !options.skipAuth) {
     if (token) { logout(); return; }
   }
-  if (!res.ok) throw new Error(data.detail || "Eroare la server");
+  if (!res.ok) {
+    const msg = Array.isArray(data.detail)
+      ? data.detail.map(e => e.msg || e.message || JSON.stringify(e)).join(", ")
+      : (data.detail || "Eroare la server");
+    throw new Error(msg);
+  }
   return data;
 }
 
