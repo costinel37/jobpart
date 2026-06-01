@@ -107,7 +107,7 @@
               class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
           </div>
           <div class="flex gap-3">
-            <button type="submit" id="btn-salveaza-job"
+            <button type="button" id="btn-salveaza-job" onclick="publicaJob()"
               class="bg-blue-600 text-white px-8 py-3 rounded-xl font-semibold hover:bg-blue-700 transition">
               Publică jobul
             </button>
@@ -341,8 +341,7 @@
       switchTab("joburi");
     }
 
-    document.getElementById("job-form").addEventListener("submit", async (e) => {
-      e.preventDefault();
+    async function publicaJob() {
       const btn = document.getElementById("btn-salveaza-job");
       const mesajEl = document.getElementById("job-mesaj");
       mesajEl.classList.add("hidden");
@@ -355,15 +354,27 @@
         return;
       }
 
+      const titlu = document.getElementById("j-titlu").value.trim();
+      const companie = document.getElementById("j-companie").value.trim();
+      const oras = document.getElementById("j-oras").value.trim();
+      const descriere = document.getElementById("j-descriere").value.trim();
+
+      if (!titlu || !companie || !oras || !descriere) {
+        mesajEl.className = "bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3";
+        mesajEl.textContent = "Completează câmpurile obligatorii: Titlu, Companie, Oraș, Descriere.";
+        mesajEl.classList.remove("hidden");
+        return;
+      }
+
       btn.disabled = true;
       btn.textContent = "Se salvează...";
 
       const editId = document.getElementById("job-edit-id").value;
       const payload = {
-        titlu: document.getElementById("j-titlu").value,
-        companie: document.getElementById("j-companie").value,
-        oras: document.getElementById("j-oras").value,
-        descriere: document.getElementById("j-descriere").value,
+        titlu,
+        companie,
+        oras,
+        descriere,
         cerinte: document.getElementById("j-cerinte").value || null,
         beneficii: document.getElementById("j-beneficii").value || null,
         categorie: document.getElementById("j-categorie").value || null,
@@ -389,7 +400,7 @@
         btn.textContent = editId ? "Salvează modificările" : "Publică jobul";
         btn.disabled = false;
       }
-    });
+    }
 
     async function incarcaJoburiPentruAplicari() {
       const jobs = await apiFetch("/jobs/mele/toate");
