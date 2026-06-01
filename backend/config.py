@@ -8,7 +8,7 @@ DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./joburi.db")
 # Railway livreaza postgres:// dar SQLAlchemy 2.0 necesita postgresql://
 if DATABASE_URL.startswith("postgres://"):
     DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
-FRONTEND_URL = os.getenv("FRONTEND_URL", "http://localhost:8000")
+FRONTEND_URL = os.getenv("FRONTEND_URL", "https://jobpart.ro")
 
 _SECRET_KEY = os.getenv("SECRET_KEY", "")
 _ENV = os.getenv("ENVIRONMENT", "development")
