@@ -5,6 +5,7 @@ from fastapi.responses import FileResponse, JSONResponse
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from sqlalchemy import text, inspect
+from datetime import datetime
 import logging
 import os
 
@@ -16,6 +17,8 @@ from security import (
     RequestLoggingMiddleware, eroare_rate_limit
 )
 from expirare_jobs import porneste_task_expirare
+from auth import hash_parola
+from database import SessionLocal
 
 logging.basicConfig(
     level=logging.INFO,
@@ -106,25 +109,23 @@ def startup():
                     except Exception as e:
                         logging.warning(f"Migrare '{coloana}' in '{tabel}': {e}")
     # Creeaza admin implicit daca nu exista
-    from database import SessionLocal
-    from auth import hash_parola
-    from datetime import datetime as _dt
     db = SessionLocal()
     try:
-        admin_existent = db.query(models.User).filter(models.User.email == "admin@jobpart.ro").first()
+        admin_existent = db.query(models.User).filter(
+            models.User.email == "admin@jobpart.ro"
+        ).first()
         if not admin_existent:
-            admin = models.User(
+            db.add(models.User(
                 nume="Administrator",
                 email="admin@jobpart.ro",
                 parola_hash=hash_parola("JobPart2026!"),
                 rol="admin",
                 activ=True,
                 email_confirmat=True,
-                gdpr_consimtit_la=_dt.utcnow(),
-            )
-            db.add(admin)
+                gdpr_consimtit_la=datetime.utcnow(),
+            ))
             db.commit()
-            logging.info("Admin implicit creat: admin@jobpart.ro")
+            logging.info("Admin creat: admin@jobpart.ro / JobPart2026!")
         elif admin_existent.rol != "admin":
             admin_existent.rol = "admin"
             db.commit()
