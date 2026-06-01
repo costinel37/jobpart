@@ -298,6 +298,15 @@
       const btn = document.getElementById("btn-salveaza-job");
       const mesajEl = document.getElementById("job-mesaj");
       mesajEl.classList.add("hidden");
+
+      if (!getToken()) {
+        mesajEl.className = "bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3";
+        mesajEl.textContent = "Sesiunea a expirat. Te rugăm să te autentifici din nou.";
+        mesajEl.classList.remove("hidden");
+        setTimeout(() => logout("Sesiunea a expirat. Te rugăm să te autentifici din nou."), 2000);
+        return;
+      }
+
       btn.disabled = true;
       btn.textContent = "Se salvează...";
 
@@ -314,11 +323,6 @@
         salariu_max: parseInt(document.getElementById("j-salariu-max").value) || null,
         tip_program: "part-time",
       };
-
-      if (!getToken()) {
-        window.location.href = "/static/login.html?motiv=" + encodeURIComponent("Trebuie să fii autentificat pentru a publica un anunț.");
-        return;
-      }
 
       try {
         if (editId) {
@@ -500,10 +504,12 @@
       document.getElementById("modal-precontract").classList.remove("hidden");
     }
 
-    document.getElementById("pc-inchide").onclick = () =>
+    const pcInchide = document.getElementById("pc-inchide");
+    if (pcInchide) pcInchide.onclick = () =>
       document.getElementById("modal-precontract").classList.add("hidden");
 
-    document.getElementById("form-precontract").addEventListener("submit", async (e) => {
+    const formPrecontract = document.getElementById("form-precontract");
+    if (formPrecontract) formPrecontract.addEventListener("submit", async (e) => {
       e.preventDefault();
       const btn = document.getElementById("pc-btn-submit");
       btn.disabled = true; btn.textContent = "Se trimite...";
