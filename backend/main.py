@@ -4,7 +4,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, JSONResponse
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
-from sqlalchemy import text
+from sqlalchemy import text, inspect
 import logging
 import os
 
@@ -75,15 +75,36 @@ app.mount("/static", StaticFiles(directory=frontend_path), name="static")
 
 @app.on_event("startup")
 def startup():
-    # Migrare automata coloane noi (idempotent)
-    try:
-        with engine.connect() as conn:
-            conn.execute(text(
-                "ALTER TABLE users ADD COLUMN IF NOT EXISTS newsletter_consimtit BOOLEAN DEFAULT FALSE"
-            ))
-            conn.commit()
-    except Exception as e:
-        logging.warning(f"Migrare newsletter_consimtit: {e}")
+    # Migrare automata coloane noi — compatibil SQLite si PostgreSQL
+    coloane_noi = {
+        "users": [
+            ("newsletter_consimtit", "BOOLEAN DEFAULT FALSE"),
+            ("gdpr_consimtit_la", "DATETIME"),
+            ("data_nasterii", "DATE"),
+            ("parola_schimbata_la", "DATETIME"),
+            ("email_confirmat", "BOOLEAN DEFAULT FALSE"),
+        ],
+        "jobs": [
+            ("avertisment_expirare", "BOOLEAN DEFAULT FALSE"),
+            ("promovat", "BOOLEAN DEFAULT FALSE"),
+            ("promovat_pana", "DATETIME"),
+        ],
+    }
+    insp = inspect(engine)
+    with engine.connect() as conn:
+        for tabel, coloane in coloane_noi.items():
+            try:
+                existente = {col["name"] for col in insp.get_columns(tabel)}
+            except Exception:
+                existente = set()
+            for coloana, definitie in coloane:
+                if coloana not in existente:
+                    try:
+                        conn.execute(text(f"ALTER TABLE {tabel} ADD COLUMN {coloana} {definitie}"))
+                        conn.commit()
+                        logging.info(f"Migrare: coloana '{coloana}' adaugata in '{tabel}'.")
+                    except Exception as e:
+                        logging.warning(f"Migrare '{coloana}' in '{tabel}': {e}")
     porneste_task_expirare(interval_secunde=300)
 
 
