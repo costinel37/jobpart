@@ -49,6 +49,12 @@
       else if (user?.rol === "angajator") window.location.href = "/static/dashboard-angajator.html";
       else if (user?.rol === "admin") window.location.href = "/static/admin.html";
     }
+    const motiv = new URLSearchParams(window.location.search).get("motiv");
+    if (motiv) {
+      const el = document.getElementById("eroare");
+      el.textContent = motiv;
+      el.classList.remove("hidden");
+    }
 
     document.getElementById("login-form").addEventListener("submit", async (e) => {
       e.preventDefault();

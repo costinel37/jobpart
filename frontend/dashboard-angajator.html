@@ -315,6 +315,11 @@
         tip_program: "part-time",
       };
 
+      if (!getToken()) {
+        window.location.href = "/static/login.html?motiv=" + encodeURIComponent("Trebuie să fii autentificat pentru a publica un anunț.");
+        return;
+      }
+
       try {
         if (editId) {
           await apiFetch(`/jobs/${editId}`, { method: "PUT", body: JSON.stringify(payload) });
@@ -327,7 +332,7 @@
         setTimeout(() => { resetFormJob(); incarcaJoburileMele(); }, 1500);
       } catch (err) {
         mesajEl.className = "bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3";
-        mesajEl.textContent = err.message;
+        mesajEl.textContent = err.message || "Eroare la publicare. Încearcă din nou.";
         mesajEl.classList.remove("hidden");
         btn.textContent = editId ? "Salvează modificările" : "Publică jobul";
         btn.disabled = false;

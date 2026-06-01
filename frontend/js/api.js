@@ -16,10 +16,13 @@ function saveSession(data) {
   localStorage.setItem("user", JSON.stringify({ id: data.user_id, nume: data.nume, rol: data.rol }));
 }
 
-function logout() {
+function logout(motiv) {
   localStorage.removeItem("token");
   localStorage.removeItem("user");
-  window.location.href = "/static/login.html";
+  const url = motiv
+    ? `/static/login.html?motiv=${encodeURIComponent(motiv)}`
+    : "/static/login.html";
+  window.location.href = url;
 }
 
 async function apiFetch(path, options = {}) {
@@ -31,7 +34,7 @@ async function apiFetch(path, options = {}) {
 
   const data = await res.json().catch(() => ({}));
   if (res.status === 401 && !options.skipAuth) {
-    if (token) { logout(); return; }
+    if (token) { logout("Sesiunea a expirat. Te rugăm să te autentifici din nou."); return; }
   }
   if (!res.ok) {
     const msg = Array.isArray(data.detail)
