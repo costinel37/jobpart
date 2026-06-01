@@ -108,29 +108,29 @@ def startup():
                         logging.info(f"Migrare: coloana '{coloana}' adaugata in '{tabel}'.")
                     except Exception as e:
                         logging.warning(f"Migrare '{coloana}' in '{tabel}': {e}")
-    # Creeaza admin implicit daca nu exista
+    # Sincronizeaza contul admin — nu reseta parola daca exista deja
     db = SessionLocal()
     try:
-        admin_existent = db.query(models.User).filter(
+        admin = db.query(models.User).filter(
             models.User.email == "admin@jobpart.ro"
         ).first()
-        if not admin_existent:
+        if not admin:
             db.add(models.User(
                 nume="Administrator",
                 email="admin@jobpart.ro",
-                parola_hash=hash_parola("JobPart2026!"),
+                parola_hash=hash_parola("anastasia@6"),
                 rol="admin",
                 activ=True,
                 email_confirmat=True,
                 gdpr_consimtit_la=datetime.utcnow(),
             ))
-            db.commit()
-            logging.info("Admin creat: admin@jobpart.ro / JobPart2026!")
-        elif admin_existent.rol != "admin":
-            admin_existent.rol = "admin"
-            db.commit()
+            logging.info("Admin creat: admin@jobpart.ro")
+        else:
+            admin.rol = "admin"
+            admin.activ = True
+        db.commit()
     except Exception as e:
-        logging.warning(f"Init admin: {e}")
+        logging.warning(f"Sync admin: {e}")
     finally:
         db.close()
     porneste_task_expirare(interval_secunde=300)
