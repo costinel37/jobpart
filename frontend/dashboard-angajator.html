@@ -109,7 +109,7 @@
           <div class="flex gap-3">
             <button type="button" id="btn-salveaza-job" onclick="publicaJob()"
               class="bg-blue-600 text-white px-8 py-3 rounded-xl font-semibold hover:bg-blue-700 transition">
-              Publică jobul
+              Publică anunțul
             </button>
             <button type="button" onclick="resetFormJob()"
               class="border border-gray-300 text-gray-600 px-6 py-3 rounded-xl font-medium hover:bg-gray-50 transition">
@@ -335,7 +335,7 @@
       document.getElementById("job-edit-id").value = "";
       document.getElementById("form-titlu-h").textContent = "Postează un job nou";
       const btnSalv = document.getElementById("btn-salveaza-job");
-      btnSalv.textContent = "Publică jobul";
+      btnSalv.textContent = "Publică anunțul";
       btnSalv.disabled = false;
       document.getElementById("job-mesaj").classList.add("hidden");
       switchTab("joburi");
@@ -401,7 +401,7 @@
         mesajEl.className = "bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3";
         mesajEl.textContent = err.message || "Eroare la publicare. Încearcă din nou.";
         mesajEl.classList.remove("hidden");
-        btn.textContent = editId ? "Salvează modificările" : "Publică jobul";
+        btn.textContent = editId ? "Salvează modificările" : "Publică anunțul";
         btn.disabled = false;
       }
     }
