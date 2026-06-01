@@ -98,7 +98,7 @@ async function initNotifBell() {
   const bell = document.getElementById("nav-notif-bell");
   if (!bell || !getToken()) return;
   try {
-    const r = await apiFetch("/notificari/necitite/count");
+    const r = await apiFetch("/notificari/necitite/count", { skipAuth: true });
     const badge = bell.querySelector(".notif-badge");
     if (!badge) return;
     if (r && r.count > 0) {
