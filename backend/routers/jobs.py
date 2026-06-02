@@ -8,6 +8,7 @@ from database import get_db
 import models, schemas
 from auth import get_user_curent, require_rol
 from geocoding import geocodeaza_oras, distanta_km
+from telegram_service import notifica_job_nou
 
 ZILE_GRATUIT = 30
 
@@ -186,6 +187,7 @@ def creeaza_job(
     db.commit()
     db.refresh(job)
     threading.Thread(target=_geocodeaza_async, args=(job.id, job.oras), daemon=True).start()
+    notifica_job_nou(job)
     return job
 
 
