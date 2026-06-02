@@ -16,7 +16,7 @@ from security import (
     limiter, SecurityHeadersMiddleware,
     RequestLoggingMiddleware, eroare_rate_limit
 )
-from expirare_jobs import porneste_task_expirare
+from expirare_jobs import porneste_task_expirare, porneste_keep_alive
 from auth import hash_parola
 from database import SessionLocal
 
@@ -134,6 +134,7 @@ def startup():
     finally:
         db.close()
     porneste_task_expirare(interval_secunde=300)
+    porneste_keep_alive(interval_secunde=600)
 
 
 @app.exception_handler(500)
@@ -150,6 +151,11 @@ async def eroare_server(request: Request, exc: Exception):
 @app.get("/")
 def root():
     return FileResponse(os.path.join(frontend_path, "index.html"))
+
+@app.get("/ping")
+def ping():
+    return {"status": "ok", "timestamp": datetime.utcnow().isoformat()}
+
 
 @app.get("/{page}.html")
 def pagina(page: str):

@@ -227,3 +227,31 @@ def porneste_task_expirare(interval_secunde: int = 300):
     t = threading.Thread(target=_loop, daemon=True)
     t.start()
     logger.info(f"[EXPIRARE] Task pornit, interval: {interval_secunde}s")
+
+
+def porneste_keep_alive(interval_secunde: int = 600):
+    """Ping la propria adresă ca să nu adoarmă pe Render free tier."""
+    import time
+    import urllib.request
+
+    app_url = (
+        os.getenv("RENDER_EXTERNAL_URL")
+        or os.getenv("APP_URL")
+        or os.getenv("FRONTEND_URL", "")
+    ).rstrip("/")
+    if not app_url:
+        logger.info("[KEEP-ALIVE] APP_URL negăsit, keep-alive dezactivat (setează RENDER_EXTERNAL_URL)")
+        return
+
+    def _loop():
+        while True:
+            time.sleep(interval_secunde)
+            try:
+                urllib.request.urlopen(f"{app_url}/ping", timeout=10)
+                logger.info("[KEEP-ALIVE] Ping ok")
+            except Exception as e:
+                logger.warning(f"[KEEP-ALIVE] Ping eșuat: {e}")
+
+    t = threading.Thread(target=_loop, daemon=True)
+    t.start()
+    logger.info(f"[KEEP-ALIVE] Pornit, interval: {interval_secunde}s, URL: {app_url}")
