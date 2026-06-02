@@ -15,10 +15,27 @@
 
     <!-- Selector rol -->
     <div class="flex gap-3 mb-6">
-      <button id="btn-candidat" onclick="selecteazaRol('candidat')"
-        class="flex-1 py-3 rounded-xl border-2 border-blue-600 bg-blue-600 text-white font-semibold transition">
-        👤 Candidat
-      </button>
+      <div class="relative flex-1 group">
+        <button id="btn-candidat" onclick="selecteazaRol('candidat')"
+          class="w-full py-3 rounded-xl border-2 border-blue-600 bg-blue-600 text-white font-semibold transition">
+          👤 Candidat
+        </button>
+        <!-- Tooltip candidat -->
+        <div class="absolute left-0 top-full mt-2 w-64 bg-white border border-blue-100 rounded-2xl shadow-xl p-4 z-20
+                    opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto
+                    transition-opacity duration-200">
+          <p class="text-xs font-bold text-blue-600 uppercase tracking-wide mb-2">Ce primești ca Candidat</p>
+          <ul class="space-y-1.5 text-sm text-gray-700">
+            <li class="flex items-center gap-2"><span class="text-blue-500">✓</span> Aplică la joburi part-time</li>
+            <li class="flex items-center gap-2"><span class="text-blue-500">✓</span> Urmărește aplicările tale</li>
+            <li class="flex items-center gap-2"><span class="text-blue-500">✓</span> Mesagerie cu angajatorii</li>
+            <li class="flex items-center gap-2"><span class="text-blue-500">✓</span> Salvează joburi favorite</li>
+            <li class="flex items-center gap-2"><span class="text-blue-500">✓</span> Notificări în timp real</li>
+            <li class="flex items-center gap-2"><span class="text-blue-500">✓</span> Export date personale (GDPR)</li>
+          </ul>
+          <div class="mt-2 pt-2 border-t border-gray-100 text-xs text-gray-400">Gratuit, fără abonament</div>
+        </div>
+      </div>
       <button id="btn-angajator" onclick="selecteazaRol('angajator')"
         class="flex-1 py-3 rounded-xl border-2 border-gray-200 text-gray-600 font-semibold hover:border-blue-400 transition">
         🏢 Angajator
