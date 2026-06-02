@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>JobPart.ro — Joburi Part-Time România</title>
+  <meta name="description" content="Platforma #1 de joburi part-time din România. Aplică gratuit, program flexibil, precontract digital." />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800;900&display=swap');
+
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'Inter', 'Segoe UI', sans-serif;
+      min-height: 100vh;
+      background: linear-gradient(160deg, #2e1065 0%, #4c1d95 40%, #6d28d9 75%, #7c3aed 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 48px 20px 40px;
+    }
+
+    .orb {
+      position: fixed;
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .card {
+      width: 100%;
+      max-width: 420px;
+      position: relative;
+      z-index: 1;
+    }
+
+    .link-btn {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      width: 100%;
+      padding: 16px 20px;
+      border-radius: 18px;
+      font-size: 16px;
+      font-weight: 700;
+      text-decoration: none;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+      margin-bottom: 12px;
+    }
+    .link-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+    }
+    .link-btn:active {
+      transform: translateY(0);
+    }
+
+    .icon-wrap {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      flex-shrink: 0;
+    }
+
+    .arrow {
+      margin-left: auto;
+      opacity: 0.5;
+      font-size: 18px;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+    .avatar { animation: float 4s ease-in-out infinite; }
+
+    @keyframes pulse-ring {
+      0% { box-shadow: 0 0 0 0 rgba(167,139,250,0.4); }
+      70% { box-shadow: 0 0 0 12px rgba(167,139,250,0); }
+      100% { box-shadow: 0 0 0 0 rgba(167,139,250,0); }
+    }
+    .pulse { animation: pulse-ring 2s infinite; }
+  </style>
+</head>
+<body>
+
+  <div class="orb" style="width:400px;height:400px;top:-100px;right:-120px;background:radial-gradient(circle,rgba(192,132,252,0.2),transparent 70%);"></div>
+  <div class="orb" style="width:300px;height:300px;bottom:0;left:-80px;background:radial-gradient(circle,rgba(139,92,246,0.2),transparent 70%);"></div>
+
+  <div class="card">
+
+    <!-- Avatar + nume -->
+    <div class="text-center mb-8">
+      <div class="avatar inline-flex items-center justify-center w-20 h-20 rounded-2xl mb-4 pulse"
+           style="background:linear-gradient(135deg,#7c3aed,#a855f7);box-shadow:0 8px 32px rgba(124,58,237,0.5);">
+        <span style="font-size:36px;">💼</span>
+      </div>
+      <h1 class="text-white font-black text-2xl tracking-tight">JobPart.ro</h1>
+      <p class="text-violet-300 text-sm font-medium mt-1">Platforma #1 joburi part-time România</p>
+      <div class="flex items-center justify-center gap-4 mt-3 text-xs text-violet-400 font-semibold">
+        <span>500+ Joburi</span>
+        <span class="w-1 h-1 rounded-full bg-violet-500"></span>
+        <span>200+ Angajatori</span>
+        <span class="w-1 h-1 rounded-full bg-violet-500"></span>
+        <span>Gratuit</span>
+      </div>
+    </div>
+
+    <!-- Butoane principale -->
+    <a href="https://jobpart.ro/static/jobs.html" class="link-btn" style="background:white;color:#4c1d95;">
+      <div class="icon-wrap" style="background:#ede9fe;">🔍</div>
+      <div>
+        <div>Caută joburi part-time</div>
+        <div style="font-size:12px;font-weight:500;opacity:0.6;margin-top:1px;">Sute de anunțuri active</div>
+      </div>
+      <span class="arrow">→</span>
+    </a>
+
+    <a href="https://jobpart.ro/static/register.html" class="link-btn" style="background:rgba(255,255,255,0.12);color:white;border:1.5px solid rgba(255,255,255,0.2);">
+      <div class="icon-wrap" style="background:rgba(255,255,255,0.1);">👤</div>
+      <div>
+        <div>Înregistrare Candidat</div>
+        <div style="font-size:12px;font-weight:500;opacity:0.6;margin-top:1px;">Aplică gratuit, fără abonament</div>
+      </div>
+      <span class="arrow">→</span>
+    </a>
+
+    <a href="https://jobpart.ro/static/register.html?rol=angajator" class="link-btn" style="background:rgba(255,255,255,0.12);color:white;border:1.5px solid rgba(255,255,255,0.2);">
+      <div class="icon-wrap" style="background:rgba(255,255,255,0.1);">🏢</div>
+      <div>
+        <div>Publică un anunț</div>
+        <div style="font-size:12px;font-weight:500;opacity:0.6;margin-top:1px;">Găsește candidați rapid</div>
+      </div>
+      <span class="arrow">→</span>
+    </a>
+
+    <a href="https://jobpart.ro/static/harta.html" class="link-btn" style="background:rgba(255,255,255,0.12);color:white;border:1.5px solid rgba(255,255,255,0.2);">
+      <div class="icon-wrap" style="background:rgba(255,255,255,0.1);">🗺️</div>
+      <div>
+        <div>Joburi pe hartă</div>
+        <div style="font-size:12px;font-weight:500;opacity:0.6;margin-top:1px;">Găsește joburi lângă tine</div>
+      </div>
+      <span class="arrow">→</span>
+    </a>
+
+    <!-- Badge precontract -->
+    <div class="mt-4 mb-6 rounded-2xl p-4 text-center"
+         style="background:rgba(255,255,255,0.07);border:1.5px solid rgba(255,255,255,0.15);">
+      <p class="text-white font-bold text-sm">📲 Precontract digital din aplicație</p>
+      <p class="text-violet-300 text-xs mt-1 font-medium">Semnezi online · Fără hârtii · Unic în România</p>
+    </div>
+
+    <!-- Footer -->
+    <p class="text-center text-violet-500 text-xs font-medium">
+      © 2025 JobPart.ro · <a href="https://jobpart.ro/static/confidentialitate.html" style="color:inherit;text-decoration:underline;">Confidențialitate</a>
+    </p>
+
+  </div>
+</body>
+</html>
