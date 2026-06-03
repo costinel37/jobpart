@@ -21,9 +21,13 @@ def hash_parola(parola: str) -> str:
 def verifica_parola(parola: str, hash: str) -> bool:
     return pwd_context.verify(parola, hash)
 
+TOKEN_EXPIRE_ZILE = 7
+
 def creeaza_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
     to_encode = data.copy()
-    to_encode.update({"iat": int(time.time())})  # time.time() = Unix epoch corect indiferent de tz
+    now = int(time.time())
+    expire = now + int((expires_delta or timedelta(days=TOKEN_EXPIRE_ZILE)).total_seconds())
+    to_encode.update({"iat": now, "exp": expire})
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
 def get_user_curent(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)):

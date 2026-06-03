@@ -115,10 +115,11 @@ def startup():
             models.User.email == "admin@jobpart.ro"
         ).first()
         if not admin:
+            admin_pass = os.getenv("ADMIN_PASSWORD", "schimba-parola-acum!")
             db.add(models.User(
                 nume="Administrator",
                 email="admin@jobpart.ro",
-                parola_hash=hash_parola("anastasia@6"),
+                parola_hash=hash_parola(admin_pass),
                 rol="admin",
                 activ=True,
                 email_confirmat=True,
