@@ -307,6 +307,7 @@
           </div>`;
           return;
         }
+        incarcaStatisticiJoburi(jobs);
         container.innerHTML = jobs.map(job => `
           <div class="bg-white rounded-xl shadow-sm p-5 mb-4 flex justify-between items-start flex-wrap gap-4 ${job.promovat ? 'border-l-4 border-yellow-400' : ''}">
             <div>
@@ -317,6 +318,7 @@
               </div>
               <p class="text-gray-500 text-sm">ðŸ“ ${escapeHtml(job.oras)} Â· ${job.categorie || 'Part-time'} Â· Postat la ${formatData(job.creat_la)}</p>
               ${job.expira_la ? `<p class="text-xs mt-1 ${new Date(job.expira_la) - new Date() < 3*86400000 ? 'text-orange-500 font-semibold' : 'text-gray-400'}">â³ ExpirÄƒ la ${formatData(job.expira_la)}</p>` : ''}
+              <div id="stats-${job.id}" class="flex gap-4 mt-2 text-xs text-gray-400"><span id="stats-viz-${job.id}">👁 -</span><span id="stats-apl-${job.id}">📨 -</span><span id="stats-acc-${job.id}">✅ -</span></div>
             </div>
             <div class="flex gap-2 flex-wrap">
               <button onclick="reinnoiesteJob(${job.id})" class="border border-green-400 text-green-700 bg-green-50 px-4 py-2 rounded-lg hover:bg-green-100 text-sm font-medium">ðŸ”„ ReÃ®nnoieÈ™te</button>
@@ -571,20 +573,33 @@
     };
 
     async function stergeContul() {
-      const confirmare1 = confirm("EÈ™ti sigur cÄƒ vrei sÄƒ Ã®È›i È™tergi contul? AceastÄƒ acÈ›iune este IREVERSIBILÄ‚.");
-      if (!confirmare1) return;
-      const confirmare2 = confirm("Ultima confirmare: datele personale vor fi È™terse definitiv. Continui?");
-      if (!confirmare2) return;
+      if (!confirm("Ești sigur că vrei să îți ștergi contul? Această acțiune este IREVERSIBILĂ.")) return;
+      const parola = prompt("Introdu parola curentă pentru a confirma ștergerea contului:");
+      if (!parola) return;
       try {
-        await apiFetch("/auth/me", { method: "DELETE" });
+        await apiFetch("/auth/me", { method: "DELETE", body: JSON.stringify({ parola_curenta: parola }) });
         logout();
       } catch (err) {
-        alert("Eroare la È™tergerea contului: " + err.message);
+        alert("Eroare: " + err.message);
       }
     }
 
     incarcaJoburileMele();
     initNotifBell();
+
+    async function incarcaStatisticiJoburi(jobs) {
+      for (const job of jobs) {
+        try {
+          const s = await apiFetch(\`/jobs/${job.id}/statistici\`);
+          const viz = document.getElementById(\`stats-viz-${job.id}\`);
+          const apl = document.getElementById(\`stats-apl-${job.id}\`);
+          const acc = document.getElementById(\`stats-acc-${job.id}\`);
+          if (viz) viz.textContent = \`👁 \${s.vizualizari} vizualizări\`;
+          if (apl) apl.textContent = \`📨 \${s.aplicari} aplicări\`;
+          if (acc) acc.textContent = \`✅ \${s.acceptate} acceptate\`;
+        } catch (e) { /* silențios */ }
+      }
+    }
 
     // â”€â”€ PRECONTRACT â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     function genereazaPrecontract(aplicareId, e) {

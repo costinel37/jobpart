@@ -225,8 +225,14 @@ def schimba_parola(request: Request, data: SchimbaParolaDate, db: Session = Depe
     return {"mesaj": "Parola a fost schimbată cu succes!"}
 
 
+class StergeContDate(BaseModel):
+    parola_curenta: str
+
+
 @router.delete("/me")
-def sterge_cont(db: Session = Depends(get_db), current_user=Depends(get_user_curent)):
+def sterge_cont(data: StergeContDate, db: Session = Depends(get_db), current_user=Depends(get_user_curent)):
+    if not verifica_parola(data.parola_curenta, current_user.parola_hash):
+        raise HTTPException(status_code=400, detail="Parola incorectă. Ștergerea contului a fost anulată.")
     import os as _os
     from config import UPLOAD_DIR
 

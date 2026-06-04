@@ -46,6 +46,49 @@ async def upload_cv(
     return {"cv_path": nume_salvat, "cv_nume_original": fisier.filename}
 
 
+@router.post("/cv-profil")
+@limiter.limit("5/minute")
+async def upload_cv_profil(
+    request: Request,
+    fisier: UploadFile = File(...),
+    db: Session = Depends(get_db),
+    current_user=Depends(get_user_curent)
+):
+    """Salvează CV-ul de profil al candidatului (refolosit la aplicări one-click)."""
+    extensie = os.path.splitext(fisier.filename or "")[1].lower()
+    if extensie not in EXTENSII_PERMISE:
+        raise HTTPException(status_code=400, detail="Tip de fișier invalid. Acceptăm PDF, DOC, DOCX.")
+    continut = await fisier.read()
+    if len(continut) > MAX_SIZE_BYTES:
+        raise HTTPException(status_code=400, detail="Fișierul depășește 5MB.")
+    if not verifica_tip_fisier(continut):
+        raise HTTPException(status_code=400, detail="Fișierul nu este un PDF sau Word valid.")
+
+    # Șterge CV-ul vechi de pe disk
+    if current_user.cv_profil_path:
+        cale_veche = os.path.join(UPLOAD_DIR, current_user.cv_profil_path)
+        if os.path.exists(cale_veche):
+            os.remove(cale_veche)
+
+    nume_salvat = f"{current_user.id}_profil_{uuid.uuid4().hex}{extensie}"
+    cale = os.path.join(UPLOAD_DIR, nume_salvat)
+    with open(cale, "wb") as f:
+        f.write(continut)
+
+    current_user.cv_profil_path = nume_salvat
+    current_user.cv_profil_nume = fisier.filename
+    db.commit()
+    return {"cv_profil_path": nume_salvat, "cv_profil_nume": fisier.filename}
+
+
+@router.get("/cv-profil/info")
+def info_cv_profil(current_user=Depends(get_user_curent)):
+    return {
+        "cv_profil_path": current_user.cv_profil_path,
+        "cv_profil_nume": current_user.cv_profil_nume,
+    }
+
+
 @router.get("/cv/{nume_fisier}")
 async def descarca_cv(
     nume_fisier: str,

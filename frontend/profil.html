@@ -128,10 +128,41 @@
           </div>`;
 
         document.title = `${profil.nume} - JobPart`;
+
+        // Dacă e angajator, afișează joburile active
+        if (profil.rol === "angajator") {
+          incarcaJoburiAngajator();
+        }
       } catch {
         document.getElementById("profil-header").innerHTML =
           '<p class="text-red-400 text-center">Profilul nu a putut fi încărcat.</p>';
       }
+    }
+
+    async function incarcaJoburiAngajator() {
+      try {
+        const jobs = await apiFetch(`/jobs?per_pagina=100`);
+        const joburiAngajator = jobs.filter(j => j.angajator_id == userId);
+        if (joburiAngajator.length === 0) return;
+
+        const sectiune = document.createElement("div");
+        sectiune.className = "mt-6";
+        sectiune.innerHTML = `
+          <h2 class="text-xl font-bold text-gray-800 mb-4">💼 Joburi active (${joburiAngajator.length})</h2>
+          <div class="space-y-3">
+            ${joburiAngajator.map(job => `
+              <a href="/static/job-detalii.html?id=${job.id}" class="block bg-white rounded-xl p-4 border border-gray-100 hover:border-blue-300 hover:shadow-sm transition">
+                <div class="flex justify-between items-start">
+                  <div>
+                    <p class="font-semibold text-gray-800">${escapeHtml(job.titlu)}</p>
+                    <p class="text-sm text-gray-500 mt-1">📍 ${escapeHtml(job.oras)} · ${job.categorie || 'Part-time'}</p>
+                  </div>
+                  <span class="text-sm text-violet-600 font-medium">${job.salariu_min ? job.salariu_min.toLocaleString() + '+ RON' : 'Negociabil'}</span>
+                </div>
+              </a>`).join("")}
+          </div>`;
+        document.getElementById("profil-header").after(sectiune);
+      } catch {}
     }
 
     async function incarcaRating() {

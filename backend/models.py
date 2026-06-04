@@ -35,6 +35,8 @@ class User(Base):
     gdpr_consimtit_la = Column(DateTime, nullable=True)
     data_nasterii = Column(Date, nullable=True)
     parola_schimbata_la = Column(DateTime, nullable=True)
+    cv_profil_path = Column(String(500), nullable=True)
+    cv_profil_nume = Column(String(255), nullable=True)
     creat_la = Column(DateTime, default=datetime.utcnow)
 
     joburi_postate = relationship("Job", back_populates="angajator")
@@ -172,6 +174,36 @@ class Application(Base):
 
     candidat = relationship("User", back_populates="aplicari")
     job = relationship("Job", back_populates="aplicari")
+
+
+class JobAlert(Base):
+    """Abonament la notificări pentru joburi noi care se potrivesc criteriilor."""
+    __tablename__ = "job_alerts"
+    __table_args__ = (UniqueConstraint("user_id", "categorie", "oras"),)
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
+    categorie = Column(String(100), nullable=True)
+    oras = Column(String(100), nullable=True)
+    salariu_min = Column(Integer, nullable=True)
+    activ = Column(Boolean, default=True)
+    ultima_verificare = Column(DateTime, default=datetime.utcnow)
+    creat_la = Column(DateTime, default=datetime.utcnow)
+
+    user = relationship("User")
+
+
+class JobView(Base):
+    """Înregistrează vizualizările unice per job (bazat pe IP hash)."""
+    __tablename__ = "job_views"
+    __table_args__ = (UniqueConstraint("job_id", "ip_hash"),)
+
+    id = Column(Integer, primary_key=True, index=True)
+    job_id = Column(Integer, ForeignKey("jobs.id"), nullable=False, index=True)
+    ip_hash = Column(String(64), nullable=False)
+    creat_la = Column(DateTime, default=datetime.utcnow)
+
+    job = relationship("Job")
 
 
 class AuditLog(Base):

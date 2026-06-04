@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from sqlalchemy.orm import Session
 from sqlalchemy import or_, case
 from typing import Optional, List
@@ -165,11 +165,48 @@ def joburile_mele(
 
 
 @router.get("/{job_id}", response_model=schemas.JobOut)
-def detalii_job(job_id: int, db: Session = Depends(get_db)):
+def detalii_job(job_id: int, request: Request, db: Session = Depends(get_db)):
     job = db.query(models.Job).filter(models.Job.id == job_id, models.Job.activ == True).first()
     if not job:
         raise HTTPException(status_code=404, detail="Jobul nu a fost găsit.")
+    # Înregistrează vizualizarea unică (IP hash pentru GDPR)
+    import hashlib
+    ip = request.headers.get("CF-Connecting-IP") or request.headers.get("X-Forwarded-For", "").split(",")[0].strip() or request.client.host
+    ip_hash = hashlib.sha256(ip.encode()).hexdigest()[:32]
+    try:
+        view = models.JobView(job_id=job_id, ip_hash=ip_hash)
+        db.add(view)
+        db.commit()
+    except Exception:
+        db.rollback()
     return job
+
+
+@router.get("/{job_id}/statistici")
+def statistici_job(
+    job_id: int,
+    db: Session = Depends(get_db),
+    current_user=Depends(require_rol("angajator", "admin"))
+):
+    job = db.query(models.Job).filter(models.Job.id == job_id).first()
+    if not job:
+        raise HTTPException(status_code=404, detail="Jobul nu a fost găsit.")
+    if job.angajator_id != current_user.id and current_user.rol != "admin":
+        raise HTTPException(status_code=403, detail="Acces interzis.")
+
+    vizualizari = db.query(models.JobView).filter(models.JobView.job_id == job_id).count()
+    aplicari = db.query(models.Application).filter(models.Application.job_id == job_id).count()
+    acceptate = db.query(models.Application).filter(
+        models.Application.job_id == job_id,
+        models.Application.status == "acceptata"
+    ).count()
+
+    return {
+        "vizualizari": vizualizari,
+        "aplicari": aplicari,
+        "acceptate": acceptate,
+        "rata_aplicare": round(aplicari / vizualizari * 100, 1) if vizualizari > 0 else 0,
+    }
 
 
 @router.post("", response_model=schemas.JobOut)

@@ -29,6 +29,7 @@ def _ruleaza_verificari():
             _curata_cv_orfane(db)
             _curata_cv_expirate(db, now)
             _curata_date_expirate(db, now)
+            _trimite_job_alerts(db, now)
         finally:
             db.close()
     except Exception as e:
@@ -227,6 +228,58 @@ def porneste_task_expirare(interval_secunde: int = 300):
     t = threading.Thread(target=_loop, daemon=True)
     t.start()
     logger.info(f"[EXPIRARE] Task pornit, interval: {interval_secunde}s")
+
+
+def _trimite_job_alerts(db, now):
+    """Verifică alertele active și trimite email candidaților pentru joburi noi."""
+    from email_service import _trimite_email
+    from config import FRONTEND_URL
+
+    alerts = db.query(models.JobAlert).filter(models.JobAlert.activ == True).all()
+    for alert in alerts:
+        try:
+            query = db.query(models.Job).filter(
+                models.Job.activ == True,
+                models.Job.creat_la > alert.ultima_verificare,
+            )
+            if alert.categorie:
+                query = query.filter(models.Job.categorie == alert.categorie)
+            if alert.oras:
+                query = query.filter(models.Job.oras.ilike(f"%{alert.oras}%"))
+            if alert.salariu_min:
+                query = query.filter(models.Job.salariu_min >= alert.salariu_min)
+
+            joburi_noi = query.limit(5).all()
+            if not joburi_noi:
+                alert.ultima_verificare = now
+                db.commit()
+                continue
+
+            user = db.query(models.User).filter(models.User.id == alert.user_id, models.User.activ == True).first()
+            if not user:
+                continue
+
+            lista_html = "".join([
+                f'<li style="margin-bottom:8px"><a href="{FRONTEND_URL}/static/job-detalii.html?id={j.id}" style="color:#7c3aed;font-weight:bold">{j.titlu}</a> — {j.companie}, {j.oras}</li>'
+                for j in joburi_noi
+            ])
+            criteriu = f"{alert.categorie or 'Toate categoriile'}" + (f" în {alert.oras}" if alert.oras else "")
+            corp = f"""
+            <div style="font-family:Arial,sans-serif;max-width:600px;margin:auto;padding:20px">
+              <h2 style="color:#7c3aed">🔔 Joburi noi pentru alerta ta</h2>
+              <p>Criterii: <strong>{criteriu}</strong></p>
+              <ul style="padding-left:20px">{lista_html}</ul>
+              <a href="{FRONTEND_URL}/static/jobs.html" style="display:inline-block;background:#7c3aed;color:white;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:bold;margin-top:12px">
+                Vezi toate joburile →
+              </a>
+              <p style="color:#94a3b8;font-size:12px;margin-top:16px">JobPart · <a href="{FRONTEND_URL}/static/dashboard-candidat.html" style="color:#94a3b8">Dezactivează alerta</a></p>
+            </div>"""
+            _trimite_email(user.email, f"🔔 {len(joburi_noi)} joburi noi pentru {criteriu}", corp)
+            alert.ultima_verificare = now
+            db.commit()
+            logger.info(f"[ALERT] Trimis {len(joburi_noi)} joburi la {user.email}")
+        except Exception as e:
+            logger.warning(f"[ALERT] Eroare alert {alert.id}: {e}")
 
 
 def porneste_keep_alive(interval_secunde: int = 600):

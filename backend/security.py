@@ -51,7 +51,9 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
         response = await call_next(request)
         if response.status_code in (401, 403, 429):
             ip = get_remote_address(request)
-            logger.warning(f"[SECURITY] {response.status_code} | {request.method} {request.url.path} | IP: {ip}")
+            # Maschează token-urile din query string în loguri
+            path = request.url.path
+            logger.warning(f"[SECURITY] {response.status_code} | {request.method} {path} | IP: {ip}")
         return response
 
 
