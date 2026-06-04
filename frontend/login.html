@@ -4,12 +4,21 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Login - JobPart</title>
+  <meta name="robots" content="noindex, nofollow" />
   <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { background: linear-gradient(135deg, #2e1065 0%, #4c1d95 40%, #6d28d9 75%, #7c3aed 100%); }
+    .btn-violet { background: linear-gradient(135deg, #7c3aed, #6d28d9); transition: all 0.2s; }
+    .btn-violet:hover { box-shadow: 0 6px 20px rgba(124,58,237,0.5); transform: translateY(-1px); }
+  </style>
 </head>
-<body class="bg-gray-50 min-h-screen flex items-center justify-center">
+<body class="min-h-screen flex items-center justify-center px-4">
 
-  <div class="bg-white rounded-2xl shadow-lg p-8 w-full max-w-md">
-    <a href="/static/index.html" class="text-2xl font-bold text-blue-600 block text-center mb-8">Job<span class="text-gray-800">Part</span></a>
+  <div class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md">
+    <a href="/static/index.html" class="block text-center mb-8">
+      <span class="text-2xl font-bold" style="background:linear-gradient(135deg,#7c3aed,#a855f7);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">Job</span><span class="text-2xl font-bold text-gray-800">Part</span>
+      <span class="text-xs align-top ml-1 bg-violet-100 text-violet-600 px-1.5 py-0.5 rounded-full font-semibold">✦</span>
+    </a>
     <h1 class="text-2xl font-bold text-gray-800 mb-2 text-center">Bun venit înapoi!</h1>
     <p class="text-gray-500 text-center mb-8">Autentifică-te în contul tău</p>
 
@@ -18,31 +27,31 @@
     <form id="login-form" class="space-y-5">
       <div>
         <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-        <input type="email" id="email" required placeholder="exemplu@email.com"
-          class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+        <input type="email" id="email" required placeholder="exemplu@email.com" autocomplete="email"
+          class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-violet-500" />
       </div>
       <div>
         <label class="block text-sm font-medium text-gray-700 mb-1">Parolă</label>
         <div class="relative">
-          <input type="password" id="parola" required placeholder="••••••••"
-            class="w-full border border-gray-300 rounded-xl px-4 py-3 pr-12 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          <input type="password" id="parola" required placeholder="••••••••" autocomplete="current-password"
+            class="w-full border border-gray-300 rounded-xl px-4 py-3 pr-12 focus:outline-none focus:ring-2 focus:ring-violet-500" />
           <button type="button" onclick="toggleParola('parola', this)" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
-            <svg id="parola-eye" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
           </button>
         </div>
       </div>
       <button type="submit" id="btn-login"
-        class="w-full bg-blue-600 text-white py-3 rounded-xl font-semibold hover:bg-blue-700 transition text-lg">
+        class="btn-violet w-full text-white py-3 rounded-xl font-semibold text-lg">
         Autentificare
       </button>
     </form>
 
     <p class="text-center mt-4">
-      <a href="/static/resetare-parola.html" class="text-sm text-gray-400 hover:text-blue-600">Ai uitat parola?</a>
+      <a href="/static/resetare-parola.html" class="text-sm text-gray-400 hover:text-violet-600">Ai uitat parola?</a>
     </p>
     <p class="text-center text-gray-500 mt-3">
       Nu ai cont?
-      <a href="/static/register.html" class="text-blue-600 hover:underline font-medium">Înregistrează-te</a>
+      <a href="/static/register.html" class="text-violet-600 hover:underline font-medium">Înregistrează-te</a>
     </p>
   </div>
 

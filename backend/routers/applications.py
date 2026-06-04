@@ -39,6 +39,10 @@ def aplica_la_job(
     if existent:
         raise HTTPException(status_code=400, detail="Ai aplicat deja la acest job.")
 
+    # Verifică că cv_path aparține utilizatorului curent (previne IDOR)
+    if data.cv_path and not data.cv_path.startswith(f"{current_user.id}_"):
+        raise HTTPException(status_code=403, detail="CV-ul specificat nu îți aparține.")
+
     aplicare = models.Application(
         candidat_id=current_user.id,
         job_id=data.job_id,

@@ -52,11 +52,14 @@ async def descarca_cv(
     db: Session = Depends(get_db),
     current_user=Depends(get_user_curent)
 ):
-    # Previne path traversal (../../etc/passwd)
+    # Previne path traversal — verificare strictă că fișierul e în UPLOAD_DIR
     if ".." in nume_fisier or "/" in nume_fisier or "\\" in nume_fisier:
         raise HTTPException(status_code=400, detail="Nume fișier invalid.")
 
     cale = os.path.join(UPLOAD_DIR, nume_fisier)
+    if os.path.abspath(cale) != os.path.join(os.path.abspath(UPLOAD_DIR), nume_fisier):
+        raise HTTPException(status_code=400, detail="Nume fișier invalid.")
+
     if not os.path.exists(cale):
         raise HTTPException(status_code=404, detail="Fișierul nu există.")
 

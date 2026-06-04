@@ -90,6 +90,7 @@ class Favorite(Base):
 
 class Review(Base):
     __tablename__ = "reviews"
+    __table_args__ = (UniqueConstraint("autor_id", "subiect_id"),)
 
     id = Column(Integer, primary_key=True, index=True)
     autor_id = Column(Integer, ForeignKey("users.id"), nullable=False)
@@ -158,6 +159,7 @@ class PasswordReset(Base):
 
 class Application(Base):
     __tablename__ = "applications"
+    __table_args__ = (UniqueConstraint("candidat_id", "job_id"),)
 
     id = Column(Integer, primary_key=True, index=True)
     scrisoare = Column(Text, nullable=True)

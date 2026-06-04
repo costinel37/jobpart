@@ -4,33 +4,39 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Joburi Part-Time - JobPart</title>
+  <meta name="description" content="Caută și filtrează sute de joburi part-time din toată România. IT, HoReCa, Retail, Livrări și multe altele. Aplică gratuit pe JobPart.ro." />
+  <meta property="og:title" content="Joburi Part-Time România — JobPart" />
+  <meta property="og:description" content="Sute de joburi part-time din toată România. Filtrează după oraș, categorie și salariu." />
+  <meta property="og:url" content="https://jobpart.ro/static/jobs.html" />
+  <meta property="og:type" content="website" />
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-50 font-sans">
 
-  <nav class="bg-white shadow-sm sticky top-0 z-50">
+  <nav class="bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-50 border-b border-violet-100">
     <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
-      <a href="/static/index.html" class="text-2xl font-bold text-blue-600">Job<span class="text-gray-800">Part</span></a>
-      <div class="flex items-center gap-4">
-        <a href="/static/jobs.html" class="text-blue-600 font-semibold">Joburi</a>
-        <a href="/static/harta.html" class="text-gray-600 hover:text-blue-600 font-medium">🗺 Hartă</a>
-        <a href="/static/promotii.html" class="text-yellow-600 hover:text-yellow-700 font-medium">⭐ Promovează</a>
-        <a href="/static/dashboard-angajator.html" class="px-4 py-2 rounded-lg bg-green-600 text-white hover:bg-green-700 font-medium text-sm">+ Publică anunț</a>
-        <!-- nav-auth: vizibil când userul NU e logat -->
+      <a href="/static/index.html" class="text-2xl font-bold">
+        <span style="background:linear-gradient(135deg,#7c3aed,#a855f7);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">Job</span><span class="text-gray-800">Part</span>
+        <span class="text-xs align-top ml-1 bg-violet-100 text-violet-600 px-1.5 py-0.5 rounded-full font-semibold">✦</span>
+      </a>
+      <div class="flex items-center gap-3">
+        <a href="/static/jobs.html" class="text-violet-600 font-semibold">Joburi</a>
+        <a href="/static/harta.html" class="text-gray-600 hover:text-violet-600 font-medium transition">🗺 Hartă</a>
+        <a href="/static/promotii.html" class="text-amber-600 hover:text-amber-700 font-medium transition">⭐ Promovează</a>
+        <a href="/static/dashboard-angajator.html" class="px-4 py-2 rounded-xl font-semibold text-sm text-white transition" style="background:linear-gradient(135deg,#7c3aed,#6d28d9)">+ Publică anunț</a>
         <div id="nav-auth" class="flex gap-2">
-          <a href="/static/login.html" class="px-4 py-2 rounded-lg border border-blue-600 text-blue-600 hover:bg-blue-50 font-medium">Login</a>
-          <a href="/static/register.html" class="px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 font-medium">Înregistrare</a>
+          <a href="/static/login.html" class="px-4 py-2 rounded-xl border-2 border-violet-500 text-violet-600 hover:bg-violet-50 font-semibold transition">Login</a>
+          <a href="/static/register.html" class="px-4 py-2 rounded-xl text-white font-semibold transition" style="background:linear-gradient(135deg,#7c3aed,#6d28d9)">Înregistrare</a>
         </div>
-        <!-- nav-user: vizibil când userul E logat -->
         <div id="nav-user" class="hidden flex items-center gap-3">
-          <a id="nav-dashboard" href="#" class="text-gray-600 hover:text-blue-600 font-medium">Dashboard</a>
-          <a href="/static/mesaje.html" class="text-gray-600 hover:text-blue-600 font-medium">✉️ Mesaje</a>
-          <a href="/static/notificari.html" id="nav-notif-bell" class="relative inline-flex items-center text-gray-600 hover:text-blue-600">
+          <a id="nav-dashboard" href="#" class="text-gray-600 hover:text-violet-600 font-medium transition">Dashboard</a>
+          <a href="/static/mesaje.html" class="text-gray-600 hover:text-violet-600 font-medium transition">✉️ Mesaje</a>
+          <a href="/static/notificari.html" id="nav-notif-bell" class="relative inline-flex items-center text-gray-600 hover:text-violet-600">
             <span class="text-xl">🔔</span>
             <span class="notif-badge hidden absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold min-w-[16px] h-4 rounded-full flex items-center justify-center px-1 leading-none"></span>
           </a>
           <span class="text-gray-700 font-medium" id="nav-username"></span>
-          <button onclick="logout()" class="px-4 py-2 rounded-lg bg-red-500 text-white hover:bg-red-600 font-medium">Ieșire</button>
+          <button onclick="logout()" class="px-4 py-2 rounded-xl bg-red-500 text-white hover:bg-red-600 font-medium transition">Ieșire</button>
         </div>
       </div>
     </div>
@@ -42,12 +48,26 @@
         <h1 class="text-3xl font-bold text-gray-800">Joburi part-time</h1>
         <p id="rezultate-count" class="text-gray-500 mt-1"></p>
       </div>
+      <!-- Buton filtre mobil -->
+      <button onclick="toggleFiltreМobil()" class="lg:hidden flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-xl font-semibold text-sm">
+        ☰ Filtre
+      </button>
     </div>
+
+    <!-- Overlay filtre mobil -->
+    <div id="filtre-overlay" onclick="toggleFiltreМobil()" class="fixed inset-0 bg-black/40 z-40 hidden lg:hidden"></div>
 
     <div class="grid lg:grid-cols-4 gap-6">
       <!-- Sidebar filtre -->
-      <aside class="lg:col-span-1">
-        <div class="bg-white rounded-xl shadow-sm p-5 sticky top-20">
+      <aside id="filtre-sidebar" class="lg:col-span-1 fixed lg:static inset-y-0 left-0 z-50 w-80 lg:w-auto -translate-x-full lg:translate-x-0 transition-transform duration-300">
+        <div class="bg-white rounded-xl shadow-sm p-5 lg:sticky lg:top-20 h-full lg:h-auto overflow-y-auto">
+          <div class="flex justify-between items-center mb-4">
+            <h2 class="font-bold text-gray-800">Filtre</h2>
+            <div class="flex gap-2 items-center">
+              <button onclick="resetFiltre()" class="text-blue-600 text-sm hover:underline">Resetează</button>
+              <button onclick="toggleFiltreМobil()" class="lg:hidden text-gray-400 hover:text-gray-600 text-xl leading-none">×</button>
+            </div>
+          </div>
           <div class="flex justify-between items-center mb-4">
             <h2 class="font-bold text-gray-800">Filtre</h2>
             <button onclick="resetFiltre()" class="text-blue-600 text-sm hover:underline">Resetează</button>
@@ -328,6 +348,14 @@
             ${tipProgram}
           </div>
         </a>`;
+    }
+
+    function toggleFiltreМobil() {
+      const sidebar = document.getElementById("filtre-sidebar");
+      const overlay = document.getElementById("filtre-overlay");
+      const isOpen = !sidebar.classList.contains("-translate-x-full");
+      sidebar.classList.toggle("-translate-x-full", isOpen);
+      overlay.classList.toggle("hidden", isOpen);
     }
 
     function resetFiltre() {

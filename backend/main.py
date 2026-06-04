@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse, JSONResponse, PlainTextResponse
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 from sqlalchemy import text, inspect
@@ -115,7 +115,9 @@ def startup():
             models.User.email == "admin@jobpart.ro"
         ).first()
         if not admin:
-            admin_pass = os.getenv("ADMIN_PASSWORD", "schimba-parola-acum!")
+            admin_pass = os.getenv("ADMIN_PASSWORD")
+            if not admin_pass:
+                raise RuntimeError("ADMIN_PASSWORD nu este setat în .env — refuz să creez contul admin cu parolă default!")
             db.add(models.User(
                 nume="Administrator",
                 email="admin@jobpart.ro",
@@ -156,6 +158,53 @@ def root():
 @app.get("/ping")
 def ping():
     return {"status": "ok", "timestamp": datetime.utcnow().isoformat()}
+
+
+@app.get("/robots.txt", response_class=PlainTextResponse)
+def robots():
+    return """User-agent: *
+Disallow: /static/admin.html
+Disallow: /static/dashboard-candidat.html
+Disallow: /static/dashboard-angajator.html
+Disallow: /static/mesaje.html
+Disallow: /static/notificari.html
+Disallow: /static/precontract.html
+Disallow: /static/favorite.html
+Disallow: /static/profil.html
+Disallow: /static/resetare-parola.html
+Disallow: /static/confirmare-email.html
+Disallow: /static/plata-succes.html
+Disallow: /api/
+Sitemap: https://jobpart.ro/sitemap.xml
+"""
+
+
+@app.get("/sitemap.xml", response_class=PlainTextResponse)
+def sitemap(db=None):
+    from database import SessionLocal
+    db = SessionLocal()
+    try:
+        joburi = db.query(models.Job).filter(models.Job.activ == True).all()
+        urls = [
+            "<url><loc>https://jobpart.ro/</loc><changefreq>daily</changefreq><priority>1.0</priority></url>",
+            "<url><loc>https://jobpart.ro/static/jobs.html</loc><changefreq>hourly</changefreq><priority>0.9</priority></url>",
+            "<url><loc>https://jobpart.ro/static/harta.html</loc><changefreq>daily</changefreq><priority>0.7</priority></url>",
+            "<url><loc>https://jobpart.ro/static/register.html</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>",
+            "<url><loc>https://jobpart.ro/static/termeni.html</loc><changefreq>monthly</changefreq><priority>0.3</priority></url>",
+            "<url><loc>https://jobpart.ro/static/confidentialitate.html</loc><changefreq>monthly</changefreq><priority>0.3</priority></url>",
+        ]
+        for job in joburi:
+            urls.append(
+                f"<url><loc>https://jobpart.ro/static/job-detalii.html?id={job.id}</loc>"
+                f"<lastmod>{job.creat_la.strftime('%Y-%m-%d')}</lastmod>"
+                f"<changefreq>weekly</changefreq><priority>0.8</priority></url>"
+            )
+        return f"""<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+{"".join(urls)}
+</urlset>"""
+    finally:
+        db.close()
 
 
 @app.get("/{page}.html")
