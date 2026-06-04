@@ -10,7 +10,7 @@ from auth import get_user_curent, require_rol
 from geocoding import geocodeaza_oras, distanta_km
 from telegram_service import notifica_job_nou
 
-ZILE_GRATUIT = 30
+ZILE_GRATUIT = 365
 
 router = APIRouter(prefix="/api/jobs", tags=["Joburi"])
 
