@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from sqlalchemy.orm import Session
 from pydantic import BaseModel, field_validator
 from typing import List, Optional
@@ -8,6 +8,7 @@ from database import get_db
 import models
 from auth import get_user_curent
 from notificari_service import creeaza_notificare
+from security import limiter
 
 router = APIRouter(prefix="/api/mesaje", tags=["Mesaje"])
 
@@ -79,7 +80,8 @@ def cauta_utilizatori(
 
 
 @router.post("", response_model=MesajOut)
-def trimite_mesaj(data: MesajCreate, db: Session = Depends(get_db), current_user=Depends(get_user_curent)):
+@limiter.limit("20/minute")
+def trimite_mesaj(request: Request, data: MesajCreate, db: Session = Depends(get_db), current_user=Depends(get_user_curent)):
     if data.destinatar_id == current_user.id:
         raise HTTPException(status_code=400, detail="Nu poți trimite mesaj ție însuți.")
     destinatar = db.query(models.User).filter(models.User.id == data.destinatar_id, models.User.activ == True).first()

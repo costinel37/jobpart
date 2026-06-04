@@ -5,7 +5,7 @@ import threading
 from database import get_db
 import models, schemas
 from auth import get_user_curent, require_rol
-from email_service import email_aplicare_noua, email_status_schimbat
+from email_service import email_aplicare_noua, email_status_schimbat, email_confirmare_aplicare
 from notificari_service import creeaza_notificare
 
 router = APIRouter(prefix="/api/aplicari", tags=["Aplicări"])
@@ -53,6 +53,9 @@ def aplica_la_job(
     db.add(aplicare)
     db.commit()
     db.refresh(aplicare)
+
+    # Email confirmare către candidat
+    _email_async(email_confirmare_aplicare, current_user.email, job.titlu, job.companie, job.oras)
 
     angajator = db.query(models.User).filter(models.User.id == job.angajator_id).first()
     if angajator:
@@ -118,10 +121,13 @@ def actualizeaza_status(
     if data.status != status_vechi and data.status in ("vizualizata", "acceptata", "respinsa"):
         candidat = db.query(models.User).filter(models.User.id == aplicare.candidat_id).first()
         if candidat:
-            _email_async(email_status_schimbat, candidat.email, job.titlu, job.companie, data.status)
+            motiv = data.motiv_respingere if data.status == "respinsa" else None
+            _email_async(email_status_schimbat, candidat.email, job.titlu, job.companie, data.status, motiv)
             labels = {"vizualizata": "vizualizată", "acceptata": "acceptată ✅", "respinsa": "respinsă"}
-            creeaza_notificare(db, candidat.id, "status_schimbat",
-                               f"Aplicarea ta la '{job.titlu}' a fost {labels.get(data.status, data.status)}",
+            mesaj_notif = f"Aplicarea ta la '{job.titlu}' a fost {labels.get(data.status, data.status)}"
+            if motiv:
+                mesaj_notif += f": {motiv[:80]}"
+            creeaza_notificare(db, candidat.id, "status_schimbat", mesaj_notif,
                                "/static/dashboard-candidat.html")
 
     return {"mesaj": f"Status actualizat la '{data.status}'."}

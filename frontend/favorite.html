@@ -1,7 +1,7 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ro">
 <head>
-  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />`n  <meta name="robots" content="noindex, nofollow" />
   <title>Joburi Salvate - JobPart</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
@@ -12,25 +12,25 @@
       <a href="/static/index.html" class="text-2xl font-bold text-blue-600">Job<span class="text-gray-800">Part</span></a>
       <div class="flex items-center gap-4">
         <a href="/static/jobs.html" class="text-gray-600 hover:text-blue-600">Joburi</a>
-        <a href="/static/mesaje.html" class="text-gray-600 hover:text-blue-600">✉️ Mesaje</a>
+        <a href="/static/mesaje.html" class="text-gray-600 hover:text-blue-600">âœ‰ï¸ Mesaje</a>
         <a href="/static/notificari.html" id="nav-notif-bell" class="relative inline-flex items-center text-gray-600 hover:text-blue-600">
-          <span class="text-xl">🔔</span>
+          <span class="text-xl">ðŸ””</span>
           <span class="notif-badge hidden absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold min-w-[16px] h-4 rounded-full flex items-center justify-center px-1 leading-none"></span>
         </a>
         <span id="nav-username" class="text-gray-700 font-medium"></span>
-        <button onclick="logout()" class="px-4 py-2 rounded-lg bg-red-500 text-white hover:bg-red-600 font-medium">Ieșire</button>
+        <button onclick="logout()" class="px-4 py-2 rounded-lg bg-red-500 text-white hover:bg-red-600 font-medium">IeÈ™ire</button>
       </div>
     </div>
   </nav>
 
   <div class="max-w-6xl mx-auto px-4 py-8">
     <div class="flex items-center justify-between mb-6">
-      <h1 class="text-3xl font-bold text-gray-800">❤️ Joburi salvate</h1>
-      <a href="/static/jobs.html" class="bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700 font-medium">+ Caută joburi</a>
+      <h1 class="text-3xl font-bold text-gray-800">â¤ï¸ Joburi salvate</h1>
+      <a href="/static/jobs.html" class="bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700 font-medium">+ CautÄƒ joburi</a>
     </div>
 
     <div id="favorite-list">
-      <div class="text-center py-10 text-gray-400">Se încarcă...</div>
+      <div class="text-center py-10 text-gray-400">Se Ã®ncarcÄƒ...</div>
     </div>
   </div>
 
@@ -48,10 +48,10 @@
         if (jobs.length === 0) {
           container.innerHTML = `
             <div class="text-center py-20 bg-white rounded-xl shadow-sm">
-              <div class="text-6xl mb-4">💔</div>
+              <div class="text-6xl mb-4">ðŸ’”</div>
               <p class="text-xl text-gray-500 mb-2">Nu ai joburi salvate.</p>
-              <p class="text-gray-400 mb-6">Apasă ❤️ pe orice job pentru a-l salva aici.</p>
-              <a href="/static/jobs.html" class="bg-blue-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-blue-700 inline-block">Caută joburi</a>
+              <p class="text-gray-400 mb-6">ApasÄƒ â¤ï¸ pe orice job pentru a-l salva aici.</p>
+              <a href="/static/jobs.html" class="bg-blue-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-blue-700 inline-block">CautÄƒ joburi</a>
             </div>`;
           return;
         }
@@ -59,7 +59,7 @@
         container.innerHTML = jobs.map(job => cardJob(job)).join("");
       } catch (e) {
         document.getElementById("favorite-list").innerHTML =
-          '<div class="text-center py-10 text-red-400">Eroare la încărcarea joburilor salvate.</div>';
+          '<div class="text-center py-10 text-red-400">Eroare la Ã®ncÄƒrcarea joburilor salvate.</div>';
       }
     }
 
@@ -79,19 +79,19 @@
             <h3 class="font-bold text-gray-800 text-xl mt-2 mb-1">${job.titlu}</h3>
             <p class="text-blue-600 font-semibold mb-2">${job.companie}</p>
             <div class="flex flex-wrap gap-4 text-sm text-gray-500">
-              <span>📍 ${job.oras}</span>
-              <span>💰 ${salariu(job)}</span>
-              ${job.tip_program ? `<span>🕐 ${job.tip_program}</span>` : ''}
+              <span>ðŸ“ ${job.oras}</span>
+              <span>ðŸ’° ${salariu(job)}</span>
+              ${job.tip_program ? `<span>ðŸ• ${job.tip_program}</span>` : ''}
             </div>
           </div>
           <div class="flex flex-col gap-2 items-end">
             <a href="/static/job-detalii.html?id=${job.id}"
               class="bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700 font-medium text-sm">
-              Vezi detalii →
+              Vezi detalii â†’
             </a>
             <button onclick="scoateFavorit(${job.id})"
               class="border border-red-200 text-red-500 px-5 py-2 rounded-lg hover:bg-red-50 font-medium text-sm transition">
-              ❌ Elimină
+              âŒ EliminÄƒ
             </button>
           </div>
         </div>`;
@@ -116,9 +116,9 @@
       if (!container.querySelector("[id^='card-']")) {
         container.innerHTML = `
           <div class="text-center py-20 bg-white rounded-xl shadow-sm">
-            <div class="text-6xl mb-4">💔</div>
+            <div class="text-6xl mb-4">ðŸ’”</div>
             <p class="text-xl text-gray-500 mb-2">Nu ai joburi salvate.</p>
-            <a href="/static/jobs.html" class="bg-blue-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-blue-700 inline-block mt-4">Caută joburi</a>
+            <a href="/static/jobs.html" class="bg-blue-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-blue-700 inline-block mt-4">CautÄƒ joburi</a>
           </div>`;
       }
     }
@@ -128,3 +128,4 @@
   </script>
 </body>
 </html>
+

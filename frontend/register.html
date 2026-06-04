@@ -20,9 +20,9 @@
           class="w-full py-3 rounded-xl border-2 border-blue-600 bg-blue-600 text-white font-semibold transition">
           👤 Candidat
         </button>
-        <!-- Tooltip candidat -->
+        <!-- Info candidat — vizibil mereu pe mobil, hover pe desktop -->
         <div class="absolute left-0 top-full mt-2 w-64 bg-white border border-blue-100 rounded-2xl shadow-xl p-4 z-20
-                    opacity-0 pointer-events-none group-hover:opacity-100 group-hover:pointer-events-auto
+                    hidden sm:block sm:opacity-0 sm:pointer-events-none sm:group-hover:opacity-100 sm:group-hover:pointer-events-auto
                     transition-opacity duration-200">
           <p class="text-xs font-bold text-blue-600 uppercase tracking-wide mb-2">Ce primești ca Candidat</p>
           <ul class="space-y-1.5 text-sm text-gray-700">
@@ -40,6 +40,13 @@
         class="flex-1 py-3 rounded-xl border-2 border-gray-200 text-gray-600 font-semibold hover:border-blue-400 transition">
         🏢 Angajator
       </button>
+    </div>
+    <!-- Info rol selectat — vizibil pe mobil -->
+    <div id="info-candidat" class="sm:hidden mb-4 bg-blue-50 border border-blue-100 rounded-xl p-3 text-sm text-blue-700">
+      ✓ Aplică la joburi · ✓ Mesagerie · ✓ Favorite · ✓ Precontract digital · Gratuit
+    </div>
+    <div id="info-angajator" class="sm:hidden mb-4 bg-green-50 border border-green-100 rounded-xl p-3 text-sm text-green-700 hidden">
+      ✓ Publică joburi · ✓ Gestionează aplicări · ✓ Precontract digital · Gratuit
     </div>
 
     <div id="eroare" class="hidden bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3 mb-5 text-sm"></div>
@@ -141,11 +148,15 @@
       const btnC = document.getElementById("btn-candidat");
       const btnA = document.getElementById("btn-angajator");
       if (rol === "candidat") {
-        btnC.className = "flex-1 py-3 rounded-xl border-2 border-blue-600 bg-blue-600 text-white font-semibold transition";
+        btnC.className = "w-full py-3 rounded-xl border-2 border-blue-600 bg-blue-600 text-white font-semibold transition";
         btnA.className = "flex-1 py-3 rounded-xl border-2 border-gray-200 text-gray-600 font-semibold hover:border-blue-400 transition";
+        document.getElementById("info-candidat")?.classList.remove("hidden");
+        document.getElementById("info-angajator")?.classList.add("hidden");
       } else {
         btnA.className = "flex-1 py-3 rounded-xl border-2 border-blue-600 bg-blue-600 text-white font-semibold transition";
-        btnC.className = "flex-1 py-3 rounded-xl border-2 border-gray-200 text-gray-600 font-semibold hover:border-blue-400 transition";
+        btnC.className = "w-full py-3 rounded-xl border-2 border-gray-200 text-gray-600 font-semibold hover:border-blue-400 transition";
+        document.getElementById("info-candidat")?.classList.add("hidden");
+        document.getElementById("info-angajator")?.classList.remove("hidden");
       }
     }
 

@@ -167,7 +167,26 @@ def email_resetare_parola(email: str, token: str):
     _trimite_email(email, subiect, corp)
 
 
-def email_status_schimbat(email_candidat: str, titlu_job: str, companie: str, status_nou: str):
+def email_confirmare_aplicare(email_candidat: str, titlu_job: str, companie: str, oras: str):
+    subiect = f"✅ Aplicarea ta la '{titlu_job}' a fost înregistrată"
+    corp = f"""
+    <div style="font-family:Arial,sans-serif;max-width:600px;margin:auto;padding:20px">
+      <h2 style="color:#7c3aed">✅ Aplicare înregistrată cu succes!</h2>
+      <p>Aplicarea ta a fost trimisă angajatorului. Îți vom trimite un email când aceasta este vizualizată sau procesată.</p>
+      <div style="background:#f5f3ff;border-radius:8px;padding:16px;margin:16px 0;border-left:4px solid #7c3aed">
+        <p style="margin:0;font-size:18px;font-weight:bold">{titlu_job}</p>
+        <p style="margin:4px 0;color:#6d28d9">{companie} · {oras}</p>
+      </div>
+      <a href="{FRONTEND_URL}/static/dashboard-candidat.html"
+         style="display:inline-block;background:#7c3aed;color:white;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:bold">
+        Vezi aplicările mele
+      </a>
+      <p style="color:#94a3b8;font-size:12px;margin-top:24px">JobPart - Platforma #1 de joburi part-time din România</p>
+    </div>"""
+    _trimite_email(email_candidat, subiect, corp)
+
+
+def email_status_schimbat(email_candidat: str, titlu_job: str, companie: str, status_nou: str, motiv: str = None):
     status_labels = {
         "vizualizata": ("Aplicarea ta a fost vizualizată", "#f59e0b", "👀"),
         "acceptata": ("Felicitări! Aplicarea ta a fost acceptată", "#10b981", "🎉"),
@@ -186,6 +205,7 @@ def email_status_schimbat(email_candidat: str, titlu_job: str, companie: str, st
         <p style="margin:4px 0;color:#64748b">{companie}</p>
       </div>
       {'<p style="color:#10b981;font-weight:bold">Te vor contacta în curând pentru pașii următori!</p>' if status_nou == "acceptata" else ''}
+      {f'<div style="background:#fef2f2;border-radius:8px;padding:12px;margin:12px 0;border-left:4px solid #ef4444"><p style="margin:0;color:#dc2626"><strong>Motiv:</strong> {motiv}</p></div>' if motiv and status_nou == "respinsa" else ''}
       <a href="{FRONTEND_URL}/static/dashboard-candidat.html"
          style="display:inline-block;background:#2563eb;color:white;padding:12px 24px;
                 border-radius:8px;text-decoration:none;font-weight:bold">

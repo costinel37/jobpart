@@ -117,12 +117,17 @@ def retrimite_confirmare(request: Request, db: Session = Depends(get_db), curren
     return {"mesaj": "Email de confirmare retrimis."}
 
 
+class CerereResetareDate(BaseModel):
+    email: str
+
+
 @router.post("/reseteaza-parola/cerere")
 @limiter.limit("3/minute")
-def cerere_resetare(request: Request, email: str, db: Session = Depends(get_db)):
+def cerere_resetare(request: Request, data: CerereResetareDate, db: Session = Depends(get_db)):
+    email = data.email
     user = db.query(models.User).filter(
         models.User.email == email.lower().strip(),
-        models.User.activ == True,
+        models.User.activ == True
     ).first()
     # Același răspuns indiferent dacă emailul există (anti-enumeration)
     if user:
@@ -208,8 +213,9 @@ class SchimbaParolaDate(BaseModel):
 
 
 @router.put("/me/schimba-parola")
-def schimba_parola(data: SchimbaParolaDate, db: Session = Depends(get_db), current_user=Depends(get_user_curent)):
-    if len(data.parola_noua) < 6:
+@limiter.limit("5/minute")
+def schimba_parola(request: Request, data: SchimbaParolaDate, db: Session = Depends(get_db), current_user=Depends(get_user_curent)):
+    if len(data.parola_noua) < 8:
         raise HTTPException(status_code=400, detail="Parola trebuie să aibă minim 6 caractere.")
     if not verifica_parola(data.parola_curenta, current_user.parola_hash):
         raise HTTPException(status_code=400, detail="Parola curentă este incorectă.")

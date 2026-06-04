@@ -1,16 +1,19 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 from typing import List
 from database import get_db
 import models, schemas
 from auth import get_user_curent
+from security import limiter
 
 router = APIRouter(prefix="/api/recenzii", tags=["Recenzii"])
 
 
 @router.post("", response_model=schemas.ReviewOut)
+@limiter.limit("5/minute")
 def scrie_recenzie(
+    request: Request,
     data: schemas.ReviewCreate,
     db: Session = Depends(get_db),
     current_user=Depends(get_user_curent)

@@ -1,19 +1,19 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ro">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Resetare Parolă - JobPart</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />`n  <meta name="robots" content="noindex, nofollow" />
+  <title>Resetare ParolÄƒ - JobPart</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-50 min-h-screen flex items-center justify-center py-10">
   <div class="bg-white rounded-2xl shadow-lg p-8 w-full max-w-md">
     <a href="/static/index.html" class="text-2xl font-bold text-blue-600 block text-center mb-8">Job<span class="text-gray-800">Part</span></a>
 
-    <!-- Formular cerere resetare (fără token) -->
+    <!-- Formular cerere resetare (fÄƒrÄƒ token) -->
     <div id="form-cerere">
-      <h1 class="text-2xl font-bold text-gray-800 mb-2 text-center">Resetare parolă</h1>
-      <p class="text-gray-500 text-center mb-6">Introdu emailul contului tău și îți trimitem un link de resetare.</p>
+      <h1 class="text-2xl font-bold text-gray-800 mb-2 text-center">Resetare parolÄƒ</h1>
+      <p class="text-gray-500 text-center mb-6">Introdu emailul contului tÄƒu È™i Ã®È›i trimitem un link de resetare.</p>
       <div id="mesaj-cerere" class="hidden mb-4 rounded-xl px-4 py-3 text-sm"></div>
       <form id="form-cerere-submit" class="space-y-4">
         <div>
@@ -27,18 +27,18 @@
         </button>
       </form>
       <p class="text-center text-gray-500 mt-6">
-        <a href="/static/login.html" class="text-blue-600 hover:underline">Înapoi la login</a>
+        <a href="/static/login.html" class="text-blue-600 hover:underline">ÃŽnapoi la login</a>
       </p>
     </div>
 
     <!-- Formular resetare cu token -->
     <div id="form-resetare" class="hidden">
-      <h1 class="text-2xl font-bold text-gray-800 mb-2 text-center">Parolă nouă</h1>
-      <p class="text-gray-500 text-center mb-6">Introdu noua ta parolă.</p>
+      <h1 class="text-2xl font-bold text-gray-800 mb-2 text-center">ParolÄƒ nouÄƒ</h1>
+      <p class="text-gray-500 text-center mb-6">Introdu noua ta parolÄƒ.</p>
       <div id="mesaj-resetare" class="hidden mb-4 rounded-xl px-4 py-3 text-sm"></div>
       <form id="form-resetare-submit" class="space-y-4">
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Parolă nouă</label>
+          <label class="block text-sm font-medium text-gray-700 mb-1">ParolÄƒ nouÄƒ</label>
           <div class="relative">
             <input type="password" id="parola-noua" required placeholder="Minim 8 caractere"
               class="w-full border border-gray-300 rounded-xl px-4 py-3 pr-12 focus:outline-none focus:ring-2 focus:ring-blue-500" />
@@ -48,9 +48,9 @@
           </div>
         </div>
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Confirmă parola</label>
+          <label class="block text-sm font-medium text-gray-700 mb-1">ConfirmÄƒ parola</label>
           <div class="relative">
-            <input type="password" id="parola-confirmare" required placeholder="Repetă parola"
+            <input type="password" id="parola-confirmare" required placeholder="RepetÄƒ parola"
               class="w-full border border-gray-300 rounded-xl px-4 py-3 pr-12 focus:outline-none focus:ring-2 focus:ring-blue-500" />
             <button type="button" onclick="toggleParola('parola-confirmare', this)" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
               <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
@@ -59,18 +59,18 @@
         </div>
         <button type="submit" id="btn-resetare"
           class="w-full bg-blue-600 text-white py-3 rounded-xl font-semibold hover:bg-blue-700 transition">
-          Salvează parola
+          SalveazÄƒ parola
         </button>
       </form>
     </div>
 
     <!-- Succes final -->
     <div id="succes-final" class="hidden text-center py-8">
-      <div class="text-6xl mb-4">✅</div>
-      <h1 class="text-2xl font-bold text-gray-800 mb-2">Parolă schimbată!</h1>
-      <p class="text-gray-500 mb-6">Te poți autentifica cu noua parolă.</p>
+      <div class="text-6xl mb-4">âœ…</div>
+      <h1 class="text-2xl font-bold text-gray-800 mb-2">ParolÄƒ schimbatÄƒ!</h1>
+      <p class="text-gray-500 mb-6">Te poÈ›i autentifica cu noua parolÄƒ.</p>
       <a href="/static/login.html" class="bg-blue-600 text-white px-8 py-3 rounded-xl font-semibold hover:bg-blue-700 inline-block">
-        Autentifică-te
+        AutentificÄƒ-te
       </a>
     </div>
   </div>
@@ -99,7 +99,7 @@
       btn.disabled = true;
       btn.textContent = "Se trimite...";
       try {
-        const r = await apiFetch(`/auth/reseteaza-parola/cerere?email=${encodeURIComponent(document.getElementById("email-cerere").value)}`, { method: "POST" });
+        const r = await apiFetch("/auth/reseteaza-parola/cerere", { method: "POST", body: JSON.stringify({ email: document.getElementById("email-cerere").value }) });
         mesaj.className = "bg-green-50 border border-green-200 text-green-700 rounded-xl px-4 py-3 text-sm mb-4";
         mesaj.textContent = r.mesaj;
         mesaj.classList.remove("hidden");
@@ -122,7 +122,7 @@
 
       if (parola.length < 8) {
         mesaj.className = "bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3 text-sm mb-4";
-        mesaj.textContent = "Parola trebuie să aibă cel puțin 8 caractere.";
+        mesaj.textContent = "Parola trebuie sÄƒ aibÄƒ cel puÈ›in 8 caractere.";
         mesaj.classList.remove("hidden");
         return;
       }
@@ -134,7 +134,7 @@
       }
 
       btn.disabled = true;
-      btn.textContent = "Se salvează...";
+      btn.textContent = "Se salveazÄƒ...";
       try {
         await apiFetch("/auth/reseteaza-parola/confirma", {
           method: "POST",
@@ -147,9 +147,10 @@
         mesaj.textContent = err.message;
         mesaj.classList.remove("hidden");
         btn.disabled = false;
-        btn.textContent = "Salvează parola";
+        btn.textContent = "SalveazÄƒ parola";
       }
     });
   </script>
 </body>
 </html>
+

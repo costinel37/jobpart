@@ -1,8 +1,8 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ro">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />`n  <meta name="robots" content="noindex, nofollow" />
   <title>Dashboard Candidat - JobPart</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
@@ -13,14 +13,14 @@
       <a href="/static/index.html" class="text-2xl font-bold text-blue-600">Job<span class="text-gray-800">Part</span></a>
       <div class="flex items-center gap-4">
         <a href="/static/jobs.html" class="text-gray-600 hover:text-blue-600">Joburi</a>
-        <a href="/static/favorite.html" class="text-gray-600 hover:text-blue-600">❤️ Salvate</a>
-        <a href="/static/mesaje.html" class="text-gray-600 hover:text-blue-600">✉️ Mesaje</a>
+        <a href="/static/favorite.html" class="text-gray-600 hover:text-blue-600">â¤ï¸ Salvate</a>
+        <a href="/static/mesaje.html" class="text-gray-600 hover:text-blue-600">âœ‰ï¸ Mesaje</a>
         <a href="/static/notificari.html" id="nav-notif-bell" class="relative inline-flex items-center text-gray-600 hover:text-blue-600">
-          <span class="text-xl">🔔</span>
+          <span class="text-xl">ðŸ””</span>
           <span class="notif-badge hidden absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold min-w-[16px] h-4 rounded-full flex items-center justify-center px-1 leading-none"></span>
         </a>
         <span id="nav-username" class="text-gray-700 font-medium"></span>
-        <button onclick="logout()" class="px-4 py-2 rounded-lg bg-red-500 text-white hover:bg-red-600 font-medium">Ieșire</button>
+        <button onclick="logout()" class="px-4 py-2 rounded-lg bg-red-500 text-white hover:bg-red-600 font-medium">IeÈ™ire</button>
       </div>
     </div>
   </nav>
@@ -33,7 +33,7 @@
     <div class="flex gap-2 mb-8 border-b border-gray-200 flex-wrap">
       <button onclick="switchTab('aplicari')" id="tab-aplicari"
         class="tab-btn px-5 py-3 font-semibold text-blue-600 border-b-2 border-blue-600">
-        Aplicările mele
+        AplicÄƒrile mele
       </button>
       <button onclick="switchTab('profil')" id="tab-profil"
         class="tab-btn px-5 py-3 font-semibold text-gray-500 hover:text-gray-700 border-b-2 border-transparent">
@@ -41,18 +41,18 @@
       </button>
       <a href="/api/export/cv-pdf" target="_blank"
         class="ml-auto flex items-center gap-2 px-5 py-3 bg-indigo-600 text-white rounded-t-lg font-semibold hover:bg-indigo-700 transition">
-        📄 Export CV PDF
+        ðŸ“„ Export CV PDF
       </a>
     </div>
 
     <!-- Tab Aplicari -->
     <div id="content-aplicari">
       <div class="flex justify-between items-center mb-5">
-        <h2 class="text-xl font-bold text-gray-700">Aplicările mele</h2>
-        <a href="/static/jobs.html" class="bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700 font-medium">+ Caută joburi</a>
+        <h2 class="text-xl font-bold text-gray-700">AplicÄƒrile mele</h2>
+        <a href="/static/jobs.html" class="bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700 font-medium">+ CautÄƒ joburi</a>
       </div>
       <div id="aplicari-list">
-        <div class="text-center py-10 text-gray-400">Se încarcă...</div>
+        <div class="text-center py-10 text-gray-400">Se Ã®ncarcÄƒ...</div>
       </div>
     </div>
 
@@ -71,27 +71,27 @@
             <input type="tel" id="p-telefon" class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500" />
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Oraș</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1">OraÈ™</label>
             <input type="text" id="p-oras" class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500" />
           </div>
           <div>
             <label class="block text-sm font-medium text-gray-700 mb-1">Despre mine</label>
-            <textarea id="p-despre" rows="4" placeholder="Prezintă-te pe scurt..."
+            <textarea id="p-despre" rows="4" placeholder="PrezintÄƒ-te pe scurt..."
               class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
           </div>
           <button type="submit" class="bg-blue-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-blue-700 transition">
-            Salvează modificările
+            SalveazÄƒ modificÄƒrile
           </button>
         </form>
 
         <div class="mt-8 pt-6 border-t border-red-100">
-          <h3 class="text-base font-semibold text-red-700 mb-2">Zonă periculoasă</h3>
+          <h3 class="text-base font-semibold text-red-700 mb-2">ZonÄƒ periculoasÄƒ</h3>
           <p class="text-sm text-gray-500 mb-4">
-            Ștergerea contului este ireversibilă. Datele personale vor fi anonimizate, iar CV-urile vor fi șterse permanent.
+            È˜tergerea contului este ireversibilÄƒ. Datele personale vor fi anonimizate, iar CV-urile vor fi È™terse permanent.
           </p>
           <button onclick="stergeContul()"
             class="bg-red-600 text-white px-6 py-2 rounded-xl font-semibold hover:bg-red-700 transition text-sm">
-            Șterge contul meu
+            È˜terge contul meu
           </button>
         </div>
       </div>
@@ -106,7 +106,7 @@
     }
 
     document.getElementById("nav-username").textContent = user?.nume || "";
-    document.getElementById("salut").textContent = `Bun venit, ${user?.nume}! Iată activitatea ta.`;
+    document.getElementById("salut").textContent = `Bun venit, ${user?.nume}! IatÄƒ activitatea ta.`;
 
     function switchTab(tab) {
       ["aplicari", "profil"].forEach(t => {
@@ -128,9 +128,9 @@
         if (aplicari.length === 0) {
           container.innerHTML = `
             <div class="text-center py-16 bg-white rounded-xl">
-              <div class="text-5xl mb-4">📋</div>
-              <p class="text-xl text-gray-500 mb-4">Nu ai aplicat la niciun job încă.</p>
-              <a href="/static/jobs.html" class="bg-blue-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-blue-700 inline-block">Caută joburi</a>
+              <div class="text-5xl mb-4">ðŸ“‹</div>
+              <p class="text-xl text-gray-500 mb-4">Nu ai aplicat la niciun job Ã®ncÄƒ.</p>
+              <a href="/static/jobs.html" class="bg-blue-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-blue-700 inline-block">CautÄƒ joburi</a>
             </div>`;
           return;
         }
@@ -140,25 +140,25 @@
             <div>
               <h3 class="font-bold text-gray-800 text-lg">${a.job?.titlu || 'Job'}</h3>
               <p class="text-blue-600 font-medium">${a.job?.companie || ''}</p>
-              <p class="text-gray-500 text-sm mt-1">📍 ${a.job?.oras || ''} · Aplicat la ${formatData(a.creat_la)}</p>
+              <p class="text-gray-500 text-sm mt-1">ðŸ“ ${a.job?.oras || ''} Â· Aplicat la ${formatData(a.creat_la)}</p>
               ${a.scrisoare ? `<p class="text-gray-500 text-sm mt-2 italic">"${escapeHtml(a.scrisoare.substring(0, 100))}${a.scrisoare.length > 100 ? '...' : ''}"</p>` : ''}
-              ${a.cv_nume_original ? `<p class="text-gray-500 text-sm mt-1">📎 <a href="${API_BASE}/upload/cv/${a.cv_path}" target="_blank" class="text-blue-600 hover:underline">${a.cv_nume_original}</a></p>` : ''}
+              ${a.cv_nume_original ? `<p class="text-gray-500 text-sm mt-1">ðŸ“Ž <a href="${API_BASE}/upload/cv/${a.cv_path}" target="_blank" class="text-blue-600 hover:underline">${a.cv_nume_original}</a></p>` : ''}
             </div>
             <div class="flex flex-col items-end gap-2">
               ${statusBadge(a.status)}
-              <a href="/static/job-detalii.html?id=${a.job_id}" class="text-blue-600 hover:underline text-sm">Vezi job →</a>
-              <a href="/static/profil.html?id=${a.job?.angajator_id}" class="text-purple-600 hover:underline text-sm">⭐ Recenzează angajatorul</a>
+              <a href="/static/job-detalii.html?id=${a.job_id}" class="text-blue-600 hover:underline text-sm">Vezi job â†’</a>
+              <a href="/static/profil.html?id=${a.job?.angajator_id}" class="text-purple-600 hover:underline text-sm">â­ RecenzeazÄƒ angajatorul</a>
               ${a.status === 'trimisa' ? `<button onclick="retrage(${a.id}, this)" class="text-red-500 hover:underline text-sm">Retrage aplicarea</button>` : ''}
             </div>
           </div>`).join("");
       } catch (e) {
         document.getElementById("aplicari-list").innerHTML =
-          '<div class="text-center py-10 text-red-400">Eroare la încărcarea aplicărilor.</div>';
+          '<div class="text-center py-10 text-red-400">Eroare la Ã®ncÄƒrcarea aplicÄƒrilor.</div>';
       }
     }
 
     async function retrage(id, btn) {
-      if (!confirm("Ești sigur că vrei să retragi această aplicare?")) return;
+      if (!confirm("EÈ™ti sigur cÄƒ vrei sÄƒ retragi aceastÄƒ aplicare?")) return;
       try {
         await apiFetch(`/aplicari/${id}`, { method: "DELETE" });
         incarcaAplicari();
@@ -202,15 +202,15 @@
     });
 
     async function stergeContul() {
-      const confirmare1 = confirm("Ești sigur că vrei să îți ștergi contul? Această acțiune este IREVERSIBILĂ.");
+      const confirmare1 = confirm("EÈ™ti sigur cÄƒ vrei sÄƒ Ã®È›i È™tergi contul? AceastÄƒ acÈ›iune este IREVERSIBILÄ‚.");
       if (!confirmare1) return;
-      const confirmare2 = confirm("Ultima confirmare: datele personale vor fi șterse definitiv și nu pot fi recuperate. Continui?");
+      const confirmare2 = confirm("Ultima confirmare: datele personale vor fi È™terse definitiv È™i nu pot fi recuperate. Continui?");
       if (!confirmare2) return;
       try {
         await apiFetch("/auth/me", { method: "DELETE" });
         logout();
       } catch (err) {
-        alert("Eroare la ștergerea contului: " + err.message);
+        alert("Eroare la È™tergerea contului: " + err.message);
       }
     }
 
@@ -220,3 +220,4 @@
   </script>
 </body>
 </html>
+

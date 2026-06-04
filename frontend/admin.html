@@ -1,8 +1,8 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ro">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />`n  <meta name="robots" content="noindex, nofollow" />
   <title>Admin Panel - JobPart</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
@@ -16,8 +16,8 @@
       </div>
       <div class="flex items-center gap-4">
         <span id="admin-name" class="text-gray-300"></span>
-        <button onclick="document.getElementById('modal-parola').classList.remove('hidden')" class="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg font-medium text-sm">🔑 Schimbă parola</button>
-        <button onclick="logout()" class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg font-medium">Ieșire</button>
+        <button onclick="document.getElementById('modal-parola').classList.remove('hidden')" class="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg font-medium text-sm">ðŸ”‘ SchimbÄƒ parola</button>
+        <button onclick="logout()" class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg font-medium">IeÈ™ire</button>
       </div>
     </div>
   </nav>
@@ -27,7 +27,7 @@
 
     <!-- Statistici -->
     <div id="statistici" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-10">
-      <div class="text-center py-8 text-gray-400 col-span-6">Se încarcă statisticile...</div>
+      <div class="text-center py-8 text-gray-400 col-span-6">Se Ã®ncarcÄƒ statisticile...</div>
     </div>
 
     <!-- Tab-uri -->
@@ -37,44 +37,44 @@
       <button onclick="switchTab('joburi')" id="tab-joburi"
         class="tab-btn px-5 py-3 font-semibold text-gray-500 hover:text-gray-700 border-b-2 border-transparent">Joburi</button>
       <button onclick="switchTab('promotii')" id="tab-promotii"
-        class="tab-btn px-5 py-3 font-semibold text-gray-500 hover:text-gray-700 border-b-2 border-transparent">⭐ Promovări</button>
+        class="tab-btn px-5 py-3 font-semibold text-gray-500 hover:text-gray-700 border-b-2 border-transparent">â­ PromovÄƒri</button>
       <button onclick="switchTab('newsletter')" id="tab-newsletter"
-        class="tab-btn px-5 py-3 font-semibold text-gray-500 hover:text-gray-700 border-b-2 border-transparent">📬 Newsletter</button>
+        class="tab-btn px-5 py-3 font-semibold text-gray-500 hover:text-gray-700 border-b-2 border-transparent">ðŸ“¬ Newsletter</button>
     </div>
 
     <!-- Tab: Utilizatori -->
     <div id="content-utilizatori">
-      <div id="utilizatori-list"><div class="text-center py-10 text-gray-400">Se încarcă...</div></div>
+      <div id="utilizatori-list"><div class="text-center py-10 text-gray-400">Se Ã®ncarcÄƒ...</div></div>
     </div>
 
     <!-- Tab: Joburi -->
     <div id="content-joburi" class="hidden">
-      <div id="toate-joburi-list"><div class="text-center py-10 text-gray-400">Se încarcă...</div></div>
+      <div id="toate-joburi-list"><div class="text-center py-10 text-gray-400">Se Ã®ncarcÄƒ...</div></div>
     </div>
 
-    <!-- Tab: Promovări -->
+    <!-- Tab: PromovÄƒri -->
     <div id="content-promotii" class="hidden">
       <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
         <div class="bg-white rounded-xl shadow-sm p-5">
-          <p class="text-sm text-gray-500">În așteptare</p>
-          <p id="stat-in-asteptare" class="text-2xl font-bold text-yellow-600">—</p>
+          <p class="text-sm text-gray-500">ÃŽn aÈ™teptare</p>
+          <p id="stat-in-asteptare" class="text-2xl font-bold text-yellow-600">â€”</p>
         </div>
         <div class="bg-white rounded-xl shadow-sm p-5">
           <p class="text-sm text-gray-500">Aprobate total</p>
-          <p id="stat-aprobate" class="text-2xl font-bold text-green-600">—</p>
+          <p id="stat-aprobate" class="text-2xl font-bold text-green-600">â€”</p>
         </div>
         <div class="bg-white rounded-xl shadow-sm p-5">
           <p class="text-sm text-gray-500">Venituri totale</p>
-          <p id="stat-venituri-total" class="text-2xl font-bold text-blue-600">— RON</p>
+          <p id="stat-venituri-total" class="text-2xl font-bold text-blue-600">â€” RON</p>
         </div>
         <div class="bg-white rounded-xl shadow-sm p-5">
           <p class="text-sm text-gray-500">Venituri luna asta</p>
-          <p id="stat-venituri-luna" class="text-2xl font-bold text-purple-600">— RON</p>
+          <p id="stat-venituri-luna" class="text-2xl font-bold text-purple-600">â€” RON</p>
         </div>
       </div>
       <div class="flex gap-3 mb-4 flex-wrap">
         <button onclick="filtreazaPromo('in_asteptare')" id="filtru-in_asteptare"
-          class="px-4 py-2 rounded-lg bg-yellow-500 text-white font-medium text-sm">În așteptare</button>
+          class="px-4 py-2 rounded-lg bg-yellow-500 text-white font-medium text-sm">ÃŽn aÈ™teptare</button>
         <button onclick="filtreazaPromo('aprobata')" id="filtru-aprobata"
           class="px-4 py-2 rounded-lg bg-gray-100 text-gray-600 font-medium text-sm hover:bg-gray-200">Aprobate</button>
         <button onclick="filtreazaPromo('respinsa')" id="filtru-respinsa"
@@ -89,14 +89,14 @@
               <th class="text-left px-4 py-3 text-gray-600 font-medium">Job</th>
               <th class="text-left px-4 py-3 text-gray-600 font-medium">Angajator</th>
               <th class="text-left px-4 py-3 text-gray-600 font-medium">Plan</th>
-              <th class="text-left px-4 py-3 text-gray-600 font-medium">Preț</th>
+              <th class="text-left px-4 py-3 text-gray-600 font-medium">PreÈ›</th>
               <th class="text-left px-4 py-3 text-gray-600 font-medium">Status</th>
               <th class="text-left px-4 py-3 text-gray-600 font-medium">Data</th>
-              <th class="text-left px-4 py-3 text-gray-600 font-medium">Acțiuni</th>
+              <th class="text-left px-4 py-3 text-gray-600 font-medium">AcÈ›iuni</th>
             </tr>
           </thead>
           <tbody id="tabel-promotii">
-            <tr><td colspan="7" class="text-center py-8 text-gray-400">Se încarcă...</td></tr>
+            <tr><td colspan="7" class="text-center py-8 text-gray-400">Se Ã®ncarcÄƒ...</td></tr>
           </tbody>
         </table>
       </div>
@@ -105,29 +105,29 @@
     <!-- Tab: Newsletter -->
     <div id="content-newsletter" class="hidden max-w-2xl mx-auto py-8">
       <h2 class="text-xl font-bold text-gray-800 mb-2">Trimite Newsletter</h2>
-      <p class="text-gray-500 text-sm mb-6">Trimite un email tuturor utilizatorilor activi din platformă.</p>
+      <p class="text-gray-500 text-sm mb-6">Trimite un email tuturor utilizatorilor activi din platformÄƒ.</p>
 
       <div id="nl-mesaj" class="hidden mb-4 rounded-xl px-4 py-3 text-sm"></div>
 
       <div class="bg-white rounded-2xl border border-gray-200 p-6 space-y-4">
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">Subiect email</label>
-          <input type="text" id="nl-subiect" value="Noutăți de la JobPart!"
+          <input type="text" id="nl-subiect" value="NoutÄƒÈ›i de la JobPart!"
             class="w-full border border-gray-300 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
         </div>
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Conținut HTML</label>
+          <label class="block text-sm font-medium text-gray-700 mb-1">ConÈ›inut HTML</label>
           <textarea id="nl-html" rows="10"
             class="w-full border border-gray-300 rounded-xl px-4 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="Lipește codul HTML al emailului..."></textarea>
+            placeholder="LipeÈ™te codul HTML al emailului..."></textarea>
         </div>
         <div class="flex items-center gap-3">
           <input type="checkbox" id="nl-doar-abonati" class="w-4 h-4 text-blue-600 border-gray-300 rounded" />
-          <label for="nl-doar-abonati" class="text-sm text-gray-600">Trimite doar utilizatorilor abonați la newsletter</label>
+          <label for="nl-doar-abonati" class="text-sm text-gray-600">Trimite doar utilizatorilor abonaÈ›i la newsletter</label>
         </div>
         <button onclick="trimiteNewsletter()"
           class="w-full bg-blue-600 text-white py-3 rounded-xl font-semibold hover:bg-blue-700 transition">
-          📬 Trimite Newsletter
+          ðŸ“¬ Trimite Newsletter
         </button>
       </div>
     </div>
@@ -155,12 +155,12 @@
       try {
         const s = await apiFetch("/admin/statistici");
         const statItems = [
-          { label: "Utilizatori totali", value: s.utilizatori, icon: "👥", color: "blue" },
-          { label: "Candidați", value: s.candidati, icon: "👤", color: "indigo" },
-          { label: "Angajatori", value: s.angajatori, icon: "🏢", color: "purple" },
-          { label: "Joburi active", value: s.joburi_active, icon: "💼", color: "green" },
-          { label: "Aplicări totale", value: s.total_aplicari, icon: "📋", color: "yellow" },
-          { label: "Aplicări acceptate", value: s.aplicari_acceptate, icon: "✅", color: "emerald" },
+          { label: "Utilizatori totali", value: s.utilizatori, icon: "ðŸ‘¥", color: "blue" },
+          { label: "CandidaÈ›i", value: s.candidati, icon: "ðŸ‘¤", color: "indigo" },
+          { label: "Angajatori", value: s.angajatori, icon: "ðŸ¢", color: "purple" },
+          { label: "Joburi active", value: s.joburi_active, icon: "ðŸ’¼", color: "green" },
+          { label: "AplicÄƒri totale", value: s.total_aplicari, icon: "ðŸ“‹", color: "yellow" },
+          { label: "AplicÄƒri acceptate", value: s.aplicari_acceptate, icon: "âœ…", color: "emerald" },
         ];
         document.getElementById("statistici").innerHTML = statItems.map(s => `
           <div class="bg-white rounded-xl shadow-sm p-5 text-center">
@@ -170,7 +170,7 @@
           </div>`).join("");
       } catch (e) {
         document.getElementById("statistici").innerHTML =
-          '<div class="col-span-6 text-red-400 text-center">Eroare la încărcarea statisticilor.</div>';
+          '<div class="col-span-6 text-red-400 text-center">Eroare la Ã®ncÄƒrcarea statisticilor.</div>';
       }
     }
 
@@ -184,10 +184,10 @@
       const btnCls = "px-3 py-1 rounded-lg border text-sm font-medium";
       return `<div class="flex items-center gap-2 mt-4 justify-end">
         <button onclick="${onSchimba}(${pagina - 1})" ${pagina === 1 ? 'disabled' : ''}
-          class="${btnCls} ${pagina === 1 ? 'border-gray-200 text-gray-300 cursor-not-allowed' : 'border-gray-300 text-gray-600 hover:bg-gray-50'}">← Anterior</button>
+          class="${btnCls} ${pagina === 1 ? 'border-gray-200 text-gray-300 cursor-not-allowed' : 'border-gray-300 text-gray-600 hover:bg-gray-50'}">â† Anterior</button>
         <span class="text-sm text-gray-500">Pagina ${pagina} din ${totalPagini} (${total} total)</span>
         <button onclick="${onSchimba}(${pagina + 1})" ${pagina >= totalPagini ? 'disabled' : ''}
-          class="${btnCls} ${pagina >= totalPagini ? 'border-gray-200 text-gray-300 cursor-not-allowed' : 'border-gray-300 text-gray-600 hover:bg-gray-50'}">Următor →</button>
+          class="${btnCls} ${pagina >= totalPagini ? 'border-gray-200 text-gray-300 cursor-not-allowed' : 'border-gray-300 text-gray-600 hover:bg-gray-50'}">UrmÄƒtor â†’</button>
       </div>`;
     }
 
@@ -214,8 +214,8 @@
                   <th class="text-left px-5 py-3">Email</th>
                   <th class="text-left px-5 py-3">Rol</th>
                   <th class="text-left px-5 py-3">Status</th>
-                  <th class="text-left px-5 py-3">Înregistrat</th>
-                  <th class="text-left px-5 py-3">Acțiuni</th>
+                  <th class="text-left px-5 py-3">ÃŽnregistrat</th>
+                  <th class="text-left px-5 py-3">AcÈ›iuni</th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-gray-100">
@@ -235,11 +235,11 @@
                       <div class="flex gap-2">
                         <button onclick="toggleActiv(${u.id})"
                           class="text-xs px-3 py-1 rounded-lg border ${u.activ ? 'border-red-300 text-red-600 hover:bg-red-50' : 'border-green-300 text-green-600 hover:bg-green-50'}">
-                          ${u.activ ? 'Dezactivează' : 'Activează'}
+                          ${u.activ ? 'DezactiveazÄƒ' : 'ActiveazÄƒ'}
                         </button>
                         <select onchange="schimbaRol(${u.id}, this.value)"
                           class="text-xs border border-gray-300 rounded-lg px-2 py-1 focus:outline-none">
-                          <option value="" disabled selected>Schimbă rol</option>
+                          <option value="" disabled selected>SchimbÄƒ rol</option>
                           <option value="candidat">Candidat</option>
                           <option value="angajator">Angajator</option>
                           <option value="admin">Admin</option>
@@ -271,10 +271,10 @@
                 <tr>
                   <th class="text-left px-5 py-3">Titlu</th>
                   <th class="text-left px-5 py-3">Companie</th>
-                  <th class="text-left px-5 py-3">Oraș</th>
+                  <th class="text-left px-5 py-3">OraÈ™</th>
                   <th class="text-left px-5 py-3">Status</th>
                   <th class="text-left px-5 py-3">Promovat</th>
-                  <th class="text-left px-5 py-3">Acțiuni</th>
+                  <th class="text-left px-5 py-3">AcÈ›iuni</th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-gray-100">
@@ -288,12 +288,12 @@
                     </td>
                     <td class="px-5 py-3">
                       ${j.promovat
-                        ? `<span class="text-xs bg-yellow-400 text-yellow-900 px-2 py-1 rounded-full font-bold">⭐ Da</span>
-                           <button onclick="anuleazaPromovare(${j.id})" class="ml-2 text-xs text-gray-400 hover:text-red-500">✕</button>`
-                        : `<button onclick="promoveazaJobAdmin(${j.id})" class="text-xs px-3 py-1 rounded-lg border border-yellow-400 text-yellow-700 hover:bg-yellow-50">⭐ Promovează</button>`}
+                        ? `<span class="text-xs bg-yellow-400 text-yellow-900 px-2 py-1 rounded-full font-bold">â­ Da</span>
+                           <button onclick="anuleazaPromovare(${j.id})" class="ml-2 text-xs text-gray-400 hover:text-red-500">âœ•</button>`
+                        : `<button onclick="promoveazaJobAdmin(${j.id})" class="text-xs px-3 py-1 rounded-lg border border-yellow-400 text-yellow-700 hover:bg-yellow-50">â­ PromoveazÄƒ</button>`}
                     </td>
                     <td class="px-5 py-3">
-                      ${j.activ ? `<button onclick="dezactiveazaJob(${j.id})" class="text-xs px-3 py-1 rounded-lg border border-red-300 text-red-600 hover:bg-red-50">Dezactivează</button>` : '<span class="text-gray-400 text-xs">Dezactivat</span>'}
+                      ${j.activ ? `<button onclick="dezactiveazaJob(${j.id})" class="text-xs px-3 py-1 rounded-lg border border-red-300 text-red-600 hover:bg-red-50">DezactiveazÄƒ</button>` : '<span class="text-gray-400 text-xs">Dezactivat</span>'}
                     </td>
                   </tr>`).join("")}
               </tbody>
@@ -306,7 +306,7 @@
     }
 
     async function promoveazaJobAdmin(jobId) {
-      const zile = prompt("Câte zile să fie promovat? (implicit 7)", "7");
+      const zile = prompt("CÃ¢te zile sÄƒ fie promovat? (implicit 7)", "7");
       if (!zile) return;
       try {
         const r = await apiFetch(`/jobs/${jobId}/promoveaza?zile=${parseInt(zile)}`, { method: "POST" });
@@ -366,25 +366,25 @@
 
     async function incarcaCereriPromo(status) {
       const tbody = document.getElementById("tabel-promotii");
-      tbody.innerHTML = '<tr><td colspan="7" class="text-center py-8 text-gray-400">Se încarcă...</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="7" class="text-center py-8 text-gray-400">Se Ã®ncarcÄƒ...</td></tr>';
       try {
         const statusParam = (status === 'toate') ? '' : `&status=${status}`;
         const r = await apiFetch(`/promotii/cereri?per_pagina=100${statusParam}`);
         if (!r.cereri || r.cereri.length === 0) {
-          tbody.innerHTML = '<tr><td colspan="7" class="text-center py-8 text-gray-400">Nicio cerere găsită.</td></tr>';
+          tbody.innerHTML = '<tr><td colspan="7" class="text-center py-8 text-gray-400">Nicio cerere gÄƒsitÄƒ.</td></tr>';
           return;
         }
         tbody.innerHTML = r.cereri.map(c => {
           const statusBadge = {
-            'in_asteptare': '<span class="bg-yellow-100 text-yellow-700 px-2 py-1 rounded-full text-xs font-medium">În așteptare</span>',
-            'aprobata': '<span class="bg-green-100 text-green-700 px-2 py-1 rounded-full text-xs font-medium">Aprobată</span>',
-            'respinsa': '<span class="bg-red-100 text-red-700 px-2 py-1 rounded-full text-xs font-medium">Respinsă</span>',
+            'in_asteptare': '<span class="bg-yellow-100 text-yellow-700 px-2 py-1 rounded-full text-xs font-medium">ÃŽn aÈ™teptare</span>',
+            'aprobata': '<span class="bg-green-100 text-green-700 px-2 py-1 rounded-full text-xs font-medium">AprobatÄƒ</span>',
+            'respinsa': '<span class="bg-red-100 text-red-700 px-2 py-1 rounded-full text-xs font-medium">RespinsÄƒ</span>',
           }[c.status] || c.status;
           const planLabel = {'7zile': 'Starter 7z', '14zile': 'Standard 14z', '30zile': 'Premium 30z'}[c.plan] || c.plan;
           const actiuni = c.status === 'in_asteptare'
-            ? `<button onclick="aprobaPromo(${c.id})" class="bg-green-600 text-white px-3 py-1 rounded-lg text-xs hover:bg-green-700 font-medium mr-1">✓ Aprobă</button>
-               <button onclick="respingePromo(${c.id})" class="bg-red-500 text-white px-3 py-1 rounded-lg text-xs hover:bg-red-600 font-medium">✗ Respinge</button>`
-            : '<span class="text-gray-400 text-xs">Procesată</span>';
+            ? `<button onclick="aprobaPromo(${c.id})" class="bg-green-600 text-white px-3 py-1 rounded-lg text-xs hover:bg-green-700 font-medium mr-1">âœ“ AprobÄƒ</button>
+               <button onclick="respingePromo(${c.id})" class="bg-red-500 text-white px-3 py-1 rounded-lg text-xs hover:bg-red-600 font-medium">âœ— Respinge</button>`
+            : '<span class="text-gray-400 text-xs">ProcesatÄƒ</span>';
           return `<tr class="border-b hover:bg-gray-50">
             <td class="px-4 py-3 font-medium text-gray-800 max-w-[160px] truncate">${escapeHtml(c.job_titlu || 'Job #' + c.job_id)}</td>
             <td class="px-4 py-3 text-gray-600">${escapeHtml(c.angajator_nume || '#' + c.angajator_id)}</td>
@@ -412,7 +412,7 @@
     }
 
     async function aprobaPromo(id) {
-      if (!confirm("Aprobi această cerere? Jobul va fi marcat ca promovat.")) return;
+      if (!confirm("Aprobi aceastÄƒ cerere? Jobul va fi marcat ca promovat.")) return;
       try {
         await apiFetch(`/promotii/cereri/${id}/aproba`, { method: "PUT", body: JSON.stringify({}) });
         incarcaCereriPromo(filtruPromoActiv);
@@ -421,7 +421,7 @@
     }
 
     async function respingePromo(id) {
-      const motiv = prompt("Motiv respingere (opțional):");
+      const motiv = prompt("Motiv respingere (opÈ›ional):");
       if (motiv === null) return;
       try {
         await apiFetch(`/promotii/cereri/${id}/respinge`, { method: "PUT", body: JSON.stringify({ mesaj: motiv || null }) });
@@ -439,15 +439,15 @@
   <div id="modal-parola" class="hidden fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
     <div class="bg-white rounded-2xl shadow-xl w-full max-w-md">
       <div class="flex justify-between items-center p-6 border-b">
-        <h2 class="text-lg font-bold text-gray-800">🔑 Schimbă parola</h2>
+        <h2 class="text-lg font-bold text-gray-800">ðŸ”‘ SchimbÄƒ parola</h2>
         <button onclick="document.getElementById('modal-parola').classList.add('hidden')" class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
       </div>
       <div class="p-6 space-y-4">
         <div id="parola-mesaj" class="hidden text-sm rounded-xl px-4 py-3"></div>
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Parola curentă</label>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Parola curentÄƒ</label>
           <div class="relative">
-            <input type="password" id="parola-curenta" placeholder="••••••••"
+            <input type="password" id="parola-curenta" placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢"
               class="w-full border border-gray-300 rounded-xl px-4 py-2.5 pr-12 focus:outline-none focus:ring-2 focus:ring-blue-500" />
             <button type="button" onclick="toggleParola('parola-curenta', this)" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
               <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
@@ -455,7 +455,7 @@
           </div>
         </div>
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Parola nouă</label>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Parola nouÄƒ</label>
           <div class="relative">
             <input type="password" id="parola-noua" placeholder="Minim 6 caractere"
               class="w-full border border-gray-300 rounded-xl px-4 py-2.5 pr-12 focus:outline-none focus:ring-2 focus:ring-blue-500" />
@@ -465,9 +465,9 @@
           </div>
         </div>
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Confirmă parola nouă</label>
+          <label class="block text-sm font-medium text-gray-700 mb-1">ConfirmÄƒ parola nouÄƒ</label>
           <div class="relative">
-            <input type="password" id="parola-confirmare" placeholder="Repetă parola"
+            <input type="password" id="parola-confirmare" placeholder="RepetÄƒ parola"
               class="w-full border border-gray-300 rounded-xl px-4 py-2.5 pr-12 focus:outline-none focus:ring-2 focus:ring-blue-500" />
             <button type="button" onclick="toggleParola('parola-confirmare', this)" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600">
               <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.477 0 8.268 2.943 9.542 7-1.274 4.057-5.065 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
@@ -476,7 +476,7 @@
         </div>
         <button onclick="schimbaParolaAdmin()" id="btn-schimba-parola"
           class="w-full bg-blue-600 text-white py-3 rounded-xl font-semibold hover:bg-blue-700 transition">
-          Salvează parola
+          SalveazÄƒ parola
         </button>
       </div>
     </div>
@@ -503,7 +503,7 @@
         mesaj.classList.remove("hidden");
         return;
       }
-      btn.disabled = true; btn.textContent = "Se salvează...";
+      btn.disabled = true; btn.textContent = "Se salveazÄƒ...";
       try {
         const r = await apiFetch("/auth/me/schimba-parola", {
           method: "PUT",
@@ -518,7 +518,7 @@
         mesaj.className = "text-sm rounded-xl px-4 py-3 bg-red-50 border border-red-200 text-red-700";
         mesaj.textContent = e.message;
         mesaj.classList.remove("hidden");
-        btn.disabled = false; btn.textContent = "Salvează parola";
+        btn.disabled = false; btn.textContent = "SalveazÄƒ parola";
       }
     }
 
@@ -531,7 +531,7 @@
 
       if (!subiect || !html) {
         mesaj.className = "bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3 text-sm";
-        mesaj.textContent = "Completează subiectul și conținutul HTML.";
+        mesaj.textContent = "CompleteazÄƒ subiectul È™i conÈ›inutul HTML.";
         mesaj.classList.remove("hidden");
         return;
       }
@@ -544,14 +544,15 @@
         mesaj.className = "bg-green-50 border border-green-200 text-green-700 rounded-xl px-4 py-3 text-sm";
         mesaj.textContent = r.mesaj;
         mesaj.classList.remove("hidden");
-        btn.textContent = "✅ Trimis!";
+        btn.textContent = "âœ… Trimis!";
       } catch (e) {
         mesaj.className = "bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3 text-sm";
         mesaj.textContent = e.message;
         mesaj.classList.remove("hidden");
-        btn.disabled = false; btn.textContent = "📬 Trimite Newsletter";
+        btn.disabled = false; btn.textContent = "ðŸ“¬ Trimite Newsletter";
       }
     }
   </script>
 </body>
 </html>
+

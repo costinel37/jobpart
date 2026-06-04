@@ -1,8 +1,8 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ro">
 <head>
-  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Notificări - JobPart</title>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />`n  <meta name="robots" content="noindex, nofollow" />
+  <title>NotificÄƒri - JobPart</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-50 font-sans">
@@ -11,6 +11,9 @@
     <div class="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
       <a href="/static/index.html" class="text-2xl font-bold text-blue-600">Job<span class="text-gray-800">Part</span></a>
       <div class="flex items-center gap-4">
+        <a id="nav-dashboard" href="#" class="text-gray-600 hover:text-blue-600 font-medium">Dashboard</a>
+        <a href="/static/jobs.html" class="text-gray-600 hover:text-blue-600 font-medium">Joburi</a>
+        <a href="/static/mesaje.html" class="text-gray-600 hover:text-blue-600 font-medium">✉️ Mesaje</a>
         <span class="text-gray-700 font-medium" id="nav-username"></span>
         <button onclick="logout()" class="px-4 py-2 rounded-lg bg-red-500 text-white hover:bg-red-600 font-medium">Ieșire</button>
       </div>
@@ -19,15 +22,15 @@
 
   <div class="max-w-4xl mx-auto px-4 py-8">
     <div class="flex items-center justify-between mb-6">
-      <h1 class="text-3xl font-bold text-gray-800">🔔 Notificări</h1>
+      <h1 class="text-3xl font-bold text-gray-800">ðŸ”” NotificÄƒri</h1>
       <button onclick="citesteToate()" id="btn-citeste-toate"
         class="hidden bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700 font-medium text-sm">
-        Marchează toate ca citite
+        MarcheazÄƒ toate ca citite
       </button>
     </div>
 
     <div id="notif-list">
-      <div class="text-center py-10 text-gray-400">Se încarcă...</div>
+      <div class="text-center py-10 text-gray-400">Se Ã®ncarcÄƒ...</div>
     </div>
   </div>
 
@@ -38,13 +41,13 @@
     document.getElementById("nav-username").textContent = user?.nume || "";
 
     const ICOANE = {
-      aplicare_noua: "📥",
-      status_schimbat: "📋",
-      mesaj_nou: "✉️",
-      promovare_expira: "⚠️",
-      promovare_expirata: "📋",
-      job_expira: "⏰",
-      job_expirat: "📋",
+      aplicare_noua: "ðŸ“¥",
+      status_schimbat: "ðŸ“‹",
+      mesaj_nou: "âœ‰ï¸",
+      promovare_expira: "âš ï¸",
+      promovare_expirata: "ðŸ“‹",
+      job_expira: "â°",
+      job_expirat: "ðŸ“‹",
     };
 
     async function incarcaNotificari() {
@@ -55,8 +58,8 @@
         if (notifs.length === 0) {
           container.innerHTML = `
             <div class="text-center py-20 bg-white rounded-xl shadow-sm">
-              <div class="text-6xl mb-4">🔕</div>
-              <p class="text-xl text-gray-500">Nu ai notificări.</p>
+              <div class="text-6xl mb-4">ðŸ”•</div>
+              <p class="text-xl text-gray-500">Nu ai notificÄƒri.</p>
             </div>`;
           return;
         }
@@ -69,18 +72,18 @@
         container.innerHTML = notifs.map(n => `
           <div class="bg-white rounded-xl shadow-sm p-4 mb-3 flex items-start gap-4 ${!n.citit ? 'border-l-4 border-blue-500' : ''}"
             id="notif-${n.id}">
-            <span class="text-2xl mt-0.5">${ICOANE[escapeHtml(n.tip)] || '🔔'}</span>
+            <span class="text-2xl mt-0.5">${ICOANE[escapeHtml(n.tip)] || 'ðŸ””'}</span>
             <div class="flex-1">
               <p class="text-gray-800 font-medium ${!n.citit ? 'text-blue-800' : ''}">${escapeHtml(n.mesaj)}</p>
               <p class="text-xs text-gray-400 mt-1">${formatData(n.creat_la)}</p>
-              ${n.link ? `<a href="${escapeHtml(n.link)}" class="text-blue-600 hover:underline text-sm mt-1 inline-block">Mergi →</a>` : ''}
+              ${n.link ? `<a href="${escapeHtml(n.link)}" class="text-blue-600 hover:underline text-sm mt-1 inline-block">Mergi â†’</a>` : ''}
             </div>
             <button onclick="stergeNotif(${n.id})"
-              class="text-gray-300 hover:text-red-400 text-xl ml-2 transition" title="Șterge">×</button>
+              class="text-gray-300 hover:text-red-400 text-xl ml-2 transition" title="È˜terge">Ã—</button>
           </div>`).join("");
       } catch (e) {
         document.getElementById("notif-list").innerHTML =
-          '<div class="text-center py-10 text-red-400">Eroare la încărcarea notificărilor.</div>';
+          '<div class="text-center py-10 text-red-400">Eroare la Ã®ncÄƒrcarea notificÄƒrilor.</div>';
       }
     }
 
@@ -112,3 +115,4 @@
   </script>
 </body>
 </html>
+

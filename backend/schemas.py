@@ -161,6 +161,7 @@ class ApplicationOut(BaseModel):
 
 class ApplicationStatusUpdate(BaseModel):
     status: str
+    motiv_respingere: Optional[str] = None
 
 
 # --- Reviews ---

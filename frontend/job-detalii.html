@@ -138,6 +138,36 @@
         // Endpointul GET /api/jobs/{id} este PUBLIC — funcționează fără token
         const job = await apiFetch(`/jobs/${jobId}`);
 
+        // Title + meta dinamice pentru SEO
+        document.title = `${job.titlu} — ${job.companie} — ${job.oras} | JobPart`;
+        document.querySelector('meta[name="description"]')?.setAttribute("content",
+          (job.descriere || "").substring(0, 160));
+        document.querySelector('meta[property="og:title"]')?.setAttribute("content",
+          `${job.titlu} — ${job.companie}`);
+
+        // JSON-LD JobPosting pentru Google Jobs
+        const schema = {
+          "@context": "https://schema.org/",
+          "@type": "JobPosting",
+          "title": job.titlu,
+          "description": job.descriere || "",
+          "hiringOrganization": { "@type": "Organization", "name": job.companie },
+          "jobLocation": { "@type": "Place", "address": { "@type": "PostalAddress", "addressLocality": job.oras, "addressCountry": "RO" } },
+          "employmentType": "PART_TIME",
+          "datePosted": job.creat_la ? job.creat_la.split("T")[0] : undefined,
+          "validThrough": job.expira_la ? job.expira_la.split("T")[0] : undefined,
+          "url": `https://jobpart.ro/static/job-detalii.html?id=${job.id}`,
+        };
+        if (job.salariu_min) {
+          schema.baseSalary = { "@type": "MonetaryAmount", "currency": "RON",
+            "value": { "@type": "QuantitativeValue", "minValue": job.salariu_min,
+              "maxValue": job.salariu_max || job.salariu_min, "unitText": "MONTH" } };
+        }
+        const ldScript = document.createElement("script");
+        ldScript.type = "application/ld+json";
+        ldScript.textContent = JSON.stringify(schema);
+        document.head.appendChild(ldScript);
+
         const salariu = job.salariu_min
           ? `${job.salariu_min.toLocaleString()}${job.salariu_max ? ' - ' + job.salariu_max.toLocaleString() : '+'} RON/lună`
           : "Negociabil";

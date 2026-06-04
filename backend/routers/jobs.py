@@ -205,7 +205,7 @@ def actualizeaza_job(
         raise HTTPException(status_code=403, detail="Nu ai permisiunea să editezi acest job.")
 
     oras_schimbat = job.oras != job_data.oras
-    for field, value in job_data.model_dump().items():
+    for field, value in job_data.model_dump(exclude_unset=True).items():
         setattr(job, field, value)
     db.commit()
     db.refresh(job)

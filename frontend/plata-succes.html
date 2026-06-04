@@ -1,43 +1,43 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="ro">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Plată - JobPart</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />`n  <meta name="robots" content="noindex, nofollow" />
+  <title>PlatÄƒ - JobPart</title>
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-50 font-sans min-h-screen flex flex-col items-center justify-center px-4">
 
   <div id="card-succes" class="hidden bg-white rounded-2xl shadow-lg p-10 max-w-md w-full text-center">
-    <div class="text-6xl mb-4">✅</div>
-    <h1 class="text-2xl font-bold text-gray-800 mb-3">Plată reușită!</h1>
-    <p class="text-gray-600 mb-2">Plata a fost procesată cu succes.</p>
+    <div class="text-6xl mb-4">âœ…</div>
+    <h1 class="text-2xl font-bold text-gray-800 mb-3">PlatÄƒ reuÈ™itÄƒ!</h1>
+    <p class="text-gray-600 mb-2">Plata a fost procesatÄƒ cu succes.</p>
     <p class="text-gray-500 text-sm mb-8">
-      Jobul tău va apărea promovat în câteva secunde, după confirmarea automată a plății.
+      Jobul tÄƒu va apÄƒrea promovat Ã®n cÃ¢teva secunde, dupÄƒ confirmarea automatÄƒ a plÄƒÈ›ii.
     </p>
     <a href="/static/dashboard-angajator.html"
        class="inline-block bg-blue-600 text-white font-bold px-8 py-3 rounded-xl hover:bg-blue-700 transition">
-      Înapoi la dashboard
+      ÃŽnapoi la dashboard
     </a>
   </div>
 
   <div id="card-esec" class="hidden bg-white rounded-2xl shadow-lg p-10 max-w-md w-full text-center">
-    <div class="text-6xl mb-4">❌</div>
-    <h1 class="text-2xl font-bold text-gray-800 mb-3">Plata a eșuat</h1>
-    <p class="text-gray-600 mb-2">Tranzacția nu a putut fi procesată.</p>
+    <div class="text-6xl mb-4">âŒ</div>
+    <h1 class="text-2xl font-bold text-gray-800 mb-3">Plata a eÈ™uat</h1>
+    <p class="text-gray-600 mb-2">TranzacÈ›ia nu a putut fi procesatÄƒ.</p>
     <p class="text-gray-500 text-sm mb-2" id="eroare-cod"></p>
     <p class="text-gray-500 text-sm mb-8">
-      Nicio sumă nu a fost reținută. Poți încerca din nou din dashboard.
+      Nicio sumÄƒ nu a fost reÈ›inutÄƒ. PoÈ›i Ã®ncerca din nou din dashboard.
     </p>
     <a href="/static/dashboard-angajator.html"
        class="inline-block bg-blue-600 text-white font-bold px-8 py-3 rounded-xl hover:bg-blue-700 transition">
-      Încearcă din nou
+      ÃŽncearcÄƒ din nou
     </a>
   </div>
 
   <div id="card-loading" class="bg-white rounded-2xl shadow-lg p-10 max-w-md w-full text-center">
-    <div class="text-5xl mb-4 animate-pulse">⏳</div>
-    <h1 class="text-xl font-bold text-gray-700">Se verifică plata...</h1>
+    <div class="text-5xl mb-4 animate-pulse">â³</div>
+    <h1 class="text-xl font-bold text-gray-700">Se verificÄƒ plata...</h1>
   </div>
 
   <script>
@@ -53,9 +53,10 @@
       document.getElementById("eroare-cod").textContent = `Cod eroare: ${errorCode}`;
       document.getElementById("card-esec").classList.remove("hidden");
     } else {
-      // Fără parametri — Netopia nu a adăugat query string, presupunem succes
+      // FÄƒrÄƒ parametri â€” Netopia nu a adÄƒugat query string, presupunem succes
       document.getElementById("card-succes").classList.remove("hidden");
     }
   </script>
 </body>
 </html>
+
