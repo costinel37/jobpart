@@ -124,7 +124,9 @@ def startup():
         if not admin:
             admin_pass = os.getenv("ADMIN_PASSWORD")
             if not admin_pass:
-                raise RuntimeError("ADMIN_PASSWORD nu este setat în .env — refuz să creez contul admin cu parolă default!")
+                import secrets
+                admin_pass = secrets.token_urlsafe(16)
+                logging.warning(f"[STARTUP] ADMIN_PASSWORD negăsit — parolă generată automat: {admin_pass} — schimb-o imediat!")
             db.add(models.User(
                 nume="Administrator",
                 email="admin@jobpart.ro",
