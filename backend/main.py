@@ -91,6 +91,8 @@ def startup():
             ("data_nasterii", "DATE"),
             ("parola_schimbata_la", "DATETIME"),
             ("email_confirmat", "BOOLEAN DEFAULT FALSE"),
+            ("cv_profil_path", "VARCHAR(500)"),
+            ("cv_profil_nume", "VARCHAR(255)"),
         ],
         "jobs": [
             ("avertisment_expirare", "BOOLEAN DEFAULT FALSE"),
