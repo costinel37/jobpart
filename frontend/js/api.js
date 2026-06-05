@@ -8,7 +8,8 @@ function getToken() {
 
 function getUser() {
   const u = localStorage.getItem("user");
-  return u ? JSON.parse(u) : null;
+  if (!u) return null;
+  try { return JSON.parse(u); } catch { localStorage.removeItem("user"); return null; }
 }
 
 function saveSession(data) {

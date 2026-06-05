@@ -1,655 +1,642 @@
-<!DOCTYPE html>
-<html lang="ro">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="robots" content="noindex, nofollow" />
-  <title>Dashboard Angajator - JobPart</title>
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%237c3aed'/><text x='50%' y='50%' font-size='20' text-anchor='middle' dominant-baseline='central' fill='white' font-family='Arial'>J</text></svg>" />
-  <meta name="theme-color" content="#7c3aed" />
-  <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-gray-50 font-sans">
-
-  <nav class="bg-white shadow-sm">
-    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
-      <a href="/static/index.html" class="text-2xl font-bold text-blue-600">Job<span class="text-gray-800">Part</span></a>
-      <div class="flex items-center gap-4">
-        <a href="/static/mesaje.html" class="text-gray-600 hover:text-blue-600">âœ‰️ Mesaje</a>
-        <a href="/static/notificari.html" id="nav-notif-bell" class="relative inline-flex items-center text-gray-600 hover:text-blue-600">
-          <span class="text-xl">ðŸ””</span>
-          <span class="notif-badge hidden absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold min-w-[16px] h-4 rounded-full flex items-center justify-center px-1 leading-none"></span>
-        </a>
-        <span id="nav-username" class="text-gray-700 font-medium"></span>
-        <button onclick="logout()" class="px-4 py-2 rounded-lg bg-red-500 text-white hover:bg-red-600 font-medium">IeȄ�ire</button>
-      </div>
-    </div>
-  </nav>
-
-  <div class="max-w-6xl mx-auto px-4 py-8">
-    <h1 class="text-3xl font-bold text-gray-800 mb-8">Dashboard Angajator</h1>
-
-    <!-- Tab-uri -->
-    <div class="flex gap-2 mb-8 border-b border-gray-200">
-      <button onclick="switchTab('joburi')" id="tab-joburi"
-        class="tab-btn px-5 py-3 font-semibold text-blue-600 border-b-2 border-blue-600">Joburile mele</button>
-      <button onclick="switchTab('adauga')" id="tab-adauga"
-        class="tab-btn px-5 py-3 font-semibold text-gray-500 hover:text-gray-700 border-b-2 border-transparent">+ PosteazÄƒ job</button>
-      <button onclick="switchTab('aplicari')" id="tab-aplicari"
-        class="tab-btn px-5 py-3 font-semibold text-gray-500 hover:text-gray-700 border-b-2 border-transparent">AplicÄƒri primite</button>
-      <button onclick="switchTab('setari')" id="tab-setari"
-        class="tab-btn px-5 py-3 font-semibold text-gray-500 hover:text-gray-700 border-b-2 border-transparent">âš™️ SetÄƒri cont</button>
-    </div>
-
-    <!-- Tab: Joburile mele -->
-    <div id="content-joburi">
-      <div id="joburi-list"><div class="text-center py-10 text-gray-400">Se încarcÄƒ...</div></div>
-    </div>
-
-    <!-- Tab: AdaugÄƒ job -->
-    <div id="content-adauga" class="hidden">
-      <div class="bg-white rounded-xl shadow-sm p-6 max-w-2xl">
-        <h2 class="text-xl font-bold text-gray-800 mb-6" id="form-titlu-h">PosteazÄƒ un job nou</h2>
-        <div id="job-mesaj" class="hidden mb-4"></div>
-        <form id="job-form" class="space-y-4">
-          <input type="hidden" id="job-edit-id" value="" />
-          <div class="grid md:grid-cols-2 gap-4">
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Titlul jobului *</label>
-              <input type="text" id="j-titlu" required placeholder="ex: Barista part-time"
-                class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500" />
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Compania *</label>
-              <input type="text" id="j-companie" required placeholder="Numele companiei"
-                class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500" />
-            </div>
-          </div>
-          <div class="grid md:grid-cols-2 gap-4">
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">OraȄ� *</label>
-              <input type="text" id="j-oras" required placeholder="BucureȄ�ti"
-                class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500" />
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Categorie</label>
-              <select id="j-categorie"
-                class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                <option value="">SelecteazÄƒ...</option>
-                <option>IT</option><option>Retail</option><option>Educatie</option>
-                <option>Livrari</option><option>HoReCa</option><option>Administrativ</option>
-                <option>Marketing</option><option>Constructii</option>
-                <option>Transport</option><option>Service Auto</option><option>Altele</option>
-              </select>
-            </div>
-          </div>
-          <div class="grid md:grid-cols-2 gap-4">
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Salariu minim (RON)</label>
-              <input type="number" id="j-salariu-min" placeholder="ex: 1500"
-                class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500" />
-            </div>
-            <div>
-              <label class="block text-sm font-medium text-gray-700 mb-1">Salariu maxim (RON)</label>
-              <input type="number" id="j-salariu-max" placeholder="ex: 2500"
-                class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500" />
-            </div>
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Descriere job *</label>
-            <textarea id="j-descriere" rows="4" required placeholder="Descrie rolul, responsabilitÄƒȀ�ile, programul..."
-              class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">CerinȀ�e</label>
-            <textarea id="j-cerinte" rows="3" placeholder="ExperienȀ�Äƒ, studii, competenȀ�e necesare..."
-              class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Beneficii</label>
-            <textarea id="j-beneficii" rows="3" placeholder="Tichete de masÄƒ, bonusuri, program flexibil..."
-              class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
-          </div>
-          <div class="flex gap-3">
-            <button type="button" id="btn-salveaza-job" onclick="publicaJob()"
-              class="bg-blue-600 text-white px-8 py-3 rounded-xl font-semibold hover:bg-blue-700 transition">
-              PublicÄƒ jobul
-            </button>
-            <button type="button" onclick="resetFormJob()"
-              class="border border-gray-300 text-gray-600 px-6 py-3 rounded-xl font-medium hover:bg-gray-50 transition">
-              AnuleazÄƒ
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-
-    <!-- Tab: AplicÄƒri primite -->
-    <div id="content-aplicari" class="hidden">
-      <p class="text-gray-500 mb-4">SelecteazÄƒ un job pentru a vedea aplicÄƒrile primite.</p>
-      <div id="aplicari-angajator-list">
-        <div class="text-center py-10 text-gray-400">Se încarcÄƒ joburile...</div>
-      </div>
-      <div id="aplicari-detalii" class="hidden mt-6">
-        <h3 class="text-xl font-bold text-gray-800 mb-4" id="job-selectat-titlu"></h3>
-        <div id="aplicari-pentru-job"></div>
-      </div>
-    </div>
-
-    <!-- Tab: SetÄƒri cont -->
-    <div id="content-setari" class="hidden max-w-lg">
-      <div class="bg-white rounded-xl shadow-sm p-6 mb-4">
-        <h2 class="text-xl font-bold text-gray-800 mb-1">SetÄƒri cont</h2>
-        <p class="text-gray-500 text-sm mb-6">GestioneazÄƒ contul tÄƒu de angajator</p>
-        <a href="/static/profil.html" class="flex items-center gap-3 p-4 rounded-xl border border-gray-200 hover:border-blue-400 hover:bg-blue-50 transition mb-3">
-          <span class="text-2xl">ðŸ‘¤</span>
-          <div><div class="font-semibold text-gray-800">Profil public</div><div class="text-sm text-gray-500">EditeazÄƒ profilul companiei tale</div></div>
-          <span class="ml-auto text-gray-400">â†’</span>
-        </a>
-        <a href="/static/mesaje.html" class="flex items-center gap-3 p-4 rounded-xl border border-gray-200 hover:border-blue-400 hover:bg-blue-50 transition mb-3">
-          <span class="text-2xl">âœ‰️</span>
-          <div><div class="font-semibold text-gray-800">Mesaje</div><div class="text-sm text-gray-500">ConversaȀ�ii cu candidaȀ�ii</div></div>
-          <span class="ml-auto text-gray-400">â†’</span>
-        </a>
-      </div>
-      <div class="bg-red-50 border border-red-200 rounded-xl p-6">
-        <h3 class="font-bold text-red-700 mb-1">ZonÄƒ periculoasÄƒ</h3>
-        <p class="text-sm text-red-600 mb-4">È˜tergerea contului este ireversibilÄƒ. Toate joburile Ȅ�i datele tale vor fi Ȅ�terse definitiv.</p>
-        <button onclick="stergeContul()" class="px-5 py-2.5 rounded-xl border-2 border-red-400 text-red-600 hover:bg-red-100 font-semibold transition">
-          ðŸ—‘️ È˜terge contul meu
-        </button>
-      </div>
-    </div>
-
-  </div>
-
-  <!-- Modal promovare -->
-  <div id="modal-promovare" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full">
-      <h2 class="text-xl font-bold text-gray-800 mb-2">⭐ PromoveazÄƒ jobul</h2>
-      <p class="text-gray-500 mb-1">Job: <strong id="modal-job-titlu"></strong></p>
-      <input type="hidden" id="modal-job-id" />
-      <p class="text-gray-600 text-sm mb-5 mt-3">
-        Jobul promovat apare <strong>primul în lista de cÄƒutare</strong> Ȅ�i este marcat cu badge-ul ⭐,
-        atrÄƒgând de 3À� mai mulȀ�i candidaȀ�i.
-      </p>
-      <div class="space-y-3 mb-5">
-        <label class="flex items-center gap-4 border-2 border-gray-200 rounded-xl p-3 cursor-pointer hover:border-yellow-400 transition">
-          <input type="radio" name="plan-promo" value="7zile" class="accent-yellow-500" />
-          <div class="flex-1">
-            <p class="font-semibold text-gray-800 text-sm">Starter â€” 7 zile</p>
-            <p class="text-xs text-gray-500">Ideal pentru joburi urgente</p>
-          </div>
-          <span class="font-bold text-yellow-700">25 RON</span>
-        </label>
-        <label class="flex items-center gap-4 border-2 border-yellow-400 rounded-xl p-3 cursor-pointer hover:border-blue-400 transition relative">
-          <span class="absolute -top-2 left-4 bg-yellow-400 text-xs font-bold px-2 py-0.5 rounded-full text-yellow-900">Popular</span>
-          <input type="radio" name="plan-promo" value="14zile" class="accent-yellow-500" checked />
-          <div class="flex-1">
-            <p class="font-semibold text-gray-800 text-sm">Standard â€” 14 zile</p>
-            <p class="text-xs text-gray-500">Cel mai ales de angajatori</p>
-          </div>
-          <span class="font-bold text-yellow-700">40 RON</span>
-        </label>
-        <label class="flex items-center gap-4 border-2 border-gray-200 rounded-xl p-3 cursor-pointer hover:border-yellow-400 transition">
-          <input type="radio" name="plan-promo" value="30zile" class="accent-yellow-500" />
-          <div class="flex-1">
-            <p class="font-semibold text-gray-800 text-sm">Premium â€” 30 zile</p>
-            <p class="text-xs text-gray-500">Vizibilitate maximÄƒ</p>
-          </div>
-          <span class="font-bold text-yellow-700">70 RON</span>
-        </label>
-      </div>
-      <div id="promo-eroare" class="hidden bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3 text-sm mb-4"></div>
-
-      <!-- InstrucȀ�iuni transfer bancar (afiȄ�ate dupÄƒ trimiterea cererii) -->
-      <div id="promo-transfer" class="hidden bg-green-50 border border-green-300 rounded-xl p-4 mb-4 text-sm text-green-900">
-        <p class="font-bold mb-2">Cerere trimisÄƒ! EfectueazÄƒ transferul bancar:</p>
-        <div class="space-y-1 text-xs bg-white rounded-lg p-3 border border-green-200 font-mono mb-2">
-          <p><span class="text-gray-500">IBAN:</span> <strong>RO14REVO0000190057488530</strong></p>
-          <p><span class="text-gray-500">Suma:</span> <strong id="transfer-suma"></strong> RON</p>
-          <p><span class="text-gray-500">Beneficiar:</span> <strong>JobPart</strong></p>
-          <p><span class="text-gray-500">Detalii platÄƒ:</span> <strong id="transfer-ref"></strong></p>
-        </div>
-        <p class="text-xs text-green-700">Jobul va fi promovat în maxim 24h dupÄƒ confirmarea plÄƒȀ�ii.</p>
-      </div>
-
-      <div id="promo-form-actiuni">
-        <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-3 mb-4 text-xs text-yellow-800 flex items-center gap-2">
-          <span>ðŸ¦</span>
-          <span>Plata se face prin <strong>transfer bancar / Revolut</strong>. Jobul se activeazÄƒ dupÄƒ confirmare (max 24h).</span>
-        </div>
-        <div class="flex gap-3">
-          <button id="btn-trimite-cerere"
-            class="flex-1 bg-blue-600 text-white font-bold px-6 py-3 rounded-xl hover:bg-blue-700 transition">
-            Trimite cererea
-          </button>
-          <button id="modal-inchide"
-            class="border border-gray-300 text-gray-600 px-6 py-3 rounded-xl hover:bg-gray-50 transition">
-            AnuleazÄƒ
-          </button>
-        </div>
-      </div>
-      <button id="modal-inchide-dupa" class="hidden w-full mt-3 border border-gray-300 text-gray-600 px-6 py-3 rounded-xl hover:bg-gray-50 transition">
-        ÃŽnchide
-      </button>
-    </div>
-  </div>
-
-  <!-- Modal Precontract â€” mutat inainte de script ca elementele sa existe in DOM -->
-  <div id="modal-precontract" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-    <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
-      <div class="flex justify-between items-center p-6 border-b">
-        <h2 class="text-lg font-bold text-gray-800">ðŸ“„ GenereazÄƒ precontract</h2>
-        <button id="pc-inchide" class="text-gray-400 hover:text-gray-600 text-2xl leading-none">&times;</button>
-      </div>
-      <form id="form-precontract" class="p-6 space-y-4">
-        <input type="hidden" id="pc-aplicare-id" />
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Program de lucru *</label>
-          <input type="text" id="pc-program" required placeholder="ex: Luni-Vineri, 09:00-13:00"
-            class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">RemuneraȀ�ie *</label>
-          <input type="text" id="pc-salariu" required placeholder="ex: 25 RON/orÄƒ sau 1500 RON/lunÄƒ"
-            class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Data estimatÄƒ de început *</label>
-          <input type="text" id="pc-data-inceput" required placeholder="ex: 01.06.2026"
-            class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">DuratÄƒ estimatÄƒ *</label>
-          <input type="text" id="pc-durata" required placeholder="ex: 3 luni, nedeterminatÄƒ, weekend-uri"
-            class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
-        </div>
-        <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">Note suplimentare</label>
-          <textarea id="pc-note" rows="3" placeholder="Alte condiȀ�ii sau detalii..."
-            class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
-        </div>
-        <div class="bg-amber-50 border border-amber-200 rounded-xl p-3 text-xs text-amber-700">
-          âš ️ Acest document <strong>nu înlocuieȄ�te un contract de muncÄƒ (CIM)</strong>. Este o înȀ�elegere informalÄƒ între cele douÄƒ pÄƒrȀ�i.
-        </div>
-        <div id="pc-mesaj" class="hidden text-sm"></div>
-        <button type="submit" id="pc-btn-submit"
-          class="w-full bg-blue-600 text-white py-3 rounded-xl font-semibold hover:bg-blue-700 transition">
-          Trimite precontractul
-        </button>
-      </form>
-    </div>
-  </div>
-
-  <script src="/static/js/api.js"></script>
-  <script>
-    const user = getUser();
-    if (!user || user.rol !== "angajator") window.location.href = "/static/login.html";
-    document.getElementById("nav-username").textContent = user?.nume || "";
-
-    function switchTab(tab) {
-      ["joburi", "adauga", "aplicari", "setari"].forEach(t => {
-        document.getElementById(`content-${t}`).classList.toggle("hidden", t !== tab);
-        const btn = document.getElementById(`tab-${t}`);
-        if (t === tab) btn.className = "tab-btn px-5 py-3 font-semibold text-blue-600 border-b-2 border-blue-600";
-        else btn.className = "tab-btn px-5 py-3 font-semibold text-gray-500 hover:text-gray-700 border-b-2 border-transparent";
-      });
-      if (tab === "aplicari") incarcaJoburiPentruAplicari();
-    }
-
-    async function incarcaJoburileMele() {
-      try {
-        const jobs = await apiFetch("/jobs/mele/toate");
-        const container = document.getElementById("joburi-list");
-        if (jobs.length === 0) {
-          container.innerHTML = `<div class="text-center py-16 bg-white rounded-xl">
-            <div class="text-5xl mb-4">ðŸ“‹</div>
-            <p class="text-xl text-gray-500 mb-4">Nu ai postat niciun job încÄƒ.</p>
-            <button onclick="switchTab('adauga')" class="bg-blue-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-blue-700">PosteazÄƒ primul job</button>
-          </div>`;
-          return;
-        }
-        incarcaStatisticiJoburi(jobs);
-        container.innerHTML = jobs.map(job => `
-          <div class="bg-white rounded-xl shadow-sm p-5 mb-4 flex justify-between items-start flex-wrap gap-4 ${job.promovat ? 'border-l-4 border-yellow-400' : ''}">
-            <div>
-              <div class="flex items-center gap-2 mb-1 flex-wrap">
-                <h3 class="font-bold text-gray-800 text-lg">${escapeHtml(job.titlu)}</h3>
-                <span class="text-xs px-2 py-1 rounded-full ${job.activ ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}">${job.activ ? 'Activ' : 'Inactiv'}</span>
-                ${job.promovat ? `<span class="text-xs bg-yellow-400 text-yellow-900 px-2 py-1 rounded-full font-bold">⭐ Promovat pânÄƒ ${formatData(job.promovat_pana)}</span>` : ''}
-              </div>
-              <p class="text-gray-500 text-sm">ðŸ“ ${escapeHtml(job.oras)} · ${job.categorie || 'Part-time'} · Postat la ${formatData(job.creat_la)}</p>
-              ${job.expira_la ? `<p class="text-xs mt-1 ${new Date(job.expira_la) - new Date() < 3*86400000 ? 'text-orange-500 font-semibold' : 'text-gray-400'}">⏳ ExpirÄƒ la ${formatData(job.expira_la)}</p>` : ''}
-              <div id="stats-${job.id}" class="flex gap-4 mt-2 text-xs text-gray-400"><span id="stats-viz-${job.id}">👁 -</span><span id="stats-apl-${job.id}">📨 -</span><span id="stats-acc-${job.id}">✅ -</span></div>
-            </div>
-            <div class="flex gap-2 flex-wrap">
-              <button onclick="reinnoiesteJob(${job.id})" class="border border-green-400 text-green-700 bg-green-50 px-4 py-2 rounded-lg hover:bg-green-100 text-sm font-medium">ðŸ”„ ReînnoieȄ�te</button>
-              ${!job.promovat ? `<button onclick="cerePromovare(${job.id})" data-titlu="${escapeHtml(job.titlu)}" class="border border-yellow-400 text-yellow-700 bg-yellow-50 px-4 py-2 rounded-lg hover:bg-yellow-100 text-sm font-medium">⭐ PromoveazÄƒ</button>` : ''}
-              <button onclick="editeazaJob(${job.id})" class="border border-blue-300 text-blue-600 px-4 py-2 rounded-lg hover:bg-blue-50 text-sm font-medium">EditeazÄƒ</button>
-              <button onclick="stergeJob(${job.id})" class="border border-red-300 text-red-500 px-4 py-2 rounded-lg hover:bg-red-50 text-sm font-medium">DezactiveazÄƒ</button>
-            </div>
-          </div>`).join("");
-      } catch (e) {
-        document.getElementById("joburi-list").innerHTML = '<div class="text-red-400 py-10 text-center">Eroare la încÄƒrcarea joburilor.</div>';
-      }
-    }
-
-    async function editeazaJob(id) {
-      try {
-        const job = await apiFetch(`/jobs/${id}`);
-        document.getElementById("job-edit-id").value = id;
-        document.getElementById("j-titlu").value = job.titlu;
-        document.getElementById("j-companie").value = job.companie;
-        document.getElementById("j-oras").value = job.oras;
-        document.getElementById("j-categorie").value = job.categorie || "";
-        document.getElementById("j-salariu-min").value = job.salariu_min || "";
-        document.getElementById("j-salariu-max").value = job.salariu_max || "";
-        document.getElementById("j-descriere").value = job.descriere;
-        document.getElementById("j-cerinte").value = job.cerinte || "";
-        document.getElementById("j-beneficii").value = job.beneficii || "";
-        document.getElementById("form-titlu-h").textContent = "EditeazÄƒ jobul";
-        document.getElementById("btn-salveaza-job").textContent = "SalveazÄƒ modificÄƒrile";
-        switchTab("adauga");
-      } catch (e) { alert("Eroare la încÄƒrcarea jobului."); }
-    }
-
-    async function stergeJob(id) {
-      if (!confirm("Dezactivezi acest job? Nu va mai apÄƒrea în lista publicÄƒ.")) return;
-      try {
-        await apiFetch(`/jobs/${id}`, { method: "DELETE" });
-        incarcaJoburileMele();
-      } catch (e) { alert(e.message); }
-    }
-
-    function resetFormJob() {
-      document.getElementById("job-form").reset();
-      document.getElementById("job-edit-id").value = "";
-      document.getElementById("form-titlu-h").textContent = "PosteazÄƒ un job nou";
-      const btnSalv = document.getElementById("btn-salveaza-job");
-      btnSalv.textContent = "PublicÄƒ jobul";
-      btnSalv.disabled = false;
-      document.getElementById("job-mesaj").classList.add("hidden");
-      switchTab("joburi");
-    }
-
-    async function publicaJob() {
-      console.log("publicaJob apelata");
-      const btn = document.getElementById("btn-salveaza-job");
-      const mesajEl = document.getElementById("job-mesaj");
-      mesajEl.classList.add("hidden");
-      mesajEl.className = "mb-4 bg-blue-50 border border-blue-200 text-blue-700 rounded-xl px-4 py-3";
-      mesajEl.textContent = "Se proceseazÄƒ...";
-      mesajEl.classList.remove("hidden");
-
-      if (!getToken()) {
-        mesajEl.className = "bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3";
-        mesajEl.textContent = "Sesiunea a expirat. Te rugÄƒm sÄƒ te autentifici din nou.";
-        mesajEl.classList.remove("hidden");
-        setTimeout(() => logout("Sesiunea a expirat. Te rugÄƒm sÄƒ te autentifici din nou."), 2000);
-        return;
-      }
-
-      const titlu = document.getElementById("j-titlu").value.trim();
-      const companie = document.getElementById("j-companie").value.trim();
-      const oras = document.getElementById("j-oras").value.trim();
-      const descriere = document.getElementById("j-descriere").value.trim();
-
-      if (!titlu || !companie || !oras || !descriere) {
-        mesajEl.className = "bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3";
-        mesajEl.textContent = "CompleteazÄƒ câmpurile obligatorii: Titlu, Companie, OraȄ�, Descriere.";
-        mesajEl.classList.remove("hidden");
-        return;
-      }
-
-      btn.disabled = true;
-      btn.textContent = "Se salveazÄƒ...";
-
-      const editId = document.getElementById("job-edit-id").value;
-      const payload = {
-        titlu,
-        companie,
-        oras,
-        descriere,
-        cerinte: document.getElementById("j-cerinte").value || null,
-        beneficii: document.getElementById("j-beneficii").value || null,
-        categorie: document.getElementById("j-categorie").value || null,
-        salariu_min: parseInt(document.getElementById("j-salariu-min").value) || null,
-        salariu_max: parseInt(document.getElementById("j-salariu-max").value) || null,
-        tip_program: "part-time",
-      };
-
-      try {
-        if (editId) {
-          await apiFetch(`/jobs/${editId}`, { method: "PUT", body: JSON.stringify(payload) });
-        } else {
-          await apiFetch("/jobs", { method: "POST", body: JSON.stringify(payload) });
-        }
-        mesajEl.className = "bg-green-50 border border-green-200 text-green-700 rounded-xl px-4 py-3";
-        mesajEl.textContent = editId ? "Jobul a fost actualizat!" : "Jobul a fost publicat cu succes!";
-        mesajEl.classList.remove("hidden");
-        setTimeout(() => { resetFormJob(); incarcaJoburileMele(); }, 1500);
-      } catch (err) {
-        mesajEl.className = "bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3";
-        mesajEl.textContent = err.message || "Eroare la publicare. ÃŽncearcÄƒ din nou.";
-        mesajEl.classList.remove("hidden");
-        btn.textContent = editId ? "SalveazÄƒ modificÄƒrile" : "PublicÄƒ jobul";
-        btn.disabled = false;
-      }
-    }
-
-    async function incarcaJoburiPentruAplicari() {
-      const jobs = await apiFetch("/jobs/mele/toate");
-      const container = document.getElementById("aplicari-angajator-list");
-      if (jobs.length === 0) {
-        container.innerHTML = '<p class="text-gray-400">Nu ai joburi postate.</p>';
-        return;
-      }
-      container.innerHTML = '<div class="flex flex-wrap gap-3">' +
-        jobs.map(j => `<button onclick="veziAplicari(${j.id}, '${j.titlu}')"
-          class="px-4 py-2 rounded-lg border border-gray-200 hover:border-blue-400 hover:bg-blue-50 text-gray-700 font-medium transition">${j.titlu}</button>`
-        ).join("") + '</div>';
-    }
-
-    async function veziAplicari(jobId, titlu) {
-      document.getElementById("job-selectat-titlu").textContent = `AplicÄƒri pentru: ${titlu}`;
-      const container = document.getElementById("aplicari-pentru-job");
-      document.getElementById("aplicari-detalii").classList.remove("hidden");
-      container.innerHTML = '<p class="text-gray-400">Se încarcÄƒ...</p>';
-      try {
-        const aplicari = await apiFetch(`/aplicari/pentru-job/${jobId}`);
-        if (aplicari.length === 0) {
-          container.innerHTML = '<p class="text-gray-500 py-6 text-center">Nu existÄƒ aplicÄƒri pentru acest job.</p>';
-          return;
-        }
-        container.innerHTML = aplicari.map(a => `
-          <div class="bg-white rounded-xl p-5 mb-3 shadow-sm">
-            <div class="flex justify-between items-start flex-wrap gap-3">
-              <div>
-                <p class="font-bold text-gray-800">${escapeHtml(a.candidat_nume || 'Candidat #' + a.candidat_id)}</p>
-                <p class="text-gray-500 text-sm">Aplicat la ${formatData(a.creat_la)}</p>
-                ${a.scrisoare ? `<p class="text-gray-600 mt-2 italic">"${escapeHtml(a.scrisoare)}"</p>` : '<p class="text-gray-400 mt-2 text-sm">FÄƒrÄƒ scrisoare de intenȀ�ie</p>'}
-                ${a.cv_nume_original ? `<p class="mt-2 text-sm">ðŸ“Ž <a href="${API_BASE}/upload/cv/${a.cv_path}" target="_blank" class="text-blue-600 hover:underline font-medium">${a.cv_nume_original}</a></p>` : ''}
-                <a href="/static/profil.html?id=${a.candidat_id}" class="text-purple-600 hover:underline text-sm mt-1 inline-block">⭐ RecenzeazÄƒ candidatul</a>
-                ${a.status === 'acceptata' ? `<button onclick="genereazaPrecontract(${a.id}, event)" class="mt-2 text-sm text-blue-600 hover:underline inline-block">ðŸ“„ GenereazÄƒ precontract</button>` : ''}
-              </div>
-              <div class="flex flex-col items-end gap-2">
-                ${statusBadge(a.status)}
-                <select onchange="schimbaStatus(${a.id}, this.value)"
-                  class="text-sm border border-gray-300 rounded-lg px-3 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500">
-                  <option value="trimisa" ${a.status==='trimisa'?'selected':''}>TrimisÄƒ</option>
-                  <option value="vizualizata" ${a.status==='vizualizata'?'selected':''}>VizualizatÄƒ</option>
-                  <option value="acceptata" ${a.status==='acceptata'?'selected':''}>AcceptatÄƒ</option>
-                  <option value="respinsa" ${a.status==='respinsa'?'selected':''}>RespinsÄƒ</option>
-                </select>
-              </div>
-            </div>
-          </div>`).join("");
-      } catch (e) {
-        container.innerHTML = `<p class="text-red-400">${e.message}</p>`;
-      }
-    }
-
-    async function schimbaStatus(aplicareId, status) {
-      try {
-        await apiFetch(`/aplicari/${aplicareId}/status`, {
-          method: "PUT",
-          body: JSON.stringify({ status }),
-        });
-      } catch (e) { alert(e.message); }
-    }
-
-    async function reinnoiesteJob(jobId) {
-      try {
-        const r = await apiFetch(`/jobs/${jobId}/reinnoire`, { method: "POST" });
-        alert(`âœ… ${r.mesaj}`);
-        incarcaJoburileMele();
-      } catch (e) { alert(e.message); }
-    }
-
-    function cerePromovare(jobId) {
-      // Citim titlul din atributul data-titlu al butonului care a declanȄ�at evenimentul
-      const btn = document.querySelector(`button[onclick="cerePromovare(${jobId})"]`);
-      const titlu = btn ? btn.getAttribute("data-titlu") : "";
-      // ResetÄƒm starea modalului înainte de a-l deschide (în caz cÄƒ a mai fost deschis)
-      document.getElementById("promo-eroare").classList.add("hidden");
-      document.getElementById("promo-transfer").classList.add("hidden");
-      document.getElementById("promo-form-actiuni").classList.remove("hidden");
-      document.getElementById("modal-inchide-dupa").classList.add("hidden");
-      const btnTrimite = document.getElementById("btn-trimite-cerere");
-      btnTrimite.disabled = false;
-      btnTrimite.textContent = "Trimite cererea";
-      // ResetÄƒm selecȀ�ia planului la cel implicit (Standard - Popular)
-      const radioDefault = document.querySelector('input[name="plan-promo"][value="14zile"]');
-      if (radioDefault) radioDefault.checked = true;
-
-      document.getElementById("modal-job-titlu").textContent = titlu;
-      document.getElementById("modal-job-id").value = jobId;
-      document.getElementById("modal-promovare").classList.remove("hidden");
-    }
-
-    const PRETURI_PLAN = { "7zile": 25, "14zile": 40, "30zile": 70 };
-
-    function inchideModalPromovare() {
-      document.getElementById("modal-promovare").classList.add("hidden");
-      document.getElementById("promo-eroare").classList.add("hidden");
-      document.getElementById("promo-transfer").classList.add("hidden");
-      document.getElementById("promo-form-actiuni").classList.remove("hidden");
-      document.getElementById("modal-inchide-dupa").classList.add("hidden");
-      const btn = document.getElementById("btn-trimite-cerere");
-      btn.disabled = false;
-      btn.textContent = "Trimite cererea";
-    }
-
-    document.getElementById("modal-inchide").onclick = inchideModalPromovare;
-    document.getElementById("modal-inchide-dupa").onclick = () => {
-      inchideModalPromovare();
-      incarcaJoburileMele();
-    };
-
-    document.getElementById("btn-trimite-cerere").onclick = async () => {
-      const jobId = document.getElementById("modal-job-id").value;
-      const plan = document.querySelector('input[name="plan-promo"]:checked')?.value;
-      const btn = document.getElementById("btn-trimite-cerere");
-      const eroare = document.getElementById("promo-eroare");
-      eroare.classList.add("hidden");
-      btn.disabled = true;
-      btn.textContent = "Se trimite...";
-      try {
-        const r = await apiFetch("/promotii/cerere", {
-          method: "POST",
-          body: JSON.stringify({ job_id: parseInt(jobId), plan }),
-        });
-        document.getElementById("transfer-suma").textContent = PRETURI_PLAN[plan] || "?";
-        // Backend poate returna id ca r.id sau r.cerere_id
-        const cerereId = r.id ?? r.cerere_id ?? "â€”";
-        document.getElementById("transfer-ref").textContent = `JobPart-${cerereId}`;
-        document.getElementById("promo-form-actiuni").classList.add("hidden");
-        document.getElementById("promo-transfer").classList.remove("hidden");
-        document.getElementById("modal-inchide-dupa").classList.remove("hidden");
-      } catch (e) {
-        eroare.textContent = e.message;
-        eroare.classList.remove("hidden");
-        btn.disabled = false;
-        btn.textContent = "Trimite cererea";
-      }
-    };
-
-    async function stergeContul() {
-      if (!confirm("Ești sigur că vrei să îți ștergi contul? Această acțiune este IREVERSIBILĂ.")) return;
-      const parola = prompt("Introdu parola curentă pentru a confirma ștergerea contului:");
-      if (!parola) return;
-      try {
-        await apiFetch("/auth/me", { method: "DELETE", body: JSON.stringify({ parola_curenta: parola }) });
-        logout();
-      } catch (err) {
-        alert("Eroare: " + err.message);
-      }
-    }
-
-    incarcaJoburileMele();
-    initNotifBell();
-
-    async function incarcaStatisticiJoburi(jobs) {
-      for (const job of jobs) {
-        try {
-          const s = await apiFetch(\`/jobs/${job.id}/statistici\`);
-          const viz = document.getElementById(\`stats-viz-${job.id}\`);
-          const apl = document.getElementById(\`stats-apl-${job.id}\`);
-          const acc = document.getElementById(\`stats-acc-${job.id}\`);
-          if (viz) viz.textContent = \`👁 \${s.vizualizari} vizualizări\`;
-          if (apl) apl.textContent = \`📨 \${s.aplicari} aplicări\`;
-          if (acc) acc.textContent = \`✅ \${s.acceptate} acceptate\`;
-        } catch (e) { /* silențios */ }
-      }
-    }
-
-    // â”€â”€ PRECONTRACT â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
-    function genereazaPrecontract(aplicareId, e) {
-      e.preventDefault();
-      document.getElementById("pc-aplicare-id").value = aplicareId;
-      document.getElementById("pc-mesaj").classList.add("hidden");
-      document.getElementById("modal-precontract").classList.remove("hidden");
-    }
-
-    document.getElementById("pc-inchide").onclick = () =>
-      document.getElementById("modal-precontract").classList.add("hidden");
-
-    document.getElementById("form-precontract").addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const btn = document.getElementById("pc-btn-submit");
-      btn.disabled = true; btn.textContent = "Se trimite...";
-      const mesaj = document.getElementById("pc-mesaj");
-      try {
-        const r = await apiFetch("/precontracte", {
-          method: "POST",
-          body: JSON.stringify({
-            aplicare_id: parseInt(document.getElementById("pc-aplicare-id").value),
-            program: document.getElementById("pc-program").value,
-            salariu: document.getElementById("pc-salariu").value,
-            data_inceput: document.getElementById("pc-data-inceput").value,
-            durata: document.getElementById("pc-durata").value,
-            descriere_scurta: document.getElementById("pc-note").value || null,
-          }),
-        });
-        mesaj.className = "mt-3 rounded-xl px-4 py-3 text-sm bg-green-50 border border-green-200 text-green-700";
-        mesaj.textContent = r.mesaj;
-        mesaj.classList.remove("hidden");
-        btn.textContent = "Trimis!";
-        setTimeout(() => {
-          document.getElementById("modal-precontract").classList.add("hidden");
-          window.open(`/static/precontract.html?id=${r.id}`, "_blank");
-        }, 1500);
-      } catch (err) {
-        mesaj.className = "mt-3 rounded-xl px-4 py-3 text-sm bg-red-50 border border-red-200 text-red-700";
-        mesaj.textContent = err.message;
-        mesaj.classList.remove("hidden");
-        btn.disabled = false; btn.textContent = "Trimite precontractul";
-      }
-    });
-  </script>
-
-
-</body>
-</html>
-
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%237c3aed'/><text x='50%' y='50%' font-size='20' text-anchor='middle' dominant-baseline='central' fill='white' font-family='Arial'>J</text></svg>" />
+  <meta name="theme-color" content="#7c3aed" />
+  <title>Dashboard Angajator - JobPart</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 font-sans">
+
+  <nav class="bg-white shadow-sm">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+      <a href="/static/index.html" class="text-2xl font-bold text-blue-600">Job<span class="text-gray-800">Part</span></a>
+      <div class="flex items-center gap-4">
+        <a href="/static/mesaje.html" class="text-gray-600 hover:text-blue-600">✉️ Mesaje</a>
+        <a href="/static/notificari.html" id="nav-notif-bell" class="relative inline-flex items-center text-gray-600 hover:text-blue-600">
+          <span class="text-xl">🔔</span>
+          <span class="notif-badge hidden absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold min-w-[16px] h-4 rounded-full flex items-center justify-center px-1 leading-none"></span>
+        </a>
+        <span id="nav-username" class="text-gray-700 font-medium"></span>
+        <button onclick="logout()" class="px-4 py-2 rounded-lg bg-red-500 text-white hover:bg-red-600 font-medium">Ieșire</button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="max-w-6xl mx-auto px-4 py-8">
+    <h1 class="text-3xl font-bold text-gray-800 mb-8">Dashboard Angajator</h1>
+
+    <!-- Tab-uri -->
+    <div class="flex gap-2 mb-8 border-b border-gray-200">
+      <button onclick="switchTab('joburi')" id="tab-joburi"
+        class="tab-btn px-5 py-3 font-semibold text-blue-600 border-b-2 border-blue-600">Joburile mele</button>
+      <button onclick="switchTab('adauga')" id="tab-adauga"
+        class="tab-btn px-5 py-3 font-semibold text-gray-500 hover:text-gray-700 border-b-2 border-transparent">+ Postează job</button>
+      <button onclick="switchTab('aplicari')" id="tab-aplicari"
+        class="tab-btn px-5 py-3 font-semibold text-gray-500 hover:text-gray-700 border-b-2 border-transparent">Aplicări primite</button>
+      <button onclick="switchTab('setari')" id="tab-setari"
+        class="tab-btn px-5 py-3 font-semibold text-gray-500 hover:text-gray-700 border-b-2 border-transparent">⚙️ Setări cont</button>
+    </div>
+
+    <!-- Tab: Joburile mele -->
+    <div id="content-joburi">
+      <div id="joburi-list"><div class="text-center py-10 text-gray-400">Se încarcă...</div></div>
+    </div>
+
+    <!-- Tab: Adaugă job -->
+    <div id="content-adauga" class="hidden">
+      <div class="bg-white rounded-xl shadow-sm p-6 max-w-2xl">
+        <h2 class="text-xl font-bold text-gray-800 mb-6" id="form-titlu-h">Postează un job nou</h2>
+        <div id="job-mesaj" class="hidden mb-4"></div>
+        <form id="job-form" class="space-y-4">
+          <input type="hidden" id="job-edit-id" value="" />
+          <div class="grid md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Titlul jobului *</label>
+              <input type="text" id="j-titlu" required placeholder="ex: Barista part-time"
+                class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Compania *</label>
+              <input type="text" id="j-companie" required placeholder="Numele companiei"
+                class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            </div>
+          </div>
+          <div class="grid md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Oraș *</label>
+              <input type="text" id="j-oras" required placeholder="București"
+                class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Categorie</label>
+              <select id="j-categorie"
+                class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                <option value="">Selectează...</option>
+                <option>IT</option><option>Retail</option><option>Educatie</option>
+                <option>Livrari</option><option>HoReCa</option><option>Administrativ</option>
+                <option>Marketing</option><option>Constructii</option>
+                <option>Transport</option><option>Service Auto</option><option>Altele</option>
+              </select>
+            </div>
+          </div>
+          <div class="grid md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Salariu minim (RON)</label>
+              <input type="number" id="j-salariu-min" placeholder="ex: 1500"
+                class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Salariu maxim (RON)</label>
+              <input type="number" id="j-salariu-max" placeholder="ex: 2500"
+                class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+            </div>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Descriere job *</label>
+            <textarea id="j-descriere" rows="4" required placeholder="Descrie rolul, responsabilitățile, programul..."
+              class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Cerințe</label>
+            <textarea id="j-cerinte" rows="3" placeholder="Experiență, studii, competențe necesare..."
+              class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Beneficii</label>
+            <textarea id="j-beneficii" rows="3" placeholder="Tichete de masă, bonusuri, program flexibil..."
+              class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+          </div>
+          <div class="flex gap-3">
+            <button type="button" id="btn-salveaza-job" onclick="publicaJob()"
+              class="bg-blue-600 text-white px-8 py-3 rounded-xl font-semibold hover:bg-blue-700 transition">
+              Publică jobul
+            </button>
+            <button type="button" onclick="resetFormJob()"
+              class="border border-gray-300 text-gray-600 px-6 py-3 rounded-xl font-medium hover:bg-gray-50 transition">
+              Anulează
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+
+    <!-- Tab: Aplicări primite -->
+    <div id="content-aplicari" class="hidden">
+      <p class="text-gray-500 mb-4">Selectează un job pentru a vedea aplicările primite.</p>
+      <div id="aplicari-angajator-list">
+        <div class="text-center py-10 text-gray-400">Se încarcă joburile...</div>
+      </div>
+      <div id="aplicari-detalii" class="hidden mt-6">
+        <h3 class="text-xl font-bold text-gray-800 mb-4" id="job-selectat-titlu"></h3>
+        <div id="aplicari-pentru-job"></div>
+      </div>
+    </div>
+
+    <!-- Tab: Setări cont -->
+    <div id="content-setari" class="hidden max-w-lg">
+      <div class="bg-white rounded-xl shadow-sm p-6 mb-4">
+        <h2 class="text-xl font-bold text-gray-800 mb-1">Setări cont</h2>
+        <p class="text-gray-500 text-sm mb-6">Gestionează contul tău de angajator</p>
+        <a href="/static/profil.html" class="flex items-center gap-3 p-4 rounded-xl border border-gray-200 hover:border-blue-400 hover:bg-blue-50 transition mb-3">
+          <span class="text-2xl">👤</span>
+          <div><div class="font-semibold text-gray-800">Profil public</div><div class="text-sm text-gray-500">Editează profilul companiei tale</div></div>
+          <span class="ml-auto text-gray-400">→</span>
+        </a>
+        <a href="/static/mesaje.html" class="flex items-center gap-3 p-4 rounded-xl border border-gray-200 hover:border-blue-400 hover:bg-blue-50 transition mb-3">
+          <span class="text-2xl">✉️</span>
+          <div><div class="font-semibold text-gray-800">Mesaje</div><div class="text-sm text-gray-500">Conversații cu candidații</div></div>
+          <span class="ml-auto text-gray-400">→</span>
+        </a>
+      </div>
+      <div class="bg-red-50 border border-red-200 rounded-xl p-6">
+        <h3 class="font-bold text-red-700 mb-1">Zonă periculoasă</h3>
+        <p class="text-sm text-red-600 mb-4">Ștergerea contului este ireversibilă. Toate joburile și datele tale vor fi șterse definitiv.</p>
+        <button onclick="stergeContul()" class="px-5 py-2.5 rounded-xl border-2 border-red-400 text-red-600 hover:bg-red-100 font-semibold transition">
+          🗑️ Șterge contul meu
+        </button>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Modal promovare -->
+  <div id="modal-promovare" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full">
+      <h2 class="text-xl font-bold text-gray-800 mb-2">⭐ Promovează jobul</h2>
+      <p class="text-gray-500 mb-1">Job: <strong id="modal-job-titlu"></strong></p>
+      <input type="hidden" id="modal-job-id" />
+      <p class="text-gray-600 text-sm mb-5 mt-3">
+        Jobul promovat apare <strong>primul în lista de căutare</strong> și este marcat cu badge-ul ⭐,
+        atrăgând de 3× mai mulți candidați.
+      </p>
+      <div class="space-y-3 mb-5">
+        <label class="flex items-center gap-4 border-2 border-gray-200 rounded-xl p-3 cursor-pointer hover:border-yellow-400 transition">
+          <input type="radio" name="plan-promo" value="7zile" class="accent-yellow-500" />
+          <div class="flex-1">
+            <p class="font-semibold text-gray-800 text-sm">Starter — 7 zile</p>
+            <p class="text-xs text-gray-500">Ideal pentru joburi urgente</p>
+          </div>
+          <span class="font-bold text-yellow-700">25 RON</span>
+        </label>
+        <label class="flex items-center gap-4 border-2 border-yellow-400 rounded-xl p-3 cursor-pointer hover:border-blue-400 transition relative">
+          <span class="absolute -top-2 left-4 bg-yellow-400 text-xs font-bold px-2 py-0.5 rounded-full text-yellow-900">Popular</span>
+          <input type="radio" name="plan-promo" value="14zile" class="accent-yellow-500" checked />
+          <div class="flex-1">
+            <p class="font-semibold text-gray-800 text-sm">Standard — 14 zile</p>
+            <p class="text-xs text-gray-500">Cel mai ales de angajatori</p>
+          </div>
+          <span class="font-bold text-yellow-700">40 RON</span>
+        </label>
+        <label class="flex items-center gap-4 border-2 border-gray-200 rounded-xl p-3 cursor-pointer hover:border-yellow-400 transition">
+          <input type="radio" name="plan-promo" value="30zile" class="accent-yellow-500" />
+          <div class="flex-1">
+            <p class="font-semibold text-gray-800 text-sm">Premium — 30 zile</p>
+            <p class="text-xs text-gray-500">Vizibilitate maximă</p>
+          </div>
+          <span class="font-bold text-yellow-700">70 RON</span>
+        </label>
+      </div>
+      <div id="promo-eroare" class="hidden bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3 text-sm mb-4"></div>
+
+      <!-- Instrucțiuni transfer bancar (afișate după trimiterea cererii) -->
+      <div id="promo-transfer" class="hidden bg-green-50 border border-green-300 rounded-xl p-4 mb-4 text-sm text-green-900">
+        <p class="font-bold mb-2">Cerere trimisă! Efectuează transferul bancar:</p>
+        <div class="space-y-1 text-xs bg-white rounded-lg p-3 border border-green-200 font-mono mb-2">
+          <p><span class="text-gray-500">IBAN:</span> <strong>RO14REVO0000190057488530</strong></p>
+          <p><span class="text-gray-500">Suma:</span> <strong id="transfer-suma"></strong> RON</p>
+          <p><span class="text-gray-500">Beneficiar:</span> <strong>JobPart</strong></p>
+          <p><span class="text-gray-500">Detalii plată:</span> <strong id="transfer-ref"></strong></p>
+        </div>
+        <p class="text-xs text-green-700">Jobul va fi promovat în maxim 24h după confirmarea plății.</p>
+      </div>
+
+      <div id="promo-form-actiuni">
+        <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-3 mb-4 text-xs text-yellow-800 flex items-center gap-2">
+          <span>🏦</span>
+          <span>Plata se face prin <strong>transfer bancar / Revolut</strong>. Jobul se activează după confirmare (max 24h).</span>
+        </div>
+        <div class="flex gap-3">
+          <button id="btn-trimite-cerere"
+            class="flex-1 bg-blue-600 text-white font-bold px-6 py-3 rounded-xl hover:bg-blue-700 transition">
+            Trimite cererea
+          </button>
+          <button id="modal-inchide"
+            class="border border-gray-300 text-gray-600 px-6 py-3 rounded-xl hover:bg-gray-50 transition">
+            Anulează
+          </button>
+        </div>
+      </div>
+      <button id="modal-inchide-dupa" class="hidden w-full mt-3 border border-gray-300 text-gray-600 px-6 py-3 rounded-xl hover:bg-gray-50 transition">
+        Închide
+      </button>
+    </div>
+  </div>
+
+  <!-- Modal Precontract — mutat inainte de script ca elementele sa existe in DOM -->
+  <div id="modal-precontract" class="hidden fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+      <div class="flex justify-between items-center p-6 border-b">
+        <h2 class="text-lg font-bold text-gray-800">📄 Generează precontract</h2>
+        <button id="pc-inchide" class="text-gray-400 hover:text-gray-600 text-2xl leading-none">&times;</button>
+      </div>
+      <form id="form-precontract" class="p-6 space-y-4">
+        <input type="hidden" id="pc-aplicare-id" />
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Program de lucru *</label>
+          <input type="text" id="pc-program" required placeholder="ex: Luni-Vineri, 09:00-13:00"
+            class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Remunerație *</label>
+          <input type="text" id="pc-salariu" required placeholder="ex: 25 RON/oră sau 1500 RON/lună"
+            class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Data estimată de început *</label>
+          <input type="text" id="pc-data-inceput" required placeholder="ex: 01.06.2026"
+            class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Durată estimată *</label>
+          <input type="text" id="pc-durata" required placeholder="ex: 3 luni, nedeterminată, weekend-uri"
+            class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1">Note suplimentare</label>
+          <textarea id="pc-note" rows="3" placeholder="Alte condiții sau detalii..."
+            class="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+        </div>
+        <div class="bg-amber-50 border border-amber-200 rounded-xl p-3 text-xs text-amber-700">
+          ⚠️ Acest document <strong>nu înlocuiește un contract de muncă (CIM)</strong>. Este o înțelegere informală între cele două părți.
+        </div>
+        <div id="pc-mesaj" class="hidden text-sm"></div>
+        <button type="submit" id="pc-btn-submit"
+          class="w-full bg-blue-600 text-white py-3 rounded-xl font-semibold hover:bg-blue-700 transition">
+          Trimite precontractul
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <script src="/static/js/api.js"></script>
+  <script>
+    const user = getUser();
+    if (!user || user.rol !== "angajator") {
+      window.location.href = "/static/login.html";
+      throw new Error("redirect");
+    }
+    document.getElementById("nav-username").textContent = user?.nume || "";
+
+    function switchTab(tab) {
+      ["joburi", "adauga", "aplicari", "setari"].forEach(t => {
+        document.getElementById(`content-${t}`).classList.toggle("hidden", t !== tab);
+        const btn = document.getElementById(`tab-${t}`);
+        if (t === tab) btn.className = "tab-btn px-5 py-3 font-semibold text-blue-600 border-b-2 border-blue-600";
+        else btn.className = "tab-btn px-5 py-3 font-semibold text-gray-500 hover:text-gray-700 border-b-2 border-transparent";
+      });
+      if (tab === "aplicari") incarcaJoburiPentruAplicari();
+    }
+
+    async function incarcaJoburileMele() {
+      try {
+        const jobs = await apiFetch("/jobs/mele/toate");
+        const container = document.getElementById("joburi-list");
+        if (jobs.length === 0) {
+          container.innerHTML = `<div class="text-center py-16 bg-white rounded-xl">
+            <div class="text-5xl mb-4">📋</div>
+            <p class="text-xl text-gray-500 mb-4">Nu ai postat niciun job încă.</p>
+            <button onclick="switchTab('adauga')" class="bg-blue-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-blue-700">Postează primul job</button>
+          </div>`;
+          return;
+        }
+        container.innerHTML = jobs.map(job => `
+          <div class="bg-white rounded-xl shadow-sm p-5 mb-4 flex justify-between items-start flex-wrap gap-4 ${job.promovat ? 'border-l-4 border-yellow-400' : ''}">
+            <div>
+              <div class="flex items-center gap-2 mb-1 flex-wrap">
+                <h3 class="font-bold text-gray-800 text-lg">${escapeHtml(job.titlu)}</h3>
+                <span class="text-xs px-2 py-1 rounded-full ${job.activ ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'}">${job.activ ? 'Activ' : 'Inactiv'}</span>
+                ${job.promovat ? `<span class="text-xs bg-yellow-400 text-yellow-900 px-2 py-1 rounded-full font-bold">⭐ Promovat până ${formatData(job.promovat_pana)}</span>` : ''}
+              </div>
+              <p class="text-gray-500 text-sm">📍 ${escapeHtml(job.oras)} · ${job.categorie || 'Part-time'} · Postat la ${formatData(job.creat_la)}</p>
+              ${job.expira_la ? `<p class="text-xs mt-1 ${new Date(job.expira_la) - new Date() < 3*86400000 ? 'text-orange-500 font-semibold' : 'text-gray-400'}">⏳ Expiră la ${formatData(job.expira_la)}</p>` : ''}
+            </div>
+            <div class="flex gap-2 flex-wrap">
+              <button onclick="reinnoiesteJob(${job.id})" class="border border-green-400 text-green-700 bg-green-50 px-4 py-2 rounded-lg hover:bg-green-100 text-sm font-medium">🔄 Reînnoiește</button>
+              ${!job.promovat ? `<button onclick="cerePromovare(${job.id})" data-titlu="${escapeHtml(job.titlu)}" class="border border-yellow-400 text-yellow-700 bg-yellow-50 px-4 py-2 rounded-lg hover:bg-yellow-100 text-sm font-medium">⭐ Promovează</button>` : ''}
+              <button onclick="editeazaJob(${job.id})" class="border border-blue-300 text-blue-600 px-4 py-2 rounded-lg hover:bg-blue-50 text-sm font-medium">Editează</button>
+              <button onclick="stergeJob(${job.id})" class="border border-red-300 text-red-500 px-4 py-2 rounded-lg hover:bg-red-50 text-sm font-medium">Dezactivează</button>
+            </div>
+          </div>`).join("");
+      } catch (e) {
+        document.getElementById("joburi-list").innerHTML = '<div class="text-red-400 py-10 text-center">Eroare la încărcarea joburilor.</div>';
+      }
+    }
+
+    async function editeazaJob(id) {
+      try {
+        const job = await apiFetch(`/jobs/${id}`);
+        document.getElementById("job-edit-id").value = id;
+        document.getElementById("j-titlu").value = job.titlu;
+        document.getElementById("j-companie").value = job.companie;
+        document.getElementById("j-oras").value = job.oras;
+        document.getElementById("j-categorie").value = job.categorie || "";
+        document.getElementById("j-salariu-min").value = job.salariu_min || "";
+        document.getElementById("j-salariu-max").value = job.salariu_max || "";
+        document.getElementById("j-descriere").value = job.descriere;
+        document.getElementById("j-cerinte").value = job.cerinte || "";
+        document.getElementById("j-beneficii").value = job.beneficii || "";
+        document.getElementById("form-titlu-h").textContent = "Editează jobul";
+        document.getElementById("btn-salveaza-job").textContent = "Salvează modificările";
+        switchTab("adauga");
+      } catch (e) { alert("Eroare la încărcarea jobului."); }
+    }
+
+    async function stergeJob(id) {
+      if (!confirm("Dezactivezi acest job? Nu va mai apărea în lista publică.")) return;
+      try {
+        await apiFetch(`/jobs/${id}`, { method: "DELETE" });
+        incarcaJoburileMele();
+      } catch (e) { alert(e.message); }
+    }
+
+    function resetFormJob() {
+      document.getElementById("job-form").reset();
+      document.getElementById("job-edit-id").value = "";
+      document.getElementById("form-titlu-h").textContent = "Postează un job nou";
+      const btnSalv = document.getElementById("btn-salveaza-job");
+      btnSalv.textContent = "Publică jobul";
+      btnSalv.disabled = false;
+      document.getElementById("job-mesaj").classList.add("hidden");
+      switchTab("joburi");
+    }
+
+    async function publicaJob() {
+      console.log("publicaJob apelata");
+      const btn = document.getElementById("btn-salveaza-job");
+      const mesajEl = document.getElementById("job-mesaj");
+      mesajEl.classList.add("hidden");
+      mesajEl.className = "mb-4 bg-blue-50 border border-blue-200 text-blue-700 rounded-xl px-4 py-3";
+      mesajEl.textContent = "Se procesează...";
+      mesajEl.classList.remove("hidden");
+
+      if (!getToken()) {
+        mesajEl.className = "bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3";
+        mesajEl.textContent = "Sesiunea a expirat. Te rugăm să te autentifici din nou.";
+        mesajEl.classList.remove("hidden");
+        setTimeout(() => logout("Sesiunea a expirat. Te rugăm să te autentifici din nou."), 2000);
+        return;
+      }
+
+      const titlu = document.getElementById("j-titlu").value.trim();
+      const companie = document.getElementById("j-companie").value.trim();
+      const oras = document.getElementById("j-oras").value.trim();
+      const descriere = document.getElementById("j-descriere").value.trim();
+
+      if (!titlu || !companie || !oras || !descriere) {
+        mesajEl.className = "bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3";
+        mesajEl.textContent = "Completează câmpurile obligatorii: Titlu, Companie, Oraș, Descriere.";
+        mesajEl.classList.remove("hidden");
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = "Se salvează...";
+
+      const editId = document.getElementById("job-edit-id").value;
+      const payload = {
+        titlu,
+        companie,
+        oras,
+        descriere,
+        cerinte: document.getElementById("j-cerinte").value || null,
+        beneficii: document.getElementById("j-beneficii").value || null,
+        categorie: document.getElementById("j-categorie").value || null,
+        salariu_min: parseInt(document.getElementById("j-salariu-min").value) || null,
+        salariu_max: parseInt(document.getElementById("j-salariu-max").value) || null,
+        tip_program: "part-time",
+      };
+
+      try {
+        if (editId) {
+          await apiFetch(`/jobs/${editId}`, { method: "PUT", body: JSON.stringify(payload) });
+        } else {
+          await apiFetch("/jobs", { method: "POST", body: JSON.stringify(payload) });
+        }
+        mesajEl.className = "bg-green-50 border border-green-200 text-green-700 rounded-xl px-4 py-3";
+        mesajEl.textContent = editId ? "Jobul a fost actualizat!" : "Jobul a fost publicat cu succes!";
+        mesajEl.classList.remove("hidden");
+        setTimeout(() => { resetFormJob(); incarcaJoburileMele(); }, 1500);
+      } catch (err) {
+        mesajEl.className = "bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3";
+        mesajEl.textContent = err.message || "Eroare la publicare. Încearcă din nou.";
+        mesajEl.classList.remove("hidden");
+        btn.textContent = editId ? "Salvează modificările" : "Publică jobul";
+        btn.disabled = false;
+      }
+    }
+
+    async function incarcaJoburiPentruAplicari() {
+      const jobs = await apiFetch("/jobs/mele/toate");
+      const container = document.getElementById("aplicari-angajator-list");
+      if (jobs.length === 0) {
+        container.innerHTML = '<p class="text-gray-400">Nu ai joburi postate.</p>';
+        return;
+      }
+      container.innerHTML = '<div class="flex flex-wrap gap-3">' +
+        jobs.map(j => `<button onclick="veziAplicari(${j.id}, '${j.titlu}')"
+          class="px-4 py-2 rounded-lg border border-gray-200 hover:border-blue-400 hover:bg-blue-50 text-gray-700 font-medium transition">${j.titlu}</button>`
+        ).join("") + '</div>';
+    }
+
+    async function veziAplicari(jobId, titlu) {
+      document.getElementById("job-selectat-titlu").textContent = `Aplicări pentru: ${titlu}`;
+      const container = document.getElementById("aplicari-pentru-job");
+      document.getElementById("aplicari-detalii").classList.remove("hidden");
+      container.innerHTML = '<p class="text-gray-400">Se încarcă...</p>';
+      try {
+        const aplicari = await apiFetch(`/aplicari/pentru-job/${jobId}`);
+        if (aplicari.length === 0) {
+          container.innerHTML = '<p class="text-gray-500 py-6 text-center">Nu există aplicări pentru acest job.</p>';
+          return;
+        }
+        container.innerHTML = aplicari.map(a => `
+          <div class="bg-white rounded-xl p-5 mb-3 shadow-sm">
+            <div class="flex justify-between items-start flex-wrap gap-3">
+              <div>
+                <p class="font-bold text-gray-800">${escapeHtml(a.candidat_nume || 'Candidat #' + a.candidat_id)}</p>
+                <p class="text-gray-500 text-sm">Aplicat la ${formatData(a.creat_la)}</p>
+                ${a.scrisoare ? `<p class="text-gray-600 mt-2 italic">"${escapeHtml(a.scrisoare)}"</p>` : '<p class="text-gray-400 mt-2 text-sm">Fără scrisoare de intenție</p>'}
+                ${a.cv_nume_original ? `<p class="mt-2 text-sm">📎 <a href="${API_BASE}/upload/cv/${a.cv_path}" target="_blank" class="text-blue-600 hover:underline font-medium">${a.cv_nume_original}</a></p>` : ''}
+                <a href="/static/profil.html?id=${a.candidat_id}" class="text-purple-600 hover:underline text-sm mt-1 inline-block">⭐ Recenzează candidatul</a>
+                ${a.status === 'acceptata' ? `<button onclick="genereazaPrecontract(${a.id}, event)" class="mt-2 text-sm text-blue-600 hover:underline inline-block">📄 Generează precontract</button>` : ''}
+              </div>
+              <div class="flex flex-col items-end gap-2">
+                ${statusBadge(a.status)}
+                <select onchange="schimbaStatus(${a.id}, this.value)"
+                  class="text-sm border border-gray-300 rounded-lg px-3 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                  <option value="trimisa" ${a.status==='trimisa'?'selected':''}>Trimisă</option>
+                  <option value="vizualizata" ${a.status==='vizualizata'?'selected':''}>Vizualizată</option>
+                  <option value="acceptata" ${a.status==='acceptata'?'selected':''}>Acceptată</option>
+                  <option value="respinsa" ${a.status==='respinsa'?'selected':''}>Respinsă</option>
+                </select>
+              </div>
+            </div>
+          </div>`).join("");
+      } catch (e) {
+        container.innerHTML = `<p class="text-red-400">${e.message}</p>`;
+      }
+    }
+
+    async function schimbaStatus(aplicareId, status) {
+      try {
+        await apiFetch(`/aplicari/${aplicareId}/status`, {
+          method: "PUT",
+          body: JSON.stringify({ status }),
+        });
+      } catch (e) { alert(e.message); }
+    }
+
+    async function reinnoiesteJob(jobId) {
+      try {
+        const r = await apiFetch(`/jobs/${jobId}/reinnoire`, { method: "POST" });
+        alert(`✅ ${r.mesaj}`);
+        incarcaJoburileMele();
+      } catch (e) { alert(e.message); }
+    }
+
+    function cerePromovare(jobId) {
+      // Citim titlul din atributul data-titlu al butonului care a declanșat evenimentul
+      const btn = document.querySelector(`button[onclick="cerePromovare(${jobId})"]`);
+      const titlu = btn ? btn.getAttribute("data-titlu") : "";
+      // Resetăm starea modalului înainte de a-l deschide (în caz că a mai fost deschis)
+      document.getElementById("promo-eroare").classList.add("hidden");
+      document.getElementById("promo-transfer").classList.add("hidden");
+      document.getElementById("promo-form-actiuni").classList.remove("hidden");
+      document.getElementById("modal-inchide-dupa").classList.add("hidden");
+      const btnTrimite = document.getElementById("btn-trimite-cerere");
+      btnTrimite.disabled = false;
+      btnTrimite.textContent = "Trimite cererea";
+      // Resetăm selecția planului la cel implicit (Standard - Popular)
+      const radioDefault = document.querySelector('input[name="plan-promo"][value="14zile"]');
+      if (radioDefault) radioDefault.checked = true;
+
+      document.getElementById("modal-job-titlu").textContent = titlu;
+      document.getElementById("modal-job-id").value = jobId;
+      document.getElementById("modal-promovare").classList.remove("hidden");
+    }
+
+    const PRETURI_PLAN = { "7zile": 25, "14zile": 40, "30zile": 70 };
+
+    function inchideModalPromovare() {
+      document.getElementById("modal-promovare").classList.add("hidden");
+      document.getElementById("promo-eroare").classList.add("hidden");
+      document.getElementById("promo-transfer").classList.add("hidden");
+      document.getElementById("promo-form-actiuni").classList.remove("hidden");
+      document.getElementById("modal-inchide-dupa").classList.add("hidden");
+      const btn = document.getElementById("btn-trimite-cerere");
+      btn.disabled = false;
+      btn.textContent = "Trimite cererea";
+    }
+
+    document.getElementById("modal-inchide").onclick = inchideModalPromovare;
+    document.getElementById("modal-inchide-dupa").onclick = () => {
+      inchideModalPromovare();
+      incarcaJoburileMele();
+    };
+
+    document.getElementById("btn-trimite-cerere").onclick = async () => {
+      const jobId = document.getElementById("modal-job-id").value;
+      const plan = document.querySelector('input[name="plan-promo"]:checked')?.value;
+      const btn = document.getElementById("btn-trimite-cerere");
+      const eroare = document.getElementById("promo-eroare");
+      eroare.classList.add("hidden");
+      btn.disabled = true;
+      btn.textContent = "Se trimite...";
+      try {
+        const r = await apiFetch("/promotii/cerere", {
+          method: "POST",
+          body: JSON.stringify({ job_id: parseInt(jobId), plan }),
+        });
+        document.getElementById("transfer-suma").textContent = PRETURI_PLAN[plan] || "?";
+        // Backend poate returna id ca r.id sau r.cerere_id
+        const cerereId = r.id ?? r.cerere_id ?? "—";
+        document.getElementById("transfer-ref").textContent = `JobPart-${cerereId}`;
+        document.getElementById("promo-form-actiuni").classList.add("hidden");
+        document.getElementById("promo-transfer").classList.remove("hidden");
+        document.getElementById("modal-inchide-dupa").classList.remove("hidden");
+      } catch (e) {
+        eroare.textContent = e.message;
+        eroare.classList.remove("hidden");
+        btn.disabled = false;
+        btn.textContent = "Trimite cererea";
+      }
+    };
+
+    async function stergeContul() {
+      const confirmare1 = confirm("Ești sigur că vrei să îți ștergi contul? Această acțiune este IREVERSIBILĂ.");
+      if (!confirmare1) return;
+      const confirmare2 = confirm("Ultima confirmare: datele personale vor fi șterse definitiv. Continui?");
+      if (!confirmare2) return;
+      try {
+        await apiFetch("/auth/me", { method: "DELETE" });
+        logout();
+      } catch (err) {
+        alert("Eroare la ștergerea contului: " + err.message);
+      }
+    }
+
+    incarcaJoburileMele();
+    initNotifBell();
+
+    // ── PRECONTRACT ──────────────────────────────────────────
+    function genereazaPrecontract(aplicareId, e) {
+      e.preventDefault();
+      document.getElementById("pc-aplicare-id").value = aplicareId;
+      document.getElementById("pc-mesaj").classList.add("hidden");
+      document.getElementById("modal-precontract").classList.remove("hidden");
+    }
+
+    document.getElementById("pc-inchide").onclick = () =>
+      document.getElementById("modal-precontract").classList.add("hidden");
+
+    document.getElementById("form-precontract").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const btn = document.getElementById("pc-btn-submit");
+      btn.disabled = true; btn.textContent = "Se trimite...";
+      const mesaj = document.getElementById("pc-mesaj");
+      try {
+        const r = await apiFetch("/precontracte", {
+          method: "POST",
+          body: JSON.stringify({
+            aplicare_id: parseInt(document.getElementById("pc-aplicare-id").value),
+            program: document.getElementById("pc-program").value,
+            salariu: document.getElementById("pc-salariu").value,
+            data_inceput: document.getElementById("pc-data-inceput").value,
+            durata: document.getElementById("pc-durata").value,
+            descriere_scurta: document.getElementById("pc-note").value || null,
+          }),
+        });
+        mesaj.className = "mt-3 rounded-xl px-4 py-3 text-sm bg-green-50 border border-green-200 text-green-700";
+        mesaj.textContent = r.mesaj;
+        mesaj.classList.remove("hidden");
+        btn.textContent = "Trimis!";
+        setTimeout(() => {
+          document.getElementById("modal-precontract").classList.add("hidden");
+          window.open(`/static/precontract.html?id=${r.id}`, "_blank");
+        }, 1500);
+      } catch (err) {
+        mesaj.className = "mt-3 rounded-xl px-4 py-3 text-sm bg-red-50 border border-red-200 text-red-700";
+        mesaj.textContent = err.message;
+        mesaj.classList.remove("hidden");
+        btn.disabled = false; btn.textContent = "Trimite precontractul";
+      }
+    });
+  </script>
+
+
+</body>
+</html>

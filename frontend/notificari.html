@@ -1,121 +1,114 @@
-<!DOCTYPE html>
-<html lang="ro">
-<head>
-  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="robots" content="noindex, nofollow" />
-  <title>NotificÄƒri - JobPart</title>
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%237c3aed'/><text x='50%' y='50%' font-size='20' text-anchor='middle' dominant-baseline='central' fill='white' font-family='Arial'>J</text></svg>" />
-  <meta name="theme-color" content="#7c3aed" />
-  <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-gray-50 font-sans">
-
-  <nav class="bg-white shadow-sm">
-    <div class="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
-      <a href="/static/index.html" class="text-2xl font-bold text-blue-600">Job<span class="text-gray-800">Part</span></a>
-      <div class="flex items-center gap-4">
-        <a id="nav-dashboard" href="#" class="text-gray-600 hover:text-blue-600 font-medium">Dashboard</a>
-        <a href="/static/jobs.html" class="text-gray-600 hover:text-blue-600 font-medium">Joburi</a>
-        <a href="/static/mesaje.html" class="text-gray-600 hover:text-blue-600 font-medium">✉️ Mesaje</a>
-        <span class="text-gray-700 font-medium" id="nav-username"></span>
-        <button onclick="logout()" class="px-4 py-2 rounded-lg bg-red-500 text-white hover:bg-red-600 font-medium">Ieșire</button>
-      </div>
-    </div>
-  </nav>
-
-  <div class="max-w-4xl mx-auto px-4 py-8">
-    <div class="flex items-center justify-between mb-6">
-      <h1 class="text-3xl font-bold text-gray-800">ðŸ”” NotificÄƒri</h1>
-      <button onclick="citesteToate()" id="btn-citeste-toate"
-        class="hidden bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700 font-medium text-sm">
-        MarcheazÄƒ toate ca citite
-      </button>
-    </div>
-
-    <div id="notif-list">
-      <div class="text-center py-10 text-gray-400">Se încarcÄƒ...</div>
-    </div>
-  </div>
-
-  <script src="/static/js/api.js"></script>
-  <script>
-    const user = getUser();
-    if (!user) window.location.href = "/static/login.html";
-    document.getElementById("nav-username").textContent = user?.nume || "";
-
-    const ICOANE = {
-      aplicare_noua: "ðŸ“¥",
-      status_schimbat: "ðŸ“‹",
-      mesaj_nou: "âœ‰️",
-      promovare_expira: "âš ️",
-      promovare_expirata: "ðŸ“‹",
-      job_expira: "⏰",
-      job_expirat: "ðŸ“‹",
-    };
-
-    async function incarcaNotificari() {
-      try {
-        const notifs = await apiFetch("/notificari");
-        const container = document.getElementById("notif-list");
-
-        if (notifs.length === 0) {
-          container.innerHTML = `
-            <div class="text-center py-20 bg-white rounded-xl shadow-sm">
-              <div class="text-6xl mb-4">ðŸ”•</div>
-              <p class="text-xl text-gray-500">Nu ai notificÄƒri.</p>
-            </div>`;
-          return;
-        }
-
-        const necitite = notifs.filter(n => !n.citit).length;
-        if (necitite > 0) {
-          document.getElementById("btn-citeste-toate").classList.remove("hidden");
-        }
-
-        container.innerHTML = notifs.map(n => `
-          <div class="bg-white rounded-xl shadow-sm p-4 mb-3 flex items-start gap-4 ${!n.citit ? 'border-l-4 border-blue-500' : ''}"
-            id="notif-${n.id}">
-            <span class="text-2xl mt-0.5">${ICOANE[escapeHtml(n.tip)] || 'ðŸ””'}</span>
-            <div class="flex-1">
-              <p class="text-gray-800 font-medium ${!n.citit ? 'text-blue-800' : ''}">${escapeHtml(n.mesaj)}</p>
-              <p class="text-xs text-gray-400 mt-1">${formatData(n.creat_la)}</p>
-              ${n.link ? `<a href="${escapeHtml(n.link)}" class="text-blue-600 hover:underline text-sm mt-1 inline-block">Mergi â†’</a>` : ''}
-            </div>
-            <button onclick="stergeNotif(${n.id})"
-              class="text-gray-300 hover:text-red-400 text-xl ml-2 transition" title="È˜terge">À�</button>
-          </div>`).join("");
-      } catch (e) {
-        document.getElementById("notif-list").innerHTML =
-          '<div class="text-center py-10 text-red-400">Eroare la încÄƒrcarea notificÄƒrilor.</div>';
-      }
-    }
-
-    async function citesteToate() {
-      try {
-        await apiFetch("/notificari/citeste-toate", { method: "PUT" });
-        document.getElementById("btn-citeste-toate").classList.add("hidden");
-        document.querySelectorAll("[id^='notif-']").forEach(el => {
-          el.classList.remove("border-l-4", "border-blue-500");
-          const textEl = el.querySelector("p");
-          if (textEl) textEl.classList.remove("text-blue-800");
-        });
-      } catch (e) {}
-    }
-
-    async function stergeNotif(id) {
-      try {
-        await apiFetch(`/notificari/${id}`, { method: "DELETE" });
-        const el = document.getElementById(`notif-${id}`);
-        if (el) {
-          el.style.opacity = "0";
-          el.style.transition = "opacity 0.3s";
-          setTimeout(() => el.remove(), 300);
-        }
-      } catch (e) {}
-    }
-
-    incarcaNotificari();
-  </script>
-</body>
-</html>
-
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8" /><meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Notificări - JobPart</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 font-sans">
+
+  <nav class="bg-white shadow-sm">
+    <div class="max-w-4xl mx-auto px-4 py-3 flex items-center justify-between">
+      <a href="/static/index.html" class="text-2xl font-bold text-blue-600">Job<span class="text-gray-800">Part</span></a>
+      <div class="flex items-center gap-4">
+        <span class="text-gray-700 font-medium" id="nav-username"></span>
+        <button onclick="logout()" class="px-4 py-2 rounded-lg bg-red-500 text-white hover:bg-red-600 font-medium">Ieșire</button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="max-w-4xl mx-auto px-4 py-8">
+    <div class="flex items-center justify-between mb-6">
+      <h1 class="text-3xl font-bold text-gray-800">🔔 Notificări</h1>
+      <button onclick="citesteToate()" id="btn-citeste-toate"
+        class="hidden bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700 font-medium text-sm">
+        Marchează toate ca citite
+      </button>
+    </div>
+
+    <div id="notif-list">
+      <div class="text-center py-10 text-gray-400">Se încarcă...</div>
+    </div>
+  </div>
+
+  <script src="/static/js/api.js"></script>
+  <script>
+    const user = getUser();
+    if (!user) window.location.href = "/static/login.html";
+    document.getElementById("nav-username").textContent = user?.nume || "";
+
+    const ICOANE = {
+      aplicare_noua: "📥",
+      status_schimbat: "📋",
+      mesaj_nou: "✉️",
+      promovare_expira: "⚠️",
+      promovare_expirata: "📋",
+      job_expira: "⏰",
+      job_expirat: "📋",
+    };
+
+    async function incarcaNotificari() {
+      try {
+        const notifs = await apiFetch("/notificari");
+        const container = document.getElementById("notif-list");
+
+        if (notifs.length === 0) {
+          container.innerHTML = `
+            <div class="text-center py-20 bg-white rounded-xl shadow-sm">
+              <div class="text-6xl mb-4">🔕</div>
+              <p class="text-xl text-gray-500">Nu ai notificări.</p>
+            </div>`;
+          return;
+        }
+
+        const necitite = notifs.filter(n => !n.citit).length;
+        if (necitite > 0) {
+          document.getElementById("btn-citeste-toate").classList.remove("hidden");
+        }
+
+        container.innerHTML = notifs.map(n => `
+          <div class="bg-white rounded-xl shadow-sm p-4 mb-3 flex items-start gap-4 ${!n.citit ? 'border-l-4 border-blue-500' : ''}"
+            id="notif-${n.id}">
+            <span class="text-2xl mt-0.5">${ICOANE[escapeHtml(n.tip)] || '🔔'}</span>
+            <div class="flex-1">
+              <p class="text-gray-800 font-medium ${!n.citit ? 'text-blue-800' : ''}">${escapeHtml(n.mesaj)}</p>
+              <p class="text-xs text-gray-400 mt-1">${formatData(n.creat_la)}</p>
+              ${n.link ? `<a href="${escapeHtml(n.link)}" class="text-blue-600 hover:underline text-sm mt-1 inline-block">Mergi →</a>` : ''}
+            </div>
+            <button onclick="stergeNotif(${n.id})"
+              class="text-gray-300 hover:text-red-400 text-xl ml-2 transition" title="Șterge">×</button>
+          </div>`).join("");
+      } catch (e) {
+        document.getElementById("notif-list").innerHTML =
+          '<div class="text-center py-10 text-red-400">Eroare la încărcarea notificărilor.</div>';
+      }
+    }
+
+    async function citesteToate() {
+      try {
+        await apiFetch("/notificari/citeste-toate", { method: "PUT" });
+        document.getElementById("btn-citeste-toate").classList.add("hidden");
+        document.querySelectorAll("[id^='notif-']").forEach(el => {
+          el.classList.remove("border-l-4", "border-blue-500");
+          const textEl = el.querySelector("p");
+          if (textEl) textEl.classList.remove("text-blue-800");
+        });
+      } catch (e) {}
+    }
+
+    async function stergeNotif(id) {
+      try {
+        await apiFetch(`/notificari/${id}`, { method: "DELETE" });
+        const el = document.getElementById(`notif-${id}`);
+        if (el) {
+          el.style.opacity = "0";
+          el.style.transition = "opacity 0.3s";
+          setTimeout(() => el.remove(), 300);
+        }
+      } catch (e) {}
+    }
+
+    incarcaNotificari();
+  </script>
+</body>
+</html>
