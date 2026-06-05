@@ -20,7 +20,7 @@
       <div class="flex items-center gap-4">
         <span id="admin-name" class="text-gray-300"></span>
         <button onclick="document.getElementById('modal-parola').classList.remove('hidden')" class="bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg font-medium text-sm">ðŸ”‘ SchimbÄƒ parola</button>
-        <button onclick="logout()" class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg font-medium">IeÈ™ire</button>
+        <button onclick="logout()" class="bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg font-medium">IeȄ�ire</button>
       </div>
     </div>
   </nav>
@@ -59,7 +59,7 @@
     <div id="content-promotii" class="hidden">
       <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
         <div class="bg-white rounded-xl shadow-sm p-5">
-          <p class="text-sm text-gray-500">ÃŽn aÈ™teptare</p>
+          <p class="text-sm text-gray-500">ÃŽn aȄ�teptare</p>
           <p id="stat-in-asteptare" class="text-2xl font-bold text-yellow-600">â€”</p>
         </div>
         <div class="bg-white rounded-xl shadow-sm p-5">
@@ -77,7 +77,7 @@
       </div>
       <div class="flex gap-3 mb-4 flex-wrap">
         <button onclick="filtreazaPromo('in_asteptare')" id="filtru-in_asteptare"
-          class="px-4 py-2 rounded-lg bg-yellow-500 text-white font-medium text-sm">ÃŽn aÈ™teptare</button>
+          class="px-4 py-2 rounded-lg bg-yellow-500 text-white font-medium text-sm">ÃŽn aȄ�teptare</button>
         <button onclick="filtreazaPromo('aprobata')" id="filtru-aprobata"
           class="px-4 py-2 rounded-lg bg-gray-100 text-gray-600 font-medium text-sm hover:bg-gray-200">Aprobate</button>
         <button onclick="filtreazaPromo('respinsa')" id="filtru-respinsa"
@@ -92,10 +92,10 @@
               <th class="text-left px-4 py-3 text-gray-600 font-medium">Job</th>
               <th class="text-left px-4 py-3 text-gray-600 font-medium">Angajator</th>
               <th class="text-left px-4 py-3 text-gray-600 font-medium">Plan</th>
-              <th class="text-left px-4 py-3 text-gray-600 font-medium">PreÈ›</th>
+              <th class="text-left px-4 py-3 text-gray-600 font-medium">PreȀ�</th>
               <th class="text-left px-4 py-3 text-gray-600 font-medium">Status</th>
               <th class="text-left px-4 py-3 text-gray-600 font-medium">Data</th>
-              <th class="text-left px-4 py-3 text-gray-600 font-medium">AcÈ›iuni</th>
+              <th class="text-left px-4 py-3 text-gray-600 font-medium">AcȀ�iuni</th>
             </tr>
           </thead>
           <tbody id="tabel-promotii">
@@ -115,18 +115,18 @@
       <div class="bg-white rounded-2xl border border-gray-200 p-6 space-y-4">
         <div>
           <label class="block text-sm font-medium text-gray-700 mb-1">Subiect email</label>
-          <input type="text" id="nl-subiect" value="NoutÄƒÈ›i de la JobPart!"
+          <input type="text" id="nl-subiect" value="NoutÄƒȀ�i de la JobPart!"
             class="w-full border border-gray-300 rounded-xl px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500" />
         </div>
         <div>
-          <label class="block text-sm font-medium text-gray-700 mb-1">ConÈ›inut HTML</label>
+          <label class="block text-sm font-medium text-gray-700 mb-1">ConȀ�inut HTML</label>
           <textarea id="nl-html" rows="10"
             class="w-full border border-gray-300 rounded-xl px-4 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-500"
-            placeholder="LipeÈ™te codul HTML al emailului..."></textarea>
+            placeholder="LipeȄ�te codul HTML al emailului..."></textarea>
         </div>
         <div class="flex items-center gap-3">
           <input type="checkbox" id="nl-doar-abonati" class="w-4 h-4 text-blue-600 border-gray-300 rounded" />
-          <label for="nl-doar-abonati" class="text-sm text-gray-600">Trimite doar utilizatorilor abonaÈ›i la newsletter</label>
+          <label for="nl-doar-abonati" class="text-sm text-gray-600">Trimite doar utilizatorilor abonaȀ�i la newsletter</label>
         </div>
         <button onclick="trimiteNewsletter()"
           class="w-full bg-blue-600 text-white py-3 rounded-xl font-semibold hover:bg-blue-700 transition">
@@ -159,7 +159,7 @@
         const s = await apiFetch("/admin/statistici");
         const statItems = [
           { label: "Utilizatori totali", value: s.utilizatori, icon: "ðŸ‘¥", color: "blue" },
-          { label: "CandidaÈ›i", value: s.candidati, icon: "ðŸ‘¤", color: "indigo" },
+          { label: "CandidaȀ�i", value: s.candidati, icon: "ðŸ‘¤", color: "indigo" },
           { label: "Angajatori", value: s.angajatori, icon: "ðŸ¢", color: "purple" },
           { label: "Joburi active", value: s.joburi_active, icon: "ðŸ’¼", color: "green" },
           { label: "AplicÄƒri totale", value: s.total_aplicari, icon: "ðŸ“‹", color: "yellow" },
@@ -218,7 +218,7 @@
                   <th class="text-left px-5 py-3">Rol</th>
                   <th class="text-left px-5 py-3">Status</th>
                   <th class="text-left px-5 py-3">ÃŽnregistrat</th>
-                  <th class="text-left px-5 py-3">AcÈ›iuni</th>
+                  <th class="text-left px-5 py-3">AcȀ�iuni</th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-gray-100">
@@ -274,10 +274,10 @@
                 <tr>
                   <th class="text-left px-5 py-3">Titlu</th>
                   <th class="text-left px-5 py-3">Companie</th>
-                  <th class="text-left px-5 py-3">OraÈ™</th>
+                  <th class="text-left px-5 py-3">OraȄ�</th>
                   <th class="text-left px-5 py-3">Status</th>
                   <th class="text-left px-5 py-3">Promovat</th>
-                  <th class="text-left px-5 py-3">AcÈ›iuni</th>
+                  <th class="text-left px-5 py-3">AcȀ�iuni</th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-gray-100">
@@ -379,7 +379,7 @@
         }
         tbody.innerHTML = r.cereri.map(c => {
           const statusBadge = {
-            'in_asteptare': '<span class="bg-yellow-100 text-yellow-700 px-2 py-1 rounded-full text-xs font-medium">ÃŽn aÈ™teptare</span>',
+            'in_asteptare': '<span class="bg-yellow-100 text-yellow-700 px-2 py-1 rounded-full text-xs font-medium">ÃŽn aȄ�teptare</span>',
             'aprobata': '<span class="bg-green-100 text-green-700 px-2 py-1 rounded-full text-xs font-medium">AprobatÄƒ</span>',
             'respinsa': '<span class="bg-red-100 text-red-700 px-2 py-1 rounded-full text-xs font-medium">RespinsÄƒ</span>',
           }[c.status] || c.status;
@@ -424,7 +424,7 @@
     }
 
     async function respingePromo(id) {
-      const motiv = prompt("Motiv respingere (opÈ›ional):");
+      const motiv = prompt("Motiv respingere (opȀ�ional):");
       if (motiv === null) return;
       try {
         await apiFetch(`/promotii/cereri/${id}/respinge`, { method: "PUT", body: JSON.stringify({ mesaj: motiv || null }) });
@@ -534,7 +534,7 @@
 
       if (!subiect || !html) {
         mesaj.className = "bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3 text-sm";
-        mesaj.textContent = "CompleteazÄƒ subiectul È™i conÈ›inutul HTML.";
+        mesaj.textContent = "CompleteazÄƒ subiectul Ȅ�i conȀ�inutul HTML.";
         mesaj.classList.remove("hidden");
         return;
       }

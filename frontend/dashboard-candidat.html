@@ -23,7 +23,7 @@
           <span class="notif-badge hidden absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold min-w-[16px] h-4 rounded-full flex items-center justify-center px-1 leading-none"></span>
         </a>
         <span id="nav-username" class="text-gray-700 font-medium"></span>
-        <button onclick="logout()" class="px-4 py-2 rounded-lg bg-red-500 text-white hover:bg-red-600 font-medium">IeÈ™ire</button>
+        <button onclick="logout()" class="px-4 py-2 rounded-lg bg-red-500 text-white hover:bg-red-600 font-medium">IeȄ�ire</button>
       </div>
     </div>
   </nav>
@@ -112,7 +112,7 @@
             <input type="tel" id="p-telefon" class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500" />
           </div>
           <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">OraÈ™</label>
+            <label class="block text-sm font-medium text-gray-700 mb-1">OraȄ�</label>
             <input type="text" id="p-oras" class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500" />
           </div>
           <div>
@@ -128,7 +128,7 @@
         <div class="mt-8 pt-6 border-t border-red-100">
           <h3 class="text-base font-semibold text-red-700 mb-2">ZonÄƒ periculoasÄƒ</h3>
           <p class="text-sm text-gray-500 mb-4">
-            È˜tergerea contului este ireversibilÄƒ. Datele personale vor fi anonimizate, iar CV-urile vor fi È™terse permanent.
+            È˜tergerea contului este ireversibilÄƒ. Datele personale vor fi anonimizate, iar CV-urile vor fi Ȅ�terse permanent.
           </p>
           <button onclick="stergeContul()"
             class="bg-red-600 text-white px-6 py-2 rounded-xl font-semibold hover:bg-red-700 transition text-sm">
@@ -255,7 +255,7 @@
     }
 
     async function retrage(id, btn) {
-      if (!confirm("EÈ™ti sigur cÄƒ vrei sÄƒ retragi aceastÄƒ aplicare?")) return;
+      if (!confirm("EȄ�ti sigur cÄƒ vrei sÄƒ retragi aceastÄƒ aplicare?")) return;
       try {
         await apiFetch(`/aplicari/${id}`, { method: "DELETE" });
         incarcaAplicari();
