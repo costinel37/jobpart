@@ -1,319 +1,319 @@
-﻿<!DOCTYPE html>
-<html lang="ro">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="robots" content="noindex, nofollow" />
-  <title>Dashboard Candidat - JobPart</title>
-    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%237c3aed'/><text x='50%' y='50%' font-size='20' text-anchor='middle' dominant-baseline='central' fill='white' font-family='Arial'>J</text></svg>" />
-  <meta name="theme-color" content="#7c3aed" />
-  <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-gray-50 font-sans">
-
-  <nav class="bg-white shadow-sm">
-    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
-      <a href="/static/index.html" class="text-2xl font-bold text-blue-600">Job<span class="text-gray-800">Part</span></a>
-      <div class="flex items-center gap-4">
-        <a href="/static/jobs.html" class="text-gray-600 hover:text-blue-600">Joburi</a>
-        <a href="/static/favorite.html" class="text-gray-600 hover:text-blue-600">â¤ï¸ Salvate</a>
-        <a href="/static/mesaje.html" class="text-gray-600 hover:text-blue-600">âœ‰ï¸ Mesaje</a>
-        <a href="/static/notificari.html" id="nav-notif-bell" class="relative inline-flex items-center text-gray-600 hover:text-blue-600">
-          <span class="text-xl">ðŸ””</span>
-          <span class="notif-badge hidden absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold min-w-[16px] h-4 rounded-full flex items-center justify-center px-1 leading-none"></span>
-        </a>
-        <span id="nav-username" class="text-gray-700 font-medium"></span>
-        <button onclick="logout()" class="px-4 py-2 rounded-lg bg-red-500 text-white hover:bg-red-600 font-medium">IeÈ™ire</button>
-      </div>
-    </div>
-  </nav>
-
-  <div class="max-w-6xl mx-auto px-4 py-8">
-    <h1 class="text-3xl font-bold text-gray-800 mb-2">Dashboard Candidat</h1>
-    <p id="salut" class="text-gray-500 mb-8"></p>
-
-    <!-- Tab-uri -->
-    <div class="flex gap-2 mb-8 border-b border-gray-200 flex-wrap">
-      <button onclick="switchTab('aplicari')" id="tab-aplicari"
-        class="tab-btn px-5 py-3 font-semibold text-blue-600 border-b-2 border-blue-600">
-        AplicÄƒrile mele
-      </button>
-      <button onclick="switchTab('profil')" id="tab-profil"
-        class="tab-btn px-5 py-3 font-semibold text-gray-500 hover:text-gray-700 border-b-2 border-transparent">
-        Profilul meu
-      </button>
-      <a href="/api/export/cv-pdf" target="_blank"
-        class="ml-auto flex items-center gap-2 px-5 py-3 bg-indigo-600 text-white rounded-t-lg font-semibold hover:bg-indigo-700 transition">
-        ðŸ“„ Export CV PDF
-      </a>
-    </div>
-
-    <!-- Tab Aplicari -->
-    <div id="content-aplicari">
-      <div class="flex justify-between items-center mb-5">
-        <h2 class="text-xl font-bold text-gray-700">AplicÄƒrile mele</h2>
-        <a href="/static/jobs.html" class="bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700 font-medium">+ CautÄƒ joburi</a>
-      </div>
-      <div id="aplicari-list">
-        <div class="text-center py-10 text-gray-400">Se Ã®ncarcÄƒ...</div>
-      </div>
-    </div>
-
-    <!-- Tab Profil -->
-    <!-- Tab Alerte -->
-    <div id="content-alerte" class="hidden max-w-xl">
-      <div class="bg-white rounded-xl shadow-sm p-6 mb-4">
-        <h2 class="text-xl font-bold text-gray-800 mb-1">🔔 Alerte joburi noi</h2>
-        <p class="text-gray-500 text-sm mb-5">Primești email automat când apare un job nou care se potrivește.</p>
-        <div id="alerte-mesaj" class="hidden mb-4 rounded-xl px-4 py-3 text-sm"></div>
-        <form id="alert-form" class="space-y-3">
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Categorie</label>
-            <select id="alert-categorie" class="w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
-              <option value="">Toate categoriile</option>
-              <option>IT</option><option>Retail</option><option>Educatie</option>
-              <option>Livrari</option><option>HoReCa</option><option>Administrativ</option>
-              <option>Marketing</option><option>Constructii</option>
-              <option>Transport</option><option>Service Auto</option><option>Altele</option>
-            </select>
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Oraș</label>
-            <input type="text" id="alert-oras" placeholder="ex: București"
-              class="w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" />
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Salariu minim (RON, opțional)</label>
-            <input type="number" id="alert-salariu" placeholder="ex: 2000"
-              class="w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" />
-          </div>
-          <button type="submit" id="btn-adauga-alert"
-            class="w-full bg-blue-600 text-white py-2.5 rounded-xl font-semibold hover:bg-blue-700 transition text-sm">
-            + Adaugă alertă
-          </button>
-        </form>
-      </div>
-      <div id="alerte-lista" class="space-y-3">
-        <div class="text-center py-6 text-gray-400 text-sm">Se încarcă alertele...</div>
-      </div>
-    </div>
-
-    <div id="content-profil" class="hidden">
-      <div class="bg-white rounded-xl shadow-sm p-6 max-w-xl">
-        <h2 class="text-xl font-bold text-gray-800 mb-6">Profilul meu</h2>
-        <div id="profil-mesaj" class="hidden mb-4"></div>
-        <form id="profil-form" class="space-y-4">
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Nume complet</label>
-            <input type="text" id="p-nume" class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500" />
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Telefon</label>
-            <input type="tel" id="p-telefon" class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500" />
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">OraÈ™</label>
-            <input type="text" id="p-oras" class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500" />
-          </div>
-          <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1">Despre mine</label>
-            <textarea id="p-despre" rows="4" placeholder="PrezintÄƒ-te pe scurt..."
-              class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
-          </div>
-          <button type="submit" class="bg-blue-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-blue-700 transition">
-            SalveazÄƒ modificÄƒrile
-          </button>
-        </form>
-
-        <div class="mt-8 pt-6 border-t border-red-100">
-          <h3 class="text-base font-semibold text-red-700 mb-2">ZonÄƒ periculoasÄƒ</h3>
-          <p class="text-sm text-gray-500 mb-4">
-            È˜tergerea contului este ireversibilÄƒ. Datele personale vor fi anonimizate, iar CV-urile vor fi È™terse permanent.
-          </p>
-          <button onclick="stergeContul()"
-            class="bg-red-600 text-white px-6 py-2 rounded-xl font-semibold hover:bg-red-700 transition text-sm">
-            È˜terge contul meu
-          </button>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <script src="/static/js/api.js"></script>
-  <script>
-    const user = getUser();
-    if (!user || user.rol !== "candidat") {
-      window.location.href = "/static/login.html";
-    }
-
-    document.getElementById("nav-username").textContent = user?.nume || "";
-    document.getElementById("salut").textContent = `Bun venit, ${user?.nume}! IatÄƒ activitatea ta.`;
-
-    function switchTab(tab) {
-      ["aplicari", "profil", "alerte"].forEach(t => {
-        document.getElementById(`content-${t}`).classList.toggle("hidden", t !== tab);
-        const btn = document.getElementById(`tab-${t}`);
-        if (!btn) return;
-        if (t === tab) {
-          btn.className = "tab-btn px-5 py-3 font-semibold text-blue-600 border-b-2 border-blue-600";
-        } else {
-          btn.className = "tab-btn px-5 py-3 font-semibold text-gray-500 hover:text-gray-700 border-b-2 border-transparent";
-        }
-      });
-      if (tab === "alerte") incarcaAlerte();
-    }
-
-    async function incarcaAlerte() {
-      const container = document.getElementById("alerte-lista");
-      try {
-        const lista = await apiFetch("/alerts");
-        if (lista.length === 0) {
-          container.innerHTML = '<div class="text-center py-6 text-gray-400 text-sm bg-white rounded-xl p-6">Nicio alertă activă. Adaugă una mai sus!</div>';
-          return;
-        }
-        container.innerHTML = lista.map(a => `
-          <div class="bg-white rounded-xl p-4 border border-gray-100 flex items-center justify-between gap-3">
-            <div>
-              <p class="font-semibold text-gray-800 text-sm">${a.categorie || 'Toate categoriile'}${a.oras ? ' · ' + a.oras : ''}${a.salariu_min ? ' · min ' + a.salariu_min + ' RON' : ''}</p>
-              <p class="text-xs text-green-600 mt-0.5">🟢 Activă</p>
-            </div>
-            <button onclick="stergeAlert(${a.id})" class="text-red-400 hover:text-red-600 text-sm font-medium">Șterge</button>
-          </div>`).join("");
-      } catch (e) {
-        container.innerHTML = '<div class="text-red-400 text-sm text-center py-4">Eroare la încărcarea alertelor.</div>';
-      }
-    }
-
-    async function stergeAlert(id) {
-      try {
-        await apiFetch(`/alerts/${id}`, { method: "DELETE" });
-        incarcaAlerte();
-      } catch (e) { alert(e.message); }
-    }
-
-    document.getElementById("alert-form").addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const mesaj = document.getElementById("alerte-mesaj");
-      mesaj.classList.add("hidden");
-      const btn = document.getElementById("btn-adauga-alert");
-      btn.disabled = true;
-      try {
-        await apiFetch("/alerts", { method: "POST", body: JSON.stringify({
-          categorie: document.getElementById("alert-categorie").value || null,
-          oras: document.getElementById("alert-oras").value || null,
-          salariu_min: parseInt(document.getElementById("alert-salariu").value) || null,
-        })});
-        mesaj.className = "bg-green-50 border border-green-200 text-green-700 rounded-xl px-4 py-3 text-sm mb-4";
-        mesaj.textContent = "Alertă adăugată! Vei primi email când apar joburi noi.";
-        mesaj.classList.remove("hidden");
-        document.getElementById("alert-form").reset();
-        incarcaAlerte();
-      } catch (err) {
-        mesaj.className = "bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3 text-sm mb-4";
-        mesaj.textContent = err.message;
-        mesaj.classList.remove("hidden");
-      } finally {
-        btn.disabled = false;
-      }
-    });
-
-    async function incarcaAplicari() {
-      try {
-        const aplicari = await apiFetch("/aplicari/ale-mele");
-        const container = document.getElementById("aplicari-list");
-
-        if (aplicari.length === 0) {
-          container.innerHTML = `
-            <div class="text-center py-16 bg-white rounded-xl">
-              <div class="text-5xl mb-4">ðŸ“‹</div>
-              <p class="text-xl text-gray-500 mb-4">Nu ai aplicat la niciun job Ã®ncÄƒ.</p>
-              <a href="/static/jobs.html" class="bg-blue-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-blue-700 inline-block">CautÄƒ joburi</a>
-            </div>`;
-          return;
-        }
-
-        container.innerHTML = aplicari.map(a => `
-          <div class="bg-white rounded-xl shadow-sm p-5 mb-4 flex justify-between items-start flex-wrap gap-4">
-            <div>
-              <h3 class="font-bold text-gray-800 text-lg">${a.job?.titlu || 'Job'}</h3>
-              <p class="text-blue-600 font-medium">${a.job?.companie || ''}</p>
-              <p class="text-gray-500 text-sm mt-1">ðŸ“ ${a.job?.oras || ''} Â· Aplicat la ${formatData(a.creat_la)}</p>
-              ${a.scrisoare ? `<p class="text-gray-500 text-sm mt-2 italic">"${escapeHtml(a.scrisoare.substring(0, 100))}${a.scrisoare.length > 100 ? '...' : ''}"</p>` : ''}
-              ${a.cv_nume_original ? `<p class="text-gray-500 text-sm mt-1">ðŸ“Ž <a href="${API_BASE}/upload/cv/${a.cv_path}" target="_blank" class="text-blue-600 hover:underline">${a.cv_nume_original}</a></p>` : ''}
-            </div>
-            <div class="flex flex-col items-end gap-2">
-              ${statusBadge(a.status)}
-              <a href="/static/job-detalii.html?id=${a.job_id}" class="text-blue-600 hover:underline text-sm">Vezi job â†’</a>
-              <a href="/static/profil.html?id=${a.job?.angajator_id}" class="text-purple-600 hover:underline text-sm">â­ RecenzeazÄƒ angajatorul</a>
-              ${a.status === 'trimisa' ? `<button onclick="retrage(${a.id}, this)" class="text-red-500 hover:underline text-sm">Retrage aplicarea</button>` : ''}
-            </div>
-          </div>`).join("");
-      } catch (e) {
-        document.getElementById("aplicari-list").innerHTML =
-          '<div class="text-center py-10 text-red-400">Eroare la Ã®ncÄƒrcarea aplicÄƒrilor.</div>';
-      }
-    }
-
-    async function retrage(id, btn) {
-      if (!confirm("EÈ™ti sigur cÄƒ vrei sÄƒ retragi aceastÄƒ aplicare?")) return;
-      try {
-        await apiFetch(`/aplicari/${id}`, { method: "DELETE" });
-        incarcaAplicari();
-      } catch (e) {
-        alert(e.message);
-      }
-    }
-
-    async function incarcaProfil() {
-      try {
-        const profil = await apiFetch("/auth/me");
-        document.getElementById("p-nume").value = profil.nume || "";
-        document.getElementById("p-telefon").value = profil.telefon || "";
-        document.getElementById("p-oras").value = profil.oras || "";
-        document.getElementById("p-despre").value = profil.despre || "";
-      } catch (e) {}
-    }
-
-    document.getElementById("profil-form").addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const mesajEl = document.getElementById("profil-mesaj");
-      try {
-        await apiFetch("/auth/me", {
-          method: "PUT",
-          body: JSON.stringify({
-            nume: document.getElementById("p-nume").value,
-            telefon: document.getElementById("p-telefon").value || null,
-            oras: document.getElementById("p-oras").value || null,
-            despre: document.getElementById("p-despre").value || null,
-          }),
-        });
-        mesajEl.className = "bg-green-50 border border-green-200 text-green-700 rounded-xl px-4 py-3";
-        mesajEl.textContent = "Profilul a fost actualizat cu succes!";
-        mesajEl.classList.remove("hidden");
-        setTimeout(() => mesajEl.classList.add("hidden"), 3000);
-      } catch (err) {
-        mesajEl.className = "bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3";
-        mesajEl.textContent = err.message;
-        mesajEl.classList.remove("hidden");
-      }
-    });
-
-    async function stergeContul() {
-      if (!confirm("Ești sigur că vrei să îți ștergi contul? Această acțiune este IREVERSIBILĂ.")) return;
-      const parola = prompt("Introdu parola curentă pentru a confirma ștergerea contului:");
-      if (!parola) return;
-      try {
-        await apiFetch("/auth/me", { method: "DELETE", body: JSON.stringify({ parola_curenta: parola }) });
-        logout();
-      } catch (err) {
-        alert("Eroare: " + err.message);
-      }
-    }
-
-    incarcaAplicari();
-    incarcaProfil();
-    initNotifBell();
-  </script>
-</body>
-</html>
-
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="robots" content="noindex, nofollow" />
+  <title>Dashboard Candidat - JobPart</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%237c3aed'/><text x='50%' y='50%' font-size='20' text-anchor='middle' dominant-baseline='central' fill='white' font-family='Arial'>J</text></svg>" />
+  <meta name="theme-color" content="#7c3aed" />
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 font-sans">
+
+  <nav class="bg-white shadow-sm">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+      <a href="/static/index.html" class="text-2xl font-bold text-blue-600">Job<span class="text-gray-800">Part</span></a>
+      <div class="flex items-center gap-4">
+        <a href="/static/jobs.html" class="text-gray-600 hover:text-blue-600">Joburi</a>
+        <a href="/static/favorite.html" class="text-gray-600 hover:text-blue-600">❤️ Salvate</a>
+        <a href="/static/mesaje.html" class="text-gray-600 hover:text-blue-600">âœ‰️ Mesaje</a>
+        <a href="/static/notificari.html" id="nav-notif-bell" class="relative inline-flex items-center text-gray-600 hover:text-blue-600">
+          <span class="text-xl">ðŸ””</span>
+          <span class="notif-badge hidden absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold min-w-[16px] h-4 rounded-full flex items-center justify-center px-1 leading-none"></span>
+        </a>
+        <span id="nav-username" class="text-gray-700 font-medium"></span>
+        <button onclick="logout()" class="px-4 py-2 rounded-lg bg-red-500 text-white hover:bg-red-600 font-medium">IeÈ™ire</button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="max-w-6xl mx-auto px-4 py-8">
+    <h1 class="text-3xl font-bold text-gray-800 mb-2">Dashboard Candidat</h1>
+    <p id="salut" class="text-gray-500 mb-8"></p>
+
+    <!-- Tab-uri -->
+    <div class="flex gap-2 mb-8 border-b border-gray-200 flex-wrap">
+      <button onclick="switchTab('aplicari')" id="tab-aplicari"
+        class="tab-btn px-5 py-3 font-semibold text-blue-600 border-b-2 border-blue-600">
+        AplicÄƒrile mele
+      </button>
+      <button onclick="switchTab('profil')" id="tab-profil"
+        class="tab-btn px-5 py-3 font-semibold text-gray-500 hover:text-gray-700 border-b-2 border-transparent">
+        Profilul meu
+      </button>
+      <a href="/api/export/cv-pdf" target="_blank"
+        class="ml-auto flex items-center gap-2 px-5 py-3 bg-indigo-600 text-white rounded-t-lg font-semibold hover:bg-indigo-700 transition">
+        ðŸ“„ Export CV PDF
+      </a>
+    </div>
+
+    <!-- Tab Aplicari -->
+    <div id="content-aplicari">
+      <div class="flex justify-between items-center mb-5">
+        <h2 class="text-xl font-bold text-gray-700">AplicÄƒrile mele</h2>
+        <a href="/static/jobs.html" class="bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700 font-medium">+ CautÄƒ joburi</a>
+      </div>
+      <div id="aplicari-list">
+        <div class="text-center py-10 text-gray-400">Se încarcÄƒ...</div>
+      </div>
+    </div>
+
+    <!-- Tab Profil -->
+    <!-- Tab Alerte -->
+    <div id="content-alerte" class="hidden max-w-xl">
+      <div class="bg-white rounded-xl shadow-sm p-6 mb-4">
+        <h2 class="text-xl font-bold text-gray-800 mb-1">🔔 Alerte joburi noi</h2>
+        <p class="text-gray-500 text-sm mb-5">Primești email automat când apare un job nou care se potrivește.</p>
+        <div id="alerte-mesaj" class="hidden mb-4 rounded-xl px-4 py-3 text-sm"></div>
+        <form id="alert-form" class="space-y-3">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Categorie</label>
+            <select id="alert-categorie" class="w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm">
+              <option value="">Toate categoriile</option>
+              <option>IT</option><option>Retail</option><option>Educatie</option>
+              <option>Livrari</option><option>HoReCa</option><option>Administrativ</option>
+              <option>Marketing</option><option>Constructii</option>
+              <option>Transport</option><option>Service Auto</option><option>Altele</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Oraș</label>
+            <input type="text" id="alert-oras" placeholder="ex: București"
+              class="w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Salariu minim (RON, opțional)</label>
+            <input type="number" id="alert-salariu" placeholder="ex: 2000"
+              class="w-full border border-gray-300 rounded-xl px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm" />
+          </div>
+          <button type="submit" id="btn-adauga-alert"
+            class="w-full bg-blue-600 text-white py-2.5 rounded-xl font-semibold hover:bg-blue-700 transition text-sm">
+            + Adaugă alertă
+          </button>
+        </form>
+      </div>
+      <div id="alerte-lista" class="space-y-3">
+        <div class="text-center py-6 text-gray-400 text-sm">Se încarcă alertele...</div>
+      </div>
+    </div>
+
+    <div id="content-profil" class="hidden">
+      <div class="bg-white rounded-xl shadow-sm p-6 max-w-xl">
+        <h2 class="text-xl font-bold text-gray-800 mb-6">Profilul meu</h2>
+        <div id="profil-mesaj" class="hidden mb-4"></div>
+        <form id="profil-form" class="space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Nume complet</label>
+            <input type="text" id="p-nume" class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Telefon</label>
+            <input type="tel" id="p-telefon" class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">OraÈ™</label>
+            <input type="text" id="p-oras" class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Despre mine</label>
+            <textarea id="p-despre" rows="4" placeholder="PrezintÄƒ-te pe scurt..."
+              class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
+          </div>
+          <button type="submit" class="bg-blue-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-blue-700 transition">
+            SalveazÄƒ modificÄƒrile
+          </button>
+        </form>
+
+        <div class="mt-8 pt-6 border-t border-red-100">
+          <h3 class="text-base font-semibold text-red-700 mb-2">ZonÄƒ periculoasÄƒ</h3>
+          <p class="text-sm text-gray-500 mb-4">
+            È˜tergerea contului este ireversibilÄƒ. Datele personale vor fi anonimizate, iar CV-urile vor fi È™terse permanent.
+          </p>
+          <button onclick="stergeContul()"
+            class="bg-red-600 text-white px-6 py-2 rounded-xl font-semibold hover:bg-red-700 transition text-sm">
+            È˜terge contul meu
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/static/js/api.js"></script>
+  <script>
+    const user = getUser();
+    if (!user || user.rol !== "candidat") {
+      window.location.href = "/static/login.html";
+    }
+
+    document.getElementById("nav-username").textContent = user?.nume || "";
+    document.getElementById("salut").textContent = `Bun venit, ${user?.nume}! IatÄƒ activitatea ta.`;
+
+    function switchTab(tab) {
+      ["aplicari", "profil", "alerte"].forEach(t => {
+        document.getElementById(`content-${t}`).classList.toggle("hidden", t !== tab);
+        const btn = document.getElementById(`tab-${t}`);
+        if (!btn) return;
+        if (t === tab) {
+          btn.className = "tab-btn px-5 py-3 font-semibold text-blue-600 border-b-2 border-blue-600";
+        } else {
+          btn.className = "tab-btn px-5 py-3 font-semibold text-gray-500 hover:text-gray-700 border-b-2 border-transparent";
+        }
+      });
+      if (tab === "alerte") incarcaAlerte();
+    }
+
+    async function incarcaAlerte() {
+      const container = document.getElementById("alerte-lista");
+      try {
+        const lista = await apiFetch("/alerts");
+        if (lista.length === 0) {
+          container.innerHTML = '<div class="text-center py-6 text-gray-400 text-sm bg-white rounded-xl p-6">Nicio alertă activă. Adaugă una mai sus!</div>';
+          return;
+        }
+        container.innerHTML = lista.map(a => `
+          <div class="bg-white rounded-xl p-4 border border-gray-100 flex items-center justify-between gap-3">
+            <div>
+              <p class="font-semibold text-gray-800 text-sm">${a.categorie || 'Toate categoriile'}${a.oras ? ' · ' + a.oras : ''}${a.salariu_min ? ' · min ' + a.salariu_min + ' RON' : ''}</p>
+              <p class="text-xs text-green-600 mt-0.5">🟢 Activă</p>
+            </div>
+            <button onclick="stergeAlert(${a.id})" class="text-red-400 hover:text-red-600 text-sm font-medium">Șterge</button>
+          </div>`).join("");
+      } catch (e) {
+        container.innerHTML = '<div class="text-red-400 text-sm text-center py-4">Eroare la încărcarea alertelor.</div>';
+      }
+    }
+
+    async function stergeAlert(id) {
+      try {
+        await apiFetch(`/alerts/${id}`, { method: "DELETE" });
+        incarcaAlerte();
+      } catch (e) { alert(e.message); }
+    }
+
+    document.getElementById("alert-form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const mesaj = document.getElementById("alerte-mesaj");
+      mesaj.classList.add("hidden");
+      const btn = document.getElementById("btn-adauga-alert");
+      btn.disabled = true;
+      try {
+        await apiFetch("/alerts", { method: "POST", body: JSON.stringify({
+          categorie: document.getElementById("alert-categorie").value || null,
+          oras: document.getElementById("alert-oras").value || null,
+          salariu_min: parseInt(document.getElementById("alert-salariu").value) || null,
+        })});
+        mesaj.className = "bg-green-50 border border-green-200 text-green-700 rounded-xl px-4 py-3 text-sm mb-4";
+        mesaj.textContent = "Alertă adăugată! Vei primi email când apar joburi noi.";
+        mesaj.classList.remove("hidden");
+        document.getElementById("alert-form").reset();
+        incarcaAlerte();
+      } catch (err) {
+        mesaj.className = "bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3 text-sm mb-4";
+        mesaj.textContent = err.message;
+        mesaj.classList.remove("hidden");
+      } finally {
+        btn.disabled = false;
+      }
+    });
+
+    async function incarcaAplicari() {
+      try {
+        const aplicari = await apiFetch("/aplicari/ale-mele");
+        const container = document.getElementById("aplicari-list");
+
+        if (aplicari.length === 0) {
+          container.innerHTML = `
+            <div class="text-center py-16 bg-white rounded-xl">
+              <div class="text-5xl mb-4">ðŸ“‹</div>
+              <p class="text-xl text-gray-500 mb-4">Nu ai aplicat la niciun job încÄƒ.</p>
+              <a href="/static/jobs.html" class="bg-blue-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-blue-700 inline-block">CautÄƒ joburi</a>
+            </div>`;
+          return;
+        }
+
+        container.innerHTML = aplicari.map(a => `
+          <div class="bg-white rounded-xl shadow-sm p-5 mb-4 flex justify-between items-start flex-wrap gap-4">
+            <div>
+              <h3 class="font-bold text-gray-800 text-lg">${a.job?.titlu || 'Job'}</h3>
+              <p class="text-blue-600 font-medium">${a.job?.companie || ''}</p>
+              <p class="text-gray-500 text-sm mt-1">ðŸ“ ${a.job?.oras || ''} · Aplicat la ${formatData(a.creat_la)}</p>
+              ${a.scrisoare ? `<p class="text-gray-500 text-sm mt-2 italic">"${escapeHtml(a.scrisoare.substring(0, 100))}${a.scrisoare.length > 100 ? '...' : ''}"</p>` : ''}
+              ${a.cv_nume_original ? `<p class="text-gray-500 text-sm mt-1">ðŸ“Ž <a href="${API_BASE}/upload/cv/${a.cv_path}" target="_blank" class="text-blue-600 hover:underline">${a.cv_nume_original}</a></p>` : ''}
+            </div>
+            <div class="flex flex-col items-end gap-2">
+              ${statusBadge(a.status)}
+              <a href="/static/job-detalii.html?id=${a.job_id}" class="text-blue-600 hover:underline text-sm">Vezi job â†’</a>
+              <a href="/static/profil.html?id=${a.job?.angajator_id}" class="text-purple-600 hover:underline text-sm">⭐ RecenzeazÄƒ angajatorul</a>
+              ${a.status === 'trimisa' ? `<button onclick="retrage(${a.id}, this)" class="text-red-500 hover:underline text-sm">Retrage aplicarea</button>` : ''}
+            </div>
+          </div>`).join("");
+      } catch (e) {
+        document.getElementById("aplicari-list").innerHTML =
+          '<div class="text-center py-10 text-red-400">Eroare la încÄƒrcarea aplicÄƒrilor.</div>';
+      }
+    }
+
+    async function retrage(id, btn) {
+      if (!confirm("EÈ™ti sigur cÄƒ vrei sÄƒ retragi aceastÄƒ aplicare?")) return;
+      try {
+        await apiFetch(`/aplicari/${id}`, { method: "DELETE" });
+        incarcaAplicari();
+      } catch (e) {
+        alert(e.message);
+      }
+    }
+
+    async function incarcaProfil() {
+      try {
+        const profil = await apiFetch("/auth/me");
+        document.getElementById("p-nume").value = profil.nume || "";
+        document.getElementById("p-telefon").value = profil.telefon || "";
+        document.getElementById("p-oras").value = profil.oras || "";
+        document.getElementById("p-despre").value = profil.despre || "";
+      } catch (e) {}
+    }
+
+    document.getElementById("profil-form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const mesajEl = document.getElementById("profil-mesaj");
+      try {
+        await apiFetch("/auth/me", {
+          method: "PUT",
+          body: JSON.stringify({
+            nume: document.getElementById("p-nume").value,
+            telefon: document.getElementById("p-telefon").value || null,
+            oras: document.getElementById("p-oras").value || null,
+            despre: document.getElementById("p-despre").value || null,
+          }),
+        });
+        mesajEl.className = "bg-green-50 border border-green-200 text-green-700 rounded-xl px-4 py-3";
+        mesajEl.textContent = "Profilul a fost actualizat cu succes!";
+        mesajEl.classList.remove("hidden");
+        setTimeout(() => mesajEl.classList.add("hidden"), 3000);
+      } catch (err) {
+        mesajEl.className = "bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3";
+        mesajEl.textContent = err.message;
+        mesajEl.classList.remove("hidden");
+      }
+    });
+
+    async function stergeContul() {
+      if (!confirm("Ești sigur că vrei să îți ștergi contul? Această acțiune este IREVERSIBILĂ.")) return;
+      const parola = prompt("Introdu parola curentă pentru a confirma ștergerea contului:");
+      if (!parola) return;
+      try {
+        await apiFetch("/auth/me", { method: "DELETE", body: JSON.stringify({ parola_curenta: parola }) });
+        logout();
+      } catch (err) {
+        alert("Eroare: " + err.message);
+      }
+    }
+
+    incarcaAplicari();
+    incarcaProfil();
+    initNotifBell();
+  </script>
+</body>
+</html>
+

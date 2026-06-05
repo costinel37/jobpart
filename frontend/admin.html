@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ro">
 <head>
   <meta charset="UTF-8" />
@@ -30,7 +30,7 @@
 
     <!-- Statistici -->
     <div id="statistici" class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-10">
-      <div class="text-center py-8 text-gray-400 col-span-6">Se Ã®ncarcÄƒ statisticile...</div>
+      <div class="text-center py-8 text-gray-400 col-span-6">Se încarcÄƒ statisticile...</div>
     </div>
 
     <!-- Tab-uri -->
@@ -40,19 +40,19 @@
       <button onclick="switchTab('joburi')" id="tab-joburi"
         class="tab-btn px-5 py-3 font-semibold text-gray-500 hover:text-gray-700 border-b-2 border-transparent">Joburi</button>
       <button onclick="switchTab('promotii')" id="tab-promotii"
-        class="tab-btn px-5 py-3 font-semibold text-gray-500 hover:text-gray-700 border-b-2 border-transparent">â­ PromovÄƒri</button>
+        class="tab-btn px-5 py-3 font-semibold text-gray-500 hover:text-gray-700 border-b-2 border-transparent">⭐ PromovÄƒri</button>
       <button onclick="switchTab('newsletter')" id="tab-newsletter"
         class="tab-btn px-5 py-3 font-semibold text-gray-500 hover:text-gray-700 border-b-2 border-transparent">ðŸ“¬ Newsletter</button>
     </div>
 
     <!-- Tab: Utilizatori -->
     <div id="content-utilizatori">
-      <div id="utilizatori-list"><div class="text-center py-10 text-gray-400">Se Ã®ncarcÄƒ...</div></div>
+      <div id="utilizatori-list"><div class="text-center py-10 text-gray-400">Se încarcÄƒ...</div></div>
     </div>
 
     <!-- Tab: Joburi -->
     <div id="content-joburi" class="hidden">
-      <div id="toate-joburi-list"><div class="text-center py-10 text-gray-400">Se Ã®ncarcÄƒ...</div></div>
+      <div id="toate-joburi-list"><div class="text-center py-10 text-gray-400">Se încarcÄƒ...</div></div>
     </div>
 
     <!-- Tab: PromovÄƒri -->
@@ -99,7 +99,7 @@
             </tr>
           </thead>
           <tbody id="tabel-promotii">
-            <tr><td colspan="7" class="text-center py-8 text-gray-400">Se Ã®ncarcÄƒ...</td></tr>
+            <tr><td colspan="7" class="text-center py-8 text-gray-400">Se încarcÄƒ...</td></tr>
           </tbody>
         </table>
       </div>
@@ -173,7 +173,7 @@
           </div>`).join("");
       } catch (e) {
         document.getElementById("statistici").innerHTML =
-          '<div class="col-span-6 text-red-400 text-center">Eroare la Ã®ncÄƒrcarea statisticilor.</div>';
+          '<div class="col-span-6 text-red-400 text-center">Eroare la încÄƒrcarea statisticilor.</div>';
       }
     }
 
@@ -291,9 +291,9 @@
                     </td>
                     <td class="px-5 py-3">
                       ${j.promovat
-                        ? `<span class="text-xs bg-yellow-400 text-yellow-900 px-2 py-1 rounded-full font-bold">â­ Da</span>
+                        ? `<span class="text-xs bg-yellow-400 text-yellow-900 px-2 py-1 rounded-full font-bold">⭐ Da</span>
                            <button onclick="anuleazaPromovare(${j.id})" class="ml-2 text-xs text-gray-400 hover:text-red-500">âœ•</button>`
-                        : `<button onclick="promoveazaJobAdmin(${j.id})" class="text-xs px-3 py-1 rounded-lg border border-yellow-400 text-yellow-700 hover:bg-yellow-50">â­ PromoveazÄƒ</button>`}
+                        : `<button onclick="promoveazaJobAdmin(${j.id})" class="text-xs px-3 py-1 rounded-lg border border-yellow-400 text-yellow-700 hover:bg-yellow-50">⭐ PromoveazÄƒ</button>`}
                     </td>
                     <td class="px-5 py-3">
                       ${j.activ ? `<button onclick="dezactiveazaJob(${j.id})" class="text-xs px-3 py-1 rounded-lg border border-red-300 text-red-600 hover:bg-red-50">DezactiveazÄƒ</button>` : '<span class="text-gray-400 text-xs">Dezactivat</span>'}
@@ -309,7 +309,7 @@
     }
 
     async function promoveazaJobAdmin(jobId) {
-      const zile = prompt("CÃ¢te zile sÄƒ fie promovat? (implicit 7)", "7");
+      const zile = prompt("Câte zile sÄƒ fie promovat? (implicit 7)", "7");
       if (!zile) return;
       try {
         const r = await apiFetch(`/jobs/${jobId}/promoveaza?zile=${parseInt(zile)}`, { method: "POST" });
@@ -369,7 +369,7 @@
 
     async function incarcaCereriPromo(status) {
       const tbody = document.getElementById("tabel-promotii");
-      tbody.innerHTML = '<tr><td colspan="7" class="text-center py-8 text-gray-400">Se Ã®ncarcÄƒ...</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="7" class="text-center py-8 text-gray-400">Se încarcÄƒ...</td></tr>';
       try {
         const statusParam = (status === 'toate') ? '' : `&status=${status}`;
         const r = await apiFetch(`/promotii/cereri?per_pagina=100${statusParam}`);
