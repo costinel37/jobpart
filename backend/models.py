@@ -193,6 +193,19 @@ class JobAlert(Base):
     user = relationship("User")
 
 
+class JobLike(Base):
+    """Aprecieri unice per job (bazat pe IP hash, fără autentificare)."""
+    __tablename__ = "job_likes"
+    __table_args__ = (UniqueConstraint("job_id", "ip_hash"),)
+
+    id = Column(Integer, primary_key=True, index=True)
+    job_id = Column(Integer, ForeignKey("jobs.id"), nullable=False, index=True)
+    ip_hash = Column(String(64), nullable=False)
+    creat_la = Column(DateTime, default=datetime.utcnow)
+
+    job = relationship("Job")
+
+
 class JobView(Base):
     """Înregistrează vizualizările unice per job (bazat pe IP hash)."""
     __tablename__ = "job_views"

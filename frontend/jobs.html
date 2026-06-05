@@ -12,6 +12,19 @@
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%237c3aed'/><text x='50%' y='50%' font-size='20' text-anchor='middle' dominant-baseline='central' fill='white' font-family='Arial'>J</text></svg>" />
   <meta name="theme-color" content="#7c3aed" />
   <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .heart-btn { background: none; border: none; cursor: pointer; padding: 4px 8px; border-radius: 20px; display: inline-flex; align-items: center; gap: 4px; font-size: 13px; font-weight: 600; transition: all 0.2s; color: #9ca3af; }
+    .heart-btn:hover { color: #a855f7; background: rgba(168,85,247,0.08); }
+    .heart-btn.liked { color: #7c3aed; }
+    .heart-btn.liked .heart-icon { animation: heartPop 0.35s cubic-bezier(0.36, 0.07, 0.19, 0.97); }
+    .heart-icon { font-size: 16px; line-height: 1; }
+    @keyframes heartPop {
+      0%  { transform: scale(1); }
+      40% { transform: scale(1.45); filter: drop-shadow(0 0 6px #a855f7); }
+      70% { transform: scale(0.9); }
+      100%{ transform: scale(1); }
+    }
+  </style>
 </head>
 <body class="bg-gray-50 font-sans">
 
@@ -177,6 +190,55 @@
 
   <script src="/static/js/api.js"></script>
   <script>
+    // ── LIKES ────────────────────────────────────────────────────────────────
+    const LIKED_KEY = "jp_liked_jobs";
+
+    function getLikedSet() {
+      try { return new Set(JSON.parse(localStorage.getItem(LIKED_KEY) || "[]")); }
+      catch { return new Set(); }
+    }
+
+    function isLiked(jobId) { return getLikedSet().has(jobId); }
+
+    async function toggleLike(e, jobId) {
+      e.preventDefault();
+      e.stopPropagation();
+      const btn = document.getElementById(`like-${jobId}`);
+      const icon = btn?.querySelector(".heart-icon");
+      const countEl = document.getElementById(`like-count-${jobId}`);
+      if (!btn) return;
+
+      try {
+        const res = await fetch(API_BASE + `/jobs/${jobId}/like`, { method: "POST" });
+        const data = await res.json();
+
+        // Actualizeaza localStorage
+        const liked = getLikedSet();
+        if (data.liked) liked.add(jobId); else liked.delete(jobId);
+        localStorage.setItem(LIKED_KEY, JSON.stringify([...liked]));
+
+        // Actualizeaza UI
+        btn.classList.toggle("liked", data.liked);
+        if (icon) icon.textContent = data.liked ? "💜" : "🤍";
+        if (countEl) countEl.textContent = data.total;
+      } catch {}
+    }
+
+    async function incarcaLikes(jobIds) {
+      for (const id of jobIds) {
+        try {
+          const data = await fetch(API_BASE + `/jobs/${id}/like`).then(r => r.json());
+          const btn = document.getElementById(`like-${id}`);
+          const icon = btn?.querySelector(".heart-icon");
+          const countEl = document.getElementById(`like-count-${id}`);
+          if (btn) btn.classList.toggle("liked", data.liked);
+          if (icon) icon.textContent = data.liked ? "💜" : "🤍";
+          if (countEl) countEl.textContent = data.total;
+        } catch {}
+      }
+    }
+    // ─────────────────────────────────────────────────────────────────────────
+
     // Initializare navigare — updateNav() din api.js afișează Login/Register sau Dashboard/Ieșire
     updateNav();
 
@@ -251,6 +313,7 @@
         }
 
         container.innerHTML = jobs.map(job => cardJob(job)).join("");
+        incarcaLikes(jobs.map(j => j.id));
         randeazaPaginare(total, pagina);
       } catch (e) {
         container.innerHTML = '<div class="text-center py-16 text-red-400">Eroare la încărcarea joburilor. Verifică că serverul rulează.</div>';
@@ -344,10 +407,21 @@
           <h3 class="font-bold text-gray-800 text-lg mb-1">${escapeHtml(job.titlu)}</h3>
           <p class="text-blue-600 font-medium mb-3">${escapeHtml(job.companie)}</p>
           ${descriere ? `<p class="text-gray-500 text-sm mb-3 line-clamp-2">${descriere}</p>` : ''}
-          <div class="flex flex-wrap items-center gap-4 text-sm text-gray-500">
-            <span>📍 ${escapeHtml(job.oras)}</span>
-            <span>💰 ${salariu}</span>
-            ${tipProgram}
+          <div class="flex flex-wrap items-center justify-between gap-3 text-sm text-gray-500">
+            <div class="flex items-center gap-4">
+              <span>📍 ${escapeHtml(job.oras)}</span>
+              <span>💰 ${salariu}</span>
+              ${tipProgram}
+            </div>
+            <button
+              id="like-${job.id}"
+              class="heart-btn ${isLiked(job.id) ? 'liked' : ''}"
+              onclick="toggleLike(event, ${job.id})"
+              title="Apreciază acest anunț"
+            >
+              <span class="heart-icon">${isLiked(job.id) ? '💜' : '🤍'}</span>
+              <span id="like-count-${job.id}">0</span>
+            </button>
           </div>
         </a>`;
     }

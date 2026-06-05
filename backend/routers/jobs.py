@@ -9,6 +9,7 @@ import models, schemas
 from auth import get_user_curent, require_rol
 from geocoding import geocodeaza_oras, distanta_km
 from telegram_service import notifica_job_nou
+from security import limiter
 
 ZILE_GRATUIT = 365
 
@@ -201,12 +202,64 @@ def statistici_job(
         models.Application.status == "acceptata"
     ).count()
 
+    like_count = db.query(models.JobLike).filter(models.JobLike.job_id == job_id).count()
+
     return {
         "vizualizari": vizualizari,
         "aplicari": aplicari,
         "acceptate": acceptate,
+        "aprecieri": like_count,
         "rata_aplicare": round(aplicari / vizualizari * 100, 1) if vizualizari > 0 else 0,
     }
+
+
+@router.post("/{job_id}/like")
+@limiter.limit("10/minute")
+def aprecia_job(job_id: int, request: Request, db: Session = Depends(get_db)):
+    """Apreciază sau retrage aprecierea unui job (toggle, fără autentificare)."""
+    import hashlib
+    job = db.query(models.Job).filter(models.Job.id == job_id, models.Job.activ == True).first()
+    if not job:
+        raise HTTPException(status_code=404, detail="Jobul nu există.")
+
+    ip = (request.headers.get("CF-Connecting-IP")
+          or request.headers.get("X-Forwarded-For", "").split(",")[0].strip()
+          or (request.client.host if request.client else "unknown"))
+    ip_hash = hashlib.sha256(ip.encode()).hexdigest()[:32]
+
+    existent = db.query(models.JobLike).filter(
+        models.JobLike.job_id == job_id,
+        models.JobLike.ip_hash == ip_hash
+    ).first()
+
+    if existent:
+        db.delete(existent)
+        db.commit()
+        liked = False
+    else:
+        db.add(models.JobLike(job_id=job_id, ip_hash=ip_hash))
+        db.commit()
+        liked = True
+
+    total = db.query(models.JobLike).filter(models.JobLike.job_id == job_id).count()
+    return {"liked": liked, "total": total}
+
+
+@router.get("/{job_id}/like")
+def stare_like(job_id: int, request: Request, db: Session = Depends(get_db)):
+    """Verifică dacă IP-ul curent a apreciat jobul și returnează totalul."""
+    import hashlib
+    ip = (request.headers.get("CF-Connecting-IP")
+          or request.headers.get("X-Forwarded-For", "").split(",")[0].strip()
+          or (request.client.host if request.client else "unknown"))
+    ip_hash = hashlib.sha256(ip.encode()).hexdigest()[:32]
+
+    liked = db.query(models.JobLike).filter(
+        models.JobLike.job_id == job_id,
+        models.JobLike.ip_hash == ip_hash
+    ).first() is not None
+    total = db.query(models.JobLike).filter(models.JobLike.job_id == job_id).count()
+    return {"liked": liked, "total": total}
 
 
 @router.post("", response_model=schemas.JobOut)
