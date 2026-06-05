@@ -63,7 +63,7 @@ class Job(Base):
     categorie = Column(String(100), nullable=True)
     lat = Column(Float, nullable=True)
     lng = Column(Float, nullable=True)
-    activ = Column(Boolean, default=True)
+    activ = Column(Boolean, default=True, index=True)
     expira_la = Column(DateTime, nullable=True)
     avertisment_job = Column(Boolean, default=False)
     promovat = Column(Boolean, default=False)
@@ -124,7 +124,7 @@ class Notification(Base):
     __tablename__ = "notifications"
 
     id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
     tip = Column(String(50), nullable=False)  # aplicare_noua, status_schimbat, mesaj_nou, recenzie_noua
     mesaj = Column(String(300), nullable=False)
     link = Column(String(300), nullable=True)
