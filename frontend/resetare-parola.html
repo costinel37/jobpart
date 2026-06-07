@@ -102,7 +102,11 @@
       btn.disabled = true;
       btn.textContent = "Se trimite...";
       try {
-        const r = await apiFetch(`/auth/reseteaza-parola/cerere?email=${encodeURIComponent(document.getElementById("email-cerere").value)}`, { method: "POST" });
+        const r = await apiFetch("/auth/reseteaza-parola/cerere", {
+          method: "POST",
+          skipAuth: true,
+          body: JSON.stringify({ email: document.getElementById("email-cerere").value }),
+        });
         mesaj.className = "bg-green-50 border border-green-200 text-green-700 rounded-xl px-4 py-3 text-sm mb-4";
         mesaj.textContent = r.mesaj;
         mesaj.classList.remove("hidden");
