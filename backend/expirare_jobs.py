@@ -282,6 +282,90 @@ def _trimite_job_alerts(db, now):
             logger.warning(f"[ALERT] Eroare alert {alert.id}: {e}")
 
 
+def _verifica_ssl_si_domeniu():
+    """Verifică zilnic certificatul SSL și domeniul jobpart.ro. Trimite alertă admin dacă < 30 zile."""
+    import ssl, socket, time
+    from telegram_service import notifica_admin
+
+    DOMENIU = "jobpart.ro"
+    PRAG_ZILE = 30
+
+    alerte = []
+
+    # Verificare SSL
+    try:
+        ctx = ssl.create_default_context()
+        with socket.create_connection((DOMENIU, 443), timeout=10) as sock:
+            with ctx.wrap_socket(sock, server_hostname=DOMENIU) as ssock:
+                cert = ssock.getpeercert()
+                expiry_str = cert.get("notAfter", "")
+                expiry = datetime.strptime(expiry_str, "%b %d %H:%M:%S %Y %Z")
+                zile = (expiry - datetime.utcnow()).days
+                if zile <= PRAG_ZILE:
+                    alerte.append(f"🔐 <b>Certificat SSL</b> expiră în <b>{zile} zile</b> ({expiry.strftime('%d.%m.%Y')})")
+                else:
+                    logger.info(f"[MONITOR] SSL OK — expiră în {zile} zile")
+    except Exception as e:
+        alerte.append(f"❌ <b>SSL verificare eșuată</b>: {e}")
+
+    # Verificare domeniu via WHOIS
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s.settimeout(10)
+        s.connect(("whois.rotld.ro", 43))
+        s.sendall(f"{DOMENIU}\r\n".encode())
+        raspuns = b""
+        while True:
+            chunk = s.recv(4096)
+            if not chunk:
+                break
+            raspuns += chunk
+        s.close()
+        text = raspuns.decode("utf-8", errors="ignore")
+        for linie in text.splitlines():
+            if "Expires On" in linie or "Expiry Date" in linie or "expires" in linie.lower():
+                parti = linie.split(":")
+                if len(parti) >= 2:
+                    data_str = parti[-1].strip().split("T")[0]
+                    try:
+                        for fmt in ("%Y-%m-%d", "%d.%m.%Y", "%Y/%m/%d"):
+                            try:
+                                expiry_dom = datetime.strptime(data_str, fmt)
+                                zile_dom = (expiry_dom - datetime.utcnow()).days
+                                if zile_dom <= PRAG_ZILE:
+                                    alerte.append(f"🌐 <b>Domeniu {DOMENIU}</b> expiră în <b>{zile_dom} zile</b> ({expiry_dom.strftime('%d.%m.%Y')})")
+                                else:
+                                    logger.info(f"[MONITOR] Domeniu OK — expiră în {zile_dom} zile")
+                                break
+                            except ValueError:
+                                continue
+                    except Exception:
+                        pass
+                break
+    except Exception as e:
+        logger.warning(f"[MONITOR] WHOIS verificare eșuată: {e}")
+
+    if alerte:
+        mesaj = "⚠️ <b>Alertă JobPart.ro</b>\n\n" + "\n".join(alerte) + "\n\n🔧 Acționează înainte să expire!"
+        notifica_admin(mesaj)
+        logger.warning(f"[MONITOR] Alertă trimisă admin: {len(alerte)} probleme")
+
+
+def porneste_monitorizare(interval_secunde: int = 86400):
+    """Verifică SSL și domeniu o dată pe zi și alertează adminul prin Telegram."""
+    _verifica_ssl_si_domeniu()
+
+    def _loop():
+        import time
+        while True:
+            time.sleep(interval_secunde)
+            _verifica_ssl_si_domeniu()
+
+    t = threading.Thread(target=_loop, daemon=True)
+    t.start()
+    logger.info(f"[MONITOR] Monitoring pornit, interval: {interval_secunde}s")
+
+
 def porneste_keep_alive(interval_secunde: int = 600):
     """Ping la propria adresă ca să nu adoarmă pe Render free tier."""
     import time

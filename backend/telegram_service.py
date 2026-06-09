@@ -9,6 +9,7 @@ logger = logging.getLogger(__name__)
 
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN", "")
 TELEGRAM_CHANNEL_ID = os.getenv("TELEGRAM_CHANNEL_ID", "")
+TELEGRAM_ADMIN_ID = os.getenv("TELEGRAM_ADMIN_ID", "5263819130")
 
 
 def _trimite_mesaj(text: str):
@@ -70,3 +71,22 @@ def notifica_job_nou(job):
     )
 
     threading.Thread(target=_trimite_mesaj, args=(mesaj,), daemon=True).start()
+
+
+def notifica_admin(text: str):
+    """Trimite mesaj privat adminului (Costy) pe Telegram."""
+    if not TELEGRAM_BOT_TOKEN or not TELEGRAM_ADMIN_ID:
+        return
+    try:
+        url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
+        payload = json.dumps({
+            "chat_id": TELEGRAM_ADMIN_ID,
+            "text": text,
+            "parse_mode": "HTML",
+            "disable_web_page_preview": True,
+        }).encode("utf-8")
+        req = urllib.request.Request(url, data=payload, headers={"Content-Type": "application/json"})
+        urllib.request.urlopen(req, timeout=10)
+        logger.info("[TELEGRAM ADMIN] Mesaj trimis adminului")
+    except Exception as e:
+        logger.warning(f"[TELEGRAM ADMIN] Eroare: {e}")

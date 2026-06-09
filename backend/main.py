@@ -17,7 +17,7 @@ from security import (
     limiter, SecurityHeadersMiddleware,
     RequestLoggingMiddleware, eroare_rate_limit
 )
-from expirare_jobs import porneste_task_expirare, porneste_keep_alive
+from expirare_jobs import porneste_task_expirare, porneste_keep_alive, porneste_monitorizare
 from auth import hash_parola
 from database import SessionLocal
 
@@ -147,6 +147,7 @@ def startup():
         db.close()
     porneste_task_expirare(interval_secunde=300)
     porneste_keep_alive(interval_secunde=600)
+    porneste_monitorizare(interval_secunde=86400)
 
 
 @app.exception_handler(500)
