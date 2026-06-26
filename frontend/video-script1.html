@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Script 1 — Problema | JobPart</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@700;800;900&display=swap');
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #0a0010;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      font-family: 'Inter', sans-serif;
+      gap: 16px;
+      padding: 20px;
+    }
+    .screen {
+      width: 375px;
+      height: 667px;
+      position: relative;
+      overflow: hidden;
+      border-radius: 20px;
+      background: #1a0a2e;
+      flex-shrink: 0;
+    }
+    .scene {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 32px;
+      opacity: 0;
+      transition: opacity 0.6s ease;
+      text-align: center;
+    }
+    .scene.active { opacity: 1; }
+
+    /* SCENE 1 */
+    .s1 { background: linear-gradient(180deg, #0f0520 0%, #1a0a35 100%); }
+    .s1 .emoji { font-size: 80px; margin-bottom: 24px; animation: shake 0.8s ease-in-out 0.5s; }
+    .s1 .text1 { font-size: 34px; font-weight: 900; color: #e2e8f0; line-height: 1.2; margin-bottom: 12px; }
+    .s1 .text2 { font-size: 18px; color: #94a3b8; font-weight: 600; }
+    .bills {
+      position: absolute;
+      bottom: 60px;
+      display: flex;
+      gap: 8px;
+    }
+    .bill {
+      width: 60px;
+      height: 28px;
+      background: linear-gradient(135deg, #1e5c2e, #2d7a40);
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      color: #a7f3d0;
+      font-weight: 700;
+      animation: floatBill 2s ease-in-out infinite;
+    }
+    .bill:nth-child(2) { animation-delay: 0.3s; }
+    .bill:nth-child(3) { animation-delay: 0.6s; }
+
+    /* SCENE 2 */
+    .s2 { background: linear-gradient(180deg, #1a0a35 0%, #2d1259 100%); }
+    .s2 .clock { font-size: 72px; margin-bottom: 20px; animation: spin1 2s linear infinite; }
+    .s2 .text1 { font-size: 28px; font-weight: 900; color: #c4b5fd; line-height: 1.2; margin-bottom: 16px; }
+    .s2 .text2 { font-size: 18px; color: #a78bfa; font-weight: 700; line-height: 1.4; }
+    .cross {
+      font-size: 64px;
+      color: #ef4444;
+      margin-top: 20px;
+      animation: pulse 1s ease-in-out infinite;
+    }
+
+    /* SCENE 3 */
+    .s3 { background: linear-gradient(135deg, #4c1d95 0%, #7c3aed 50%, #a855f7 100%); }
+    .s3 .phone {
+      width: 180px;
+      height: 320px;
+      background: #fff;
+      border-radius: 28px;
+      margin-bottom: 24px;
+      position: relative;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+      overflow: hidden;
+      animation: phoneIn 0.5s ease-out;
+    }
+    .phone-header {
+      background: linear-gradient(135deg, #7c3aed, #a855f7);
+      height: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .phone-logo { font-size: 16px; font-weight: 900; color: white; }
+    .phone-job {
+      margin: 10px 8px 6px;
+      background: #f5f3ff;
+      border-radius: 10px;
+      padding: 8px;
+      border-left: 3px solid #7c3aed;
+    }
+    .phone-job-title { font-size: 9px; font-weight: 800; color: #4c1d95; }
+    .phone-job-sub { font-size: 8px; color: #6d28d9; margin-top: 2px; }
+    .phone-btn {
+      margin: 8px;
+      background: linear-gradient(135deg, #7c3aed, #a855f7);
+      border-radius: 8px;
+      padding: 7px;
+      text-align: center;
+      font-size: 9px;
+      font-weight: 800;
+      color: white;
+    }
+    .checkmark {
+      font-size: 56px;
+      animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.3s both;
+    }
+    .s3 .label { font-size: 24px; font-weight: 900; color: white; margin-top: 12px; }
+
+    /* SCENE 4 */
+    .s4 { background: linear-gradient(135deg, #6d28d9 0%, #7c3aed 50%, #8b5cf6 100%); }
+    .s4 .logo-big {
+      font-size: 42px;
+      font-weight: 900;
+      color: white;
+      margin-bottom: 16px;
+      animation: glowPulse 1.5s ease-in-out infinite;
+    }
+    .s4 .logo-big span { color: rgba(255,255,255,0.5); }
+    .s4 .tagline { font-size: 22px; font-weight: 800; color: #e9d5ff; margin-bottom: 8px; }
+    .s4 .site {
+      font-size: 28px;
+      font-weight: 900;
+      color: #fbbf24;
+      margin-top: 20px;
+      animation: glowPulse 1s ease-in-out infinite;
+    }
+    .tag {
+      display: inline-block;
+      background: rgba(255,255,255,0.15);
+      color: white;
+      font-size: 14px;
+      font-weight: 700;
+      padding: 6px 16px;
+      border-radius: 100px;
+      margin: 6px 4px;
+    }
+    .orb {
+      position: absolute;
+      border-radius: 50%;
+      pointer-events: none;
+    }
+
+    /* PROGRESS BAR */
+    .progress-wrap {
+      width: 375px;
+      display: flex;
+      gap: 6px;
+    }
+    .prog-seg {
+      height: 4px;
+      flex: 1;
+      background: rgba(255,255,255,0.15);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+    .prog-fill {
+      height: 100%;
+      background: #a855f7;
+      width: 0%;
+      border-radius: 2px;
+      transition: width linear;
+    }
+
+    /* CONTROLS */
+    .controls {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+    .btn {
+      padding: 10px 24px;
+      border-radius: 100px;
+      font-weight: 700;
+      font-size: 14px;
+      cursor: pointer;
+      border: none;
+      transition: all 0.2s;
+    }
+    .btn-play { background: #7c3aed; color: white; }
+    .btn-play:hover { background: #6d28d9; transform: scale(1.05); }
+    .btn-restart { background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2); }
+    .scene-label { color: rgba(255,255,255,0.5); font-size: 12px; font-weight: 600; }
+
+    /* ANIMATIONS */
+    @keyframes shake {
+      0%, 100% { transform: rotate(0); }
+      25% { transform: rotate(-5deg); }
+      75% { transform: rotate(5deg); }
+    }
+    @keyframes floatBill {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-6px); }
+    }
+    @keyframes spin1 {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.1); opacity: 0.7; }
+    }
+    @keyframes phoneIn {
+      from { transform: translateY(40px) scale(0.9); opacity: 0; }
+      to { transform: translateY(0) scale(1); opacity: 1; }
+    }
+    @keyframes popIn {
+      from { transform: scale(0); }
+      to { transform: scale(1); }
+    }
+    @keyframes glowPulse {
+      0%, 100% { text-shadow: 0 0 20px rgba(168,85,247,0.5); }
+      50% { text-shadow: 0 0 40px rgba(168,85,247,0.9), 0 0 80px rgba(124,58,237,0.4); }
+    }
+    @keyframes countUp {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="progress-wrap">
+    <div class="prog-seg"><div class="prog-fill" id="p0"></div></div>
+    <div class="prog-seg"><div class="prog-fill" id="p1"></div></div>
+    <div class="prog-seg"><div class="prog-fill" id="p2"></div></div>
+    <div class="prog-seg"><div class="prog-fill" id="p3"></div></div>
+  </div>
+
+  <div class="screen">
+    <!-- SCENE 1: Problema -->
+    <div class="scene s1 active" id="scene-0">
+      <div class="orb" style="width:250px;height:250px;top:-80px;right:-60px;background:radial-gradient(circle,rgba(139,92,246,0.15),transparent 70%)"></div>
+      <div class="emoji">😩</div>
+      <div class="text1">Salariul<br>nu ajunge...</div>
+      <div class="text2">Luna are 30 de zile.<br>Banii — 15.</div>
+      <div class="bills">
+        <div class="bill">100 RON</div>
+        <div class="bill">200 RON</div>
+        <div class="bill">500 RON</div>
+      </div>
+    </div>
+
+    <!-- SCENE 2: Problema 2 -->
+    <div class="scene s2" id="scene-1">
+      <div class="clock">⏰</div>
+      <div class="text1">Dar nu ai timp<br>de un job full-time</div>
+      <div class="text2">Facultate. Familie.<br>Viața ta.</div>
+      <div class="cross">✗</div>
+    </div>
+
+    <!-- SCENE 3: Solutia -->
+    <div class="scene s3" id="scene-2">
+      <div class="orb" style="width:200px;height:200px;top:-40px;right:-40px;background:radial-gradient(circle,rgba(255,255,255,0.1),transparent 70%)"></div>
+      <div class="phone">
+        <div class="phone-header"><div class="phone-logo">JobPart.ro ✦</div></div>
+        <div class="phone-job">
+          <div class="phone-job-title">Manager Social Media</div>
+          <div class="phone-job-sub">📍 Remote · 2.000–3.000 RON</div>
+        </div>
+        <div class="phone-job">
+          <div class="phone-job-title">Data Entry Specialist</div>
+          <div class="phone-job-sub">📍 Online · 4h/zi</div>
+        </div>
+        <div class="phone-btn">✅ Aplică în 2 minute</div>
+        <div class="phone-job">
+          <div class="phone-job-title">Designer Grafic Remote</div>
+          <div class="phone-job-sub">📍 Acasa · Flexibil</div>
+        </div>
+      </div>
+      <div class="checkmark">✅</div>
+      <div class="label">JobPart.ro</div>
+    </div>
+
+    <!-- SCENE 4: CTA -->
+    <div class="scene s4" id="scene-3">
+      <div class="orb" style="width:300px;height:300px;top:-100px;left:-80px;background:radial-gradient(circle,rgba(192,132,252,0.2),transparent 70%)"></div>
+      <div class="logo-big">Job<span>Part</span> ✦</div>
+      <div class="tagline">Sute de joburi part-time.</div>
+      <div class="tagline">Tu alegi orele.</div>
+      <div style="margin-top:16px">
+        <span class="tag">100% Gratuit</span>
+        <span class="tag">Program flexibil</span>
+        <span class="tag">Precontract digital</span>
+      </div>
+      <div class="site">jobpart.ro</div>
+    </div>
+  </div>
+
+  <div class="controls">
+    <button class="btn btn-play" id="btn-play" onclick="togglePlay()">▶ Play</button>
+    <button class="btn btn-restart" onclick="restart()">↺ Restart</button>
+    <span class="scene-label" id="scene-label">Scena 1 / 4</span>
+  </div>
+
+  <script>
+    const durate = [3000, 5000, 4000, 4000]; // ms per scena
+    let curent = 0, playing = false, timer = null, progTimer = null;
+    const total = durate.length;
+
+    function showScene(i) {
+      document.querySelectorAll('.scene').forEach((s, idx) => {
+        s.classList.toggle('active', idx === i);
+      });
+      document.getElementById('scene-label').textContent = `Scena ${i+1} / ${total}`;
+    }
+
+    function animProg(idx, durata) {
+      const fill = document.getElementById('p' + idx);
+      fill.style.transition = 'none';
+      fill.style.width = '0%';
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          fill.style.transition = `width ${durata}ms linear`;
+          fill.style.width = '100%';
+        });
+      });
+    }
+
+    function next() {
+      if (curent >= total - 1) { playing = false; document.getElementById('btn-play').textContent = '▶ Play'; return; }
+      curent++;
+      showScene(curent);
+      animProg(curent, durate[curent]);
+      timer = setTimeout(next, durate[curent]);
+    }
+
+    function togglePlay() {
+      if (playing) {
+        clearTimeout(timer);
+        playing = false;
+        document.getElementById('btn-play').textContent = '▶ Play';
+      } else {
+        playing = true;
+        document.getElementById('btn-play').textContent = '⏸ Pauza';
+        animProg(curent, durate[curent]);
+        timer = setTimeout(next, durate[curent]);
+      }
+    }
+
+    function restart() {
+      clearTimeout(timer);
+      playing = false;
+      curent = 0;
+      showScene(0);
+      document.querySelectorAll('.prog-fill').forEach(f => { f.style.transition='none'; f.style.width='0%'; });
+      document.getElementById('btn-play').textContent = '▶ Play';
+    }
+  </script>
+</body>
+</html>

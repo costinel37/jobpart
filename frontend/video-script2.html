@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Script 2 — Transformare | JobPart</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@700;800;900&display=swap');
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #0a0010;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      font-family: 'Inter', sans-serif;
+      gap: 16px;
+      padding: 20px;
+    }
+    .screen {
+      width: 375px;
+      height: 667px;
+      position: relative;
+      overflow: hidden;
+      border-radius: 20px;
+      flex-shrink: 0;
+    }
+    .scene {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 32px;
+      opacity: 0;
+      transition: opacity 0.5s ease;
+      text-align: center;
+    }
+    .scene.active { opacity: 1; }
+
+    .day-label {
+      font-size: 13px;
+      font-weight: 800;
+      letter-spacing: 4px;
+      text-transform: uppercase;
+      padding: 6px 18px;
+      border-radius: 100px;
+      margin-bottom: 24px;
+    }
+    .big-emoji { font-size: 90px; margin-bottom: 20px; }
+    .main-text { font-size: 32px; font-weight: 900; line-height: 1.2; margin-bottom: 12px; }
+    .sub-text { font-size: 18px; font-weight: 600; line-height: 1.4; opacity: 0.8; }
+    .orb { position: absolute; border-radius: 50%; pointer-events: none; }
+
+    /* S1 LUNI */
+    .s1 { background: linear-gradient(160deg, #1e0a3c 0%, #2d1259 100%); }
+    .s1 .day-label { background: rgba(139,92,246,0.2); color: #a78bfa; border: 1px solid rgba(139,92,246,0.3); }
+    .s1 .main-text { color: #e2e8f0; }
+    .s1 .sub-text { color: #94a3b8; }
+
+    /* S2 MIERCURI */
+    .s2 { background: linear-gradient(160deg, #1e3a5f 0%, #1e40af 60%, #3b82f6 100%); }
+    .s2 .day-label { background: rgba(59,130,246,0.25); color: #93c5fd; border: 1px solid rgba(59,130,246,0.4); }
+    .s2 .main-text { color: white; }
+    .s2 .sub-text { color: #bfdbfe; }
+    .phone-mini {
+      width: 140px;
+      height: 240px;
+      background: white;
+      border-radius: 20px;
+      margin: 0 auto 20px;
+      overflow: hidden;
+      box-shadow: 0 16px 40px rgba(0,0,0,0.3);
+      animation: slideUp 0.6s ease-out;
+    }
+    .pm-header { background: linear-gradient(135deg,#7c3aed,#a855f7); height: 40px; display:flex; align-items:center; justify-content:center; }
+    .pm-logo { color: white; font-size: 13px; font-weight: 900; }
+    .pm-job { margin: 8px; background: #f5f3ff; border-radius: 8px; padding: 7px; border-left: 3px solid #7c3aed; }
+    .pm-title { font-size: 8px; font-weight: 800; color: #4c1d95; }
+    .pm-sub { font-size: 7px; color: #7c3aed; margin-top: 2px; }
+    .pm-btn { margin: 8px; background: #7c3aed; border-radius: 7px; padding: 7px; text-align: center; font-size: 9px; font-weight: 800; color: white; }
+
+    /* S3 VINERI */
+    .s3 { background: linear-gradient(160deg, #064e3b 0%, #065f46 50%, #047857 100%); }
+    .s3 .day-label { background: rgba(16,185,129,0.2); color: #6ee7b7; border: 1px solid rgba(16,185,129,0.3); }
+    .s3 .main-text { color: white; }
+    .s3 .sub-text { color: #a7f3d0; }
+    .notif-card {
+      background: white;
+      border-radius: 16px;
+      padding: 16px 20px;
+      width: 100%;
+      max-width: 280px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+      margin-bottom: 20px;
+      animation: slideDown 0.5s ease-out;
+    }
+    .notif-icon { font-size: 32px; flex-shrink: 0; }
+    .notif-text { text-align: left; }
+    .notif-title { font-size: 13px; font-weight: 800; color: #1f2937; }
+    .notif-sub { font-size: 11px; color: #6b7280; margin-top: 2px; }
+
+    /* S4 WEEKEND */
+    .s4 { background: linear-gradient(160deg, #78350f 0%, #b45309 50%, #d97706 100%); }
+    .s4 .day-label { background: rgba(251,191,36,0.2); color: #fde68a; border: 1px solid rgba(251,191,36,0.3); }
+    .s4 .main-text { color: white; }
+    .s4 .sub-text { color: #fde68a; }
+    .money-row { display: flex; gap: 12px; margin-bottom: 20px; }
+    .money-bill {
+      width: 80px;
+      height: 40px;
+      border-radius: 6px;
+      background: linear-gradient(135deg, #065f46, #047857);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 800;
+      color: #6ee7b7;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      animation: popIn 0.4s ease-out both;
+    }
+    .money-bill:nth-child(2) { animation-delay: 0.1s; }
+    .money-bill:nth-child(3) { animation-delay: 0.2s; }
+
+    /* S5 CTA */
+    .s5 { background: linear-gradient(135deg, #4c1d95 0%, #7c3aed 50%, #a855f7 100%); }
+    .s5 .logo { font-size: 44px; font-weight: 900; color: white; margin-bottom: 12px; animation: glowPulse 1.5s ease-in-out infinite; }
+    .s5 .logo span { opacity: 0.5; }
+    .s5 .tagline { font-size: 20px; color: #e9d5ff; font-weight: 700; margin-bottom: 6px; }
+    .s5 .site { font-size: 32px; font-weight: 900; color: #fbbf24; margin-top: 20px; animation: glowPulse 1s ease-in-out infinite; }
+    .timeline {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      width: 100%;
+      max-width: 260px;
+      margin-bottom: 16px;
+    }
+    .tl-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 10px;
+      padding: 8px 12px;
+      animation: slideInLeft 0.4s ease-out both;
+    }
+    .tl-day { font-size: 11px; font-weight: 800; color: #c4b5fd; width: 70px; flex-shrink: 0; }
+    .tl-text { font-size: 12px; color: white; font-weight: 600; }
+
+    /* PROGRESS */
+    .progress-wrap { width: 375px; display: flex; gap: 6px; }
+    .prog-seg { height: 4px; flex: 1; background: rgba(255,255,255,0.15); border-radius: 2px; overflow: hidden; }
+    .prog-fill { height: 100%; background: #a855f7; width: 0%; border-radius: 2px; transition: width linear; }
+
+    /* CONTROLS */
+    .controls { display: flex; gap: 12px; align-items: center; }
+    .btn { padding: 10px 24px; border-radius: 100px; font-weight: 700; font-size: 14px; cursor: pointer; border: none; transition: all 0.2s; }
+    .btn-play { background: #7c3aed; color: white; }
+    .btn-play:hover { background: #6d28d9; }
+    .btn-restart { background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2); }
+    .scene-label { color: rgba(255,255,255,0.5); font-size: 12px; font-weight: 600; }
+
+    @keyframes slideUp { from { transform: translateY(30px); opacity:0; } to { transform: translateY(0); opacity:1; } }
+    @keyframes slideDown { from { transform: translateY(-20px); opacity:0; } to { transform: translateY(0); opacity:1; } }
+    @keyframes slideInLeft { from { transform: translateX(-20px); opacity:0; } to { transform: translateX(0); opacity:1; } }
+    @keyframes popIn { from { transform: scale(0.5); opacity:0; } to { transform: scale(1); opacity:1; } }
+    @keyframes glowPulse {
+      0%,100% { text-shadow: 0 0 20px rgba(168,85,247,0.5); }
+      50% { text-shadow: 0 0 40px rgba(168,85,247,0.9); }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="progress-wrap">
+    <div class="prog-seg"><div class="prog-fill" id="p0"></div></div>
+    <div class="prog-seg"><div class="prog-fill" id="p1"></div></div>
+    <div class="prog-seg"><div class="prog-fill" id="p2"></div></div>
+    <div class="prog-seg"><div class="prog-fill" id="p3"></div></div>
+    <div class="prog-seg"><div class="prog-fill" id="p4"></div></div>
+  </div>
+
+  <div class="screen">
+    <!-- LUNI -->
+    <div class="scene s1 active" id="scene-0">
+      <div class="orb" style="width:300px;height:300px;top:-100px;right:-80px;background:radial-gradient(circle,rgba(139,92,246,0.15),transparent 70%)"></div>
+      <div class="day-label">📅 LUNI</div>
+      <div class="big-emoji">😴</div>
+      <div class="main-text">Iti doresti<br>bani in plus</div>
+      <div class="sub-text">Dar nu stii de unde sa incepi...</div>
+    </div>
+
+    <!-- MIERCURI -->
+    <div class="scene s2" id="scene-1">
+      <div class="day-label">📱 MIERCURI</div>
+      <div class="phone-mini">
+        <div class="pm-header"><div class="pm-logo">JobPart.ro ✦</div></div>
+        <div class="pm-job"><div class="pm-title">Manager Social Media</div><div class="pm-sub">Remote · 2.500 RON</div></div>
+        <div class="pm-job"><div class="pm-title">Video Editor Reels</div><div class="pm-sub">Online · Flexibil</div></div>
+        <div class="pm-btn">Aplica acum →</div>
+      </div>
+      <div class="main-text" style="font-size:22px">Gasesti job in<br>2 minute pe JobPart.ro</div>
+      <div class="sub-text">Fara CV. Fara abonament.</div>
+    </div>
+
+    <!-- VINERI -->
+    <div class="scene s3" id="scene-2">
+      <div class="day-label">✅ VINERI</div>
+      <div class="notif-card">
+        <div class="notif-icon">🎉</div>
+        <div class="notif-text">
+          <div class="notif-title">Aplicare Acceptata!</div>
+          <div class="notif-sub">Creative Studio SRL te-a acceptat</div>
+        </div>
+      </div>
+      <div class="main-text">Esti angajat!</div>
+      <div class="sub-text">Precontract digital semnat online.<br>Zero hartii. Zero drumuri.</div>
+    </div>
+
+    <!-- WEEKEND -->
+    <div class="scene s4" id="scene-3">
+      <div class="day-label">💸 WEEKEND</div>
+      <div class="money-row">
+        <div class="money-bill">100 RON</div>
+        <div class="money-bill">200 RON</div>
+        <div class="money-bill">500 RON</div>
+      </div>
+      <div class="big-emoji" style="margin-bottom:12px">🤑</div>
+      <div class="main-text">Primul salariu extra!</div>
+      <div class="sub-text">De la 0 la bani in plus —<br>in doar 5 zile.</div>
+    </div>
+
+    <!-- CTA -->
+    <div class="scene s5" id="scene-4">
+      <div class="orb" style="width:350px;height:350px;top:-120px;left:-100px;background:radial-gradient(circle,rgba(192,132,252,0.2),transparent 70%)"></div>
+      <div class="timeline">
+        <div class="tl-item" style="animation-delay:0.1s"><span class="tl-day">LUNI</span><span class="tl-text">Dorinta</span></div>
+        <div class="tl-item" style="animation-delay:0.2s"><span class="tl-day">MIERCURI</span><span class="tl-text">Aplica in 2 min</span></div>
+        <div class="tl-item" style="animation-delay:0.3s"><span class="tl-day">VINERI</span><span class="tl-text">Acceptat ✅</span></div>
+        <div class="tl-item" style="animation-delay:0.4s"><span class="tl-day">WEEKEND</span><span class="tl-text">Bani extra 💸</span></div>
+      </div>
+      <div class="logo">Job<span>Part</span> ✦</div>
+      <div class="tagline">Precontract digital · 100% Gratuit</div>
+      <div class="site">jobpart.ro</div>
+    </div>
+  </div>
+
+  <div class="controls">
+    <button class="btn btn-play" id="btn-play" onclick="togglePlay()">▶ Play</button>
+    <button class="btn btn-restart" onclick="restart()">↺ Restart</button>
+    <span class="scene-label" id="scene-label">Scena 1 / 5</span>
+  </div>
+
+  <script>
+    const durate = [3000, 6000, 5000, 5000, 5000];
+    let curent = 0, playing = false, timer = null;
+    const total = durate.length;
+    function showScene(i) {
+      document.querySelectorAll('.scene').forEach((s,idx) => s.classList.toggle('active', idx===i));
+      document.getElementById('scene-label').textContent = `Scena ${i+1} / ${total}`;
+    }
+    function animProg(idx, dur) {
+      const f = document.getElementById('p'+idx);
+      f.style.transition='none'; f.style.width='0%';
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        f.style.transition=`width ${dur}ms linear`; f.style.width='100%';
+      }));
+    }
+    function next() {
+      if (curent >= total-1) { playing=false; document.getElementById('btn-play').textContent='▶ Play'; return; }
+      curent++; showScene(curent); animProg(curent, durate[curent]);
+      timer = setTimeout(next, durate[curent]);
+    }
+    function togglePlay() {
+      if (playing) { clearTimeout(timer); playing=false; document.getElementById('btn-play').textContent='▶ Play'; }
+      else { playing=true; document.getElementById('btn-play').textContent='⏸ Pauza'; animProg(curent,durate[curent]); timer=setTimeout(next,durate[curent]); }
+    }
+    function restart() {
+      clearTimeout(timer); playing=false; curent=0; showScene(0);
+      document.querySelectorAll('.prog-fill').forEach(f=>{f.style.transition='none';f.style.width='0%';});
+      document.getElementById('btn-play').textContent='▶ Play';
+    }
+  </script>
+</body>
+</html>

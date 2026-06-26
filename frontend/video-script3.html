@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Script 3 — Social Proof | JobPart</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@700;800;900&display=swap');
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: #0a0010;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      font-family: 'Inter', sans-serif;
+      gap: 16px;
+      padding: 20px;
+    }
+    .screen {
+      width: 375px;
+      height: 667px;
+      position: relative;
+      overflow: hidden;
+      border-radius: 20px;
+      flex-shrink: 0;
+    }
+    .scene {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 28px;
+      opacity: 0;
+      transition: opacity 0.5s ease;
+      text-align: center;
+    }
+    .scene.active { opacity: 1; }
+    .orb { position: absolute; border-radius: 50%; pointer-events: none; }
+
+    /* SCENE 1 — Counter */
+    .s1 { background: linear-gradient(160deg, #1e0a3c 0%, #4c1d95 60%, #6d28d9 100%); }
+    .counter-wrap { margin-bottom: 8px; }
+    .counter-num {
+      font-size: 120px;
+      font-weight: 900;
+      color: white;
+      line-height: 1;
+      font-variant-numeric: tabular-nums;
+      text-shadow: 0 0 60px rgba(168,85,247,0.8), 0 0 120px rgba(124,58,237,0.4);
+    }
+    .counter-label {
+      font-size: 20px;
+      font-weight: 700;
+      color: #c4b5fd;
+      margin-top: 8px;
+      letter-spacing: 0.5px;
+    }
+    .counter-sub {
+      font-size: 15px;
+      color: #a78bfa;
+      margin-top: 6px;
+    }
+    .dots-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+      justify-content: center;
+      max-width: 280px;
+      margin-top: 24px;
+    }
+    .dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: rgba(167,139,250,0.4);
+    }
+    .dot.filled { background: #a855f7; animation: popDot 0.3s ease-out both; }
+    @keyframes popDot { from { transform: scale(0); } to { transform: scale(1); } }
+
+    /* SCENE 2 — Intrebare */
+    .s2 { background: linear-gradient(160deg, #3b0764 0%, #6d28d9 50%, #7c3aed 100%); }
+    .q-num {
+      font-size: 100px;
+      font-weight: 900;
+      color: white;
+      line-height: 1;
+      animation: glowPulse 1.5s ease-in-out infinite;
+    }
+    .q-text { font-size: 28px; font-weight: 900; color: #e9d5ff; margin: 16px 0 8px; }
+    .q-sub { font-size: 18px; color: #c4b5fd; font-weight: 700; }
+    .arrow-down {
+      font-size: 36px;
+      margin-top: 20px;
+      animation: bounce 1s ease-in-out infinite;
+    }
+    @keyframes bounce { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+
+    /* SCENE 3 — Telefon */
+    .s3 { background: linear-gradient(160deg, #1e1b4b 0%, #312e81 50%, #4338ca 100%); }
+    .phone-wrap {
+      position: relative;
+      margin-bottom: 20px;
+    }
+    .phone-big {
+      width: 160px;
+      height: 280px;
+      background: white;
+      border-radius: 24px;
+      overflow: hidden;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.4), 0 0 0 3px rgba(167,139,250,0.3);
+      animation: floatPhone 3s ease-in-out infinite;
+    }
+    .pb-header { background: linear-gradient(135deg,#7c3aed,#a855f7); height: 45px; display:flex; align-items:center; justify-content:center; }
+    .pb-logo { color:white; font-size:14px; font-weight:900; }
+    .pb-card { margin:8px; background:#f5f3ff; border-radius:8px; padding:7px; border-left:3px solid #7c3aed; }
+    .pb-ct { font-size:8px; font-weight:800; color:#4c1d95; }
+    .pb-cs { font-size:7px; color:#7c3aed; margin-top:2px; }
+    .pb-btn { margin:8px; background:linear-gradient(135deg,#7c3aed,#a855f7); border-radius:7px; padding:7px; text-align:center; font-size:9px; font-weight:800; color:white; }
+    .badge-live {
+      position: absolute;
+      top: -8px;
+      right: -12px;
+      background: #ef4444;
+      color: white;
+      font-size: 10px;
+      font-weight: 800;
+      padding: 4px 10px;
+      border-radius: 100px;
+      animation: pulse 1s ease-in-out infinite;
+    }
+    .s3 .main-text { font-size: 22px; font-weight: 900; color: white; margin-bottom: 8px; }
+    .s3 .sub-text { font-size: 15px; color: #a5b4fc; font-weight: 600; }
+    @keyframes floatPhone { 0%,100% { transform: translateY(0) rotate(-2deg); } 50% { transform: translateY(-12px) rotate(2deg); } }
+
+    /* SCENE 4 — CTA */
+    .s4 { background: linear-gradient(135deg, #6d28d9 0%, #7c3aed 40%, #a855f7 100%); }
+    .logo-big { font-size: 48px; font-weight: 900; color: white; margin-bottom: 8px; animation: glowPulse 1.5s ease-in-out infinite; }
+    .logo-big span { opacity: 0.5; }
+    .cta-box {
+      background: rgba(255,255,255,0.12);
+      border: 2px solid rgba(255,255,255,0.2);
+      border-radius: 20px;
+      padding: 20px 24px;
+      width: 100%;
+      max-width: 280px;
+      margin: 16px 0;
+    }
+    .cta-item { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; color: white; font-size: 15px; font-weight: 700; animation: slideInLeft 0.4s ease-out both; }
+    .cta-item:last-child { margin-bottom: 0; }
+    .site-big { font-size: 36px; font-weight: 900; color: #fbbf24; margin-top: 12px; animation: glowPulse 1s ease-in-out infinite; }
+    .link-bio { font-size: 14px; color: rgba(255,255,255,0.6); font-weight: 600; margin-top: 4px; }
+
+    /* PROGRESS */
+    .progress-wrap { width: 375px; display: flex; gap: 6px; }
+    .prog-seg { height: 4px; flex: 1; background: rgba(255,255,255,0.15); border-radius: 2px; overflow: hidden; }
+    .prog-fill { height: 100%; background: #a855f7; width: 0%; border-radius: 2px; transition: width linear; }
+
+    /* CONTROLS */
+    .controls { display: flex; gap: 12px; align-items: center; }
+    .btn { padding: 10px 24px; border-radius: 100px; font-weight: 700; font-size: 14px; cursor: pointer; border: none; transition: all 0.2s; }
+    .btn-play { background: #7c3aed; color: white; }
+    .btn-play:hover { background: #6d28d9; }
+    .btn-restart { background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2); }
+    .scene-label { color: rgba(255,255,255,0.5); font-size: 12px; font-weight: 600; }
+
+    @keyframes glowPulse {
+      0%,100% { text-shadow: 0 0 20px rgba(168,85,247,0.5); }
+      50% { text-shadow: 0 0 50px rgba(168,85,247,1), 0 0 100px rgba(124,58,237,0.5); }
+    }
+    @keyframes pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.1); } }
+    @keyframes slideInLeft { from { transform: translateX(-20px); opacity:0; } to { transform: translateX(0); opacity:1; } }
+  </style>
+</head>
+<body>
+
+  <div class="progress-wrap">
+    <div class="prog-seg"><div class="prog-fill" id="p0"></div></div>
+    <div class="prog-seg"><div class="prog-fill" id="p1"></div></div>
+    <div class="prog-seg"><div class="prog-fill" id="p2"></div></div>
+    <div class="prog-seg"><div class="prog-fill" id="p3"></div></div>
+  </div>
+
+  <div class="screen">
+    <!-- SCENE 1: Counter -->
+    <div class="scene s1 active" id="scene-0">
+      <div class="orb" style="width:350px;height:350px;top:-100px;right:-100px;background:radial-gradient(circle,rgba(192,132,252,0.2),transparent 70%)"></div>
+      <div class="orb" style="width:250px;height:250px;bottom:-80px;left:-60px;background:radial-gradient(circle,rgba(139,92,246,0.15),transparent 70%)"></div>
+      <div class="counter-wrap">
+        <div class="counter-num" id="counter">0</div>
+      </div>
+      <div class="counter-label">oameni si-au gasit job AZI</div>
+      <div class="counter-sub">pe JobPart.ro</div>
+      <div class="dots-row" id="dots-wrap"></div>
+    </div>
+
+    <!-- SCENE 2: Intrebare -->
+    <div class="scene s2" id="scene-1">
+      <div class="orb" style="width:300px;height:300px;top:-80px;right:-80px;background:radial-gradient(circle,rgba(167,139,250,0.2),transparent 70%)"></div>
+      <div class="q-num">44</div>
+      <div class="q-text">Tu esti numarul 44?</div>
+      <div class="q-sub">Urmatorul job part-time<br>te asteapta pe JobPart.ro</div>
+      <div class="arrow-down">👇</div>
+    </div>
+
+    <!-- SCENE 3: Platforma -->
+    <div class="scene s3" id="scene-2">
+      <div class="phone-wrap">
+        <div class="phone-big">
+          <div class="pb-header"><div class="pb-logo">JobPart.ro ✦</div></div>
+          <div class="pb-card"><div class="pb-ct">Manager Instagram & TikTok</div><div class="pb-cs">Remote · 2.000–3.000 RON</div></div>
+          <div class="pb-card"><div class="pb-ct">Copywriter SEO</div><div class="pb-cs">Online · Program liber</div></div>
+          <div class="pb-btn">✅ Aplica in 2 minute</div>
+          <div class="pb-card"><div class="pb-ct">Designer Grafic Remote</div><div class="pb-cs">Acasa · Flexibil</div></div>
+        </div>
+        <div class="badge-live">🔴 LIVE</div>
+      </div>
+      <div class="main-text">45 joburi active acum</div>
+      <div class="sub-text">Aplici in 2 minute · 100% gratuit<br>Precontract digital inclus</div>
+    </div>
+
+    <!-- SCENE 4: CTA -->
+    <div class="scene s4" id="scene-3">
+      <div class="orb" style="width:300px;height:300px;top:-100px;left:-80px;background:radial-gradient(circle,rgba(192,132,252,0.2),transparent 70%)"></div>
+      <div class="logo-big">Job<span>Part</span> ✦</div>
+      <div class="cta-box">
+        <div class="cta-item" style="animation-delay:0.1s">✅ Sute de joburi part-time</div>
+        <div class="cta-item" style="animation-delay:0.2s">✅ Aplici in 2 minute</div>
+        <div class="cta-item" style="animation-delay:0.3s">✅ Precontract digital</div>
+        <div class="cta-item" style="animation-delay:0.4s">✅ 100% GRATUIT</div>
+      </div>
+      <div class="site-big">jobpart.ro</div>
+      <div class="link-bio">👆 link in bio</div>
+    </div>
+  </div>
+
+  <div class="controls">
+    <button class="btn btn-play" id="btn-play" onclick="togglePlay()">▶ Play</button>
+    <button class="btn btn-restart" onclick="restart()">↺ Restart</button>
+    <span class="scene-label" id="scene-label">Scena 1 / 4</span>
+  </div>
+
+  <script>
+    const durate = [4500, 4000, 4500, 5000];
+    let curent = 0, playing = false, timer = null;
+    const total = durate.length;
+
+    // Counter animation
+    function animCounter(target, dur) {
+      const el = document.getElementById('counter');
+      const dots = document.getElementById('dots-wrap');
+      let start = null;
+      dots.innerHTML = '';
+      el.textContent = '0';
+
+      function step(ts) {
+        if (!start) start = ts;
+        const prog = Math.min((ts - start) / dur, 1);
+        const val = Math.floor(prog * target);
+        el.textContent = val;
+        // Add dots
+        dots.innerHTML = '';
+        for (let i = 0; i < Math.min(val, 43); i++) {
+          const d = document.createElement('div');
+          d.className = 'dot filled';
+          d.style.animationDelay = (i * 20) + 'ms';
+          dots.appendChild(d);
+        }
+        if (prog < 1) requestAnimationFrame(step);
+      }
+      requestAnimationFrame(step);
+    }
+
+    function showScene(i) {
+      document.querySelectorAll('.scene').forEach((s,idx) => s.classList.toggle('active', idx===i));
+      document.getElementById('scene-label').textContent = `Scena ${i+1} / ${total}`;
+      if (i === 0) animCounter(43, 3000);
+    }
+
+    function animProg(idx, dur) {
+      const f = document.getElementById('p'+idx);
+      f.style.transition='none'; f.style.width='0%';
+      requestAnimationFrame(() => requestAnimationFrame(() => {
+        f.style.transition=`width ${dur}ms linear`; f.style.width='100%';
+      }));
+    }
+
+    function next() {
+      if (curent >= total-1) { playing=false; document.getElementById('btn-play').textContent='▶ Play'; return; }
+      curent++; showScene(curent); animProg(curent, durate[curent]);
+      timer = setTimeout(next, durate[curent]);
+    }
+
+    function togglePlay() {
+      if (playing) { clearTimeout(timer); playing=false; document.getElementById('btn-play').textContent='▶ Play'; }
+      else {
+        playing=true; document.getElementById('btn-play').textContent='⏸ Pauza';
+        if (curent===0) animCounter(43, 3000);
+        animProg(curent, durate[curent]);
+        timer = setTimeout(next, durate[curent]);
+      }
+    }
+
+    function restart() {
+      clearTimeout(timer); playing=false; curent=0; showScene(0);
+      document.querySelectorAll('.prog-fill').forEach(f=>{f.style.transition='none';f.style.width='0%';});
+      document.getElementById('btn-play').textContent='▶ Play';
+    }
+  </script>
+</body>
+</html>
