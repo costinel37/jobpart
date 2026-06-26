@@ -37,6 +37,8 @@ class User(Base):
     parola_schimbata_la = Column(DateTime, nullable=True)
     cv_profil_path = Column(String(500), nullable=True)
     cv_profil_nume = Column(String(255), nullable=True)
+    cautare_urgenta = Column(Boolean, default=False)
+    cautare_urgenta_pana = Column(DateTime, nullable=True)
     creat_la = Column(DateTime, default=datetime.utcnow)
 
     joburi_postate = relationship("Job", back_populates="angajator")
@@ -248,6 +250,26 @@ class PromovareCerere(Base):
 
     job = relationship("Job")
     angajator = relationship("User", foreign_keys=[angajator_id])
+
+
+class CautareUrgenta(Base):
+    """Cerere candidat pentru boost 'Caut job urgent' — notifica angajatorii relevanti."""
+    __tablename__ = "cautari_urgente"
+
+    id = Column(Integer, primary_key=True, index=True)
+    candidat_id = Column(Integer, ForeignKey("users.id"), nullable=False, index=True)
+    zile = Column(Integer, nullable=False)        # 1 sau 3
+    pret = Column(Integer, nullable=False)        # 50 RON
+    oras = Column(String(100), nullable=True)
+    categorie = Column(String(100), nullable=True)
+    status = Column(String(20), default="in_asteptare")  # in_asteptare / aprobata / respinsa
+    activa_pana = Column(DateTime, nullable=True)
+    mesaj_admin = Column(Text, nullable=True)
+    notificari_trimise = Column(Integer, default=0)
+    creat_la = Column(DateTime, default=datetime.utcnow)
+    procesata_la = Column(DateTime, nullable=True)
+
+    candidat = relationship("User", foreign_keys=[candidat_id])
 
 
 class Precontract(Base):

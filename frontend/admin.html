@@ -43,6 +43,8 @@
         class="tab-btn px-5 py-3 font-semibold text-gray-500 hover:text-gray-700 border-b-2 border-transparent">⭐ Promovări</button>
       <button onclick="switchTab('newsletter')" id="tab-newsletter"
         class="tab-btn px-5 py-3 font-semibold text-gray-500 hover:text-gray-700 border-b-2 border-transparent">📬 Newsletter</button>
+      <button onclick="switchTab('urgenta')" id="tab-urgenta"
+        class="tab-btn px-5 py-3 font-semibold text-gray-500 hover:text-gray-700 border-b-2 border-transparent">🚨 Job Urgent</button>
     </div>
 
     <!-- Tab: Utilizatori -->
@@ -135,6 +137,12 @@
       </div>
     </div>
 
+    <!-- Tab: Job Urgent -->
+    <div id="content-urgenta" class="hidden">
+      <h2 class="text-xl font-bold text-gray-800 mb-5">🚨 Cereri Cautare Urgenta</h2>
+      <div id="urgenta-list"><div class="text-center py-10 text-gray-400">Se incarca...</div></div>
+    </div>
+
   </div>
 
   <script src="/static/js/api.js"></script>
@@ -144,7 +152,7 @@
     document.getElementById("admin-name").textContent = user?.nume || "";
 
     function switchTab(tab) {
-      ["utilizatori", "joburi", "promotii", "newsletter"].forEach(t => {
+      ["utilizatori", "joburi", "promotii", "newsletter", "urgenta"].forEach(t => {
         document.getElementById(`content-${t}`).classList.toggle("hidden", t !== tab);
         const btn = document.getElementById(`tab-${t}`);
         if (t === tab) btn.className = "tab-btn px-5 py-3 font-semibold text-blue-600 border-b-2 border-blue-600";
@@ -152,6 +160,7 @@
       });
       if (tab === "joburi") incarcaToateJoburile();
       if (tab === "promotii") { incarcaCereriPromo(filtruPromoActiv); incarcaStatisticiPromo(); }
+      if (tab === "urgenta") incarcaCereriUrgenta();
     }
 
     async function incarcaStatistici() {
@@ -554,6 +563,71 @@
         mesaj.classList.remove("hidden");
         btn.disabled = false; btn.textContent = "📬 Trimite Newsletter";
       }
+    }
+
+    async function incarcaCereriUrgenta() {
+      const container = document.getElementById("urgenta-list");
+      try {
+        const cereri = await apiFetch("/urgenta/cereri");
+        if (!cereri.length) {
+          container.innerHTML = '<div class="text-center py-10 text-gray-400">Nicio cerere urgenta inca.</div>';
+          return;
+        }
+        const statusBadge = s => ({
+          in_asteptare: '<span class="bg-yellow-100 text-yellow-700 text-xs font-bold px-2 py-1 rounded-full">In asteptare</span>',
+          aprobata: '<span class="bg-green-100 text-green-700 text-xs font-bold px-2 py-1 rounded-full">Aprobata</span>',
+          respinsa: '<span class="bg-red-100 text-red-700 text-xs font-bold px-2 py-1 rounded-full">Respinsa</span>',
+        }[s] || s);
+        container.innerHTML = cereri.map(c => `
+          <div class="bg-white rounded-xl border border-gray-200 p-5 mb-4 flex flex-wrap items-center gap-4">
+            <div class="flex-1 min-w-0">
+              <div class="flex items-center gap-2 mb-1">
+                ${statusBadge(c.status)}
+                <span class="font-bold text-gray-800">${escapeHtml(c.candidat_nume || '')}</span>
+                <span class="text-gray-400 text-sm">${escapeHtml(c.candidat_email || '')}</span>
+              </div>
+              <div class="text-sm text-gray-600">
+                📍 ${escapeHtml(c.oras || 'Orice oras')} &nbsp;|&nbsp;
+                🏷 ${escapeHtml(c.categorie || 'Orice domeniu')} &nbsp;|&nbsp;
+                ⏱ ${c.zile} ${c.zile === 1 ? 'zi' : 'zile'} &nbsp;|&nbsp;
+                💰 ${c.pret} RON &nbsp;|&nbsp;
+                📢 ${c.notificari_trimise || 0} angajatori notificati
+              </div>
+              <div class="text-xs text-gray-400 mt-1">Trimisa: ${new Date(c.creat_la).toLocaleString('ro-RO')}
+              ${c.activa_pana ? ' · Activa pana: ' + new Date(c.activa_pana).toLocaleDateString('ro-RO') : ''}</div>
+            </div>
+            ${c.status === 'in_asteptare' ? `
+            <div class="flex gap-2 flex-shrink-0">
+              <button onclick="aprobaUrgenta(${c.id})"
+                class="bg-green-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-green-700">
+                ✅ Aproba
+              </button>
+              <button onclick="respingeUrgenta(${c.id})"
+                class="bg-red-100 text-red-600 px-4 py-2 rounded-lg text-sm font-semibold hover:bg-red-200">
+                ✕ Respinge
+              </button>
+            </div>` : ''}
+          </div>`).join('');
+      } catch(e) {
+        container.innerHTML = `<div class="text-red-400 py-10 text-center">${e.message}</div>`;
+      }
+    }
+
+    async function aprobaUrgenta(id) {
+      if (!confirm("Confirmi aprobarea? Asigura-te ca plata a fost primita.")) return;
+      try {
+        const r = await apiFetch(`/urgenta/cereri/${id}/aproba`, { method: "PUT", body: JSON.stringify({}) });
+        alert(r.mesaj);
+        incarcaCereriUrgenta();
+      } catch(e) { alert("Eroare: " + e.message); }
+    }
+
+    async function respingeUrgenta(id) {
+      const motiv = prompt("Motiv respingere (optional):") || "";
+      try {
+        await apiFetch(`/urgenta/cereri/${id}/respinge`, { method: "PUT", body: JSON.stringify({ mesaj: motiv }) });
+        incarcaCereriUrgenta();
+      } catch(e) { alert("Eroare: " + e.message); }
     }
   </script>
 </body>

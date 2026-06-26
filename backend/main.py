@@ -12,7 +12,7 @@ import os
 
 from database import engine
 import models
-from routers import auth, jobs, applications, admin, upload, reviews, favorite, mesaje, notificari, export, promotii, precontracte, alerts
+from routers import auth, jobs, applications, admin, upload, reviews, favorite, mesaje, notificari, export, promotii, precontracte, alerts, urgenta
 from security import (
     limiter, SecurityHeadersMiddleware,
     RequestLoggingMiddleware, eroare_rate_limit
@@ -77,6 +77,7 @@ app.include_router(export.router)
 app.include_router(promotii.router)
 app.include_router(precontracte.router)
 app.include_router(alerts.router)
+app.include_router(urgenta.router)
 
 frontend_path = os.path.join(os.path.dirname(__file__), "..", "frontend")
 app.mount("/static", StaticFiles(directory=frontend_path), name="static")
@@ -94,6 +95,8 @@ def startup():
             ("email_confirmat", "BOOLEAN DEFAULT FALSE"),
             ("cv_profil_path", "VARCHAR(500)"),
             ("cv_profil_nume", "VARCHAR(255)"),
+            ("cautare_urgenta", "BOOLEAN DEFAULT FALSE"),
+            ("cautare_urgenta_pana", "DATETIME"),
         ],
         "jobs": [
             ("avertisment_expirare", "BOOLEAN DEFAULT FALSE"),
