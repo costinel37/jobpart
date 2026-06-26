@@ -165,7 +165,10 @@
         </div>
 
         <!-- Paginare -->
-        <div id="paginare" class="hidden flex justify-center gap-2 mt-8"></div>
+        <div id="paginare-wrap" class="hidden mt-10">
+          <p id="paginare-info" class="text-center text-sm text-gray-500 mb-4"></p>
+          <div id="paginare" class="flex justify-center gap-2 flex-wrap"></div>
+        </div>
 
         <div id="no-jobs" class="hidden text-center py-16 bg-white rounded-xl">
           <div class="text-5xl mb-4">🔍</div>
@@ -292,7 +295,7 @@
       const container = document.getElementById("jobs-container");
       container.innerHTML = '<div class="text-center py-16 text-gray-400">Se încarcă...</div>';
       document.getElementById("no-jobs").classList.add("hidden");
-      document.getElementById("paginare").classList.add("hidden");
+      document.getElementById("paginare-wrap").classList.add("hidden");
 
       try {
         const query = buildQuery(pagina);
@@ -322,24 +325,33 @@
 
     function randeazaPaginare(total, paginaCurenta) {
       const totalPagini = Math.ceil(total / PER_PAGINA);
-      if (totalPagini <= 1) return;
-
+      const wrap = document.getElementById("paginare-wrap");
       const paginare = document.getElementById("paginare");
-      paginare.classList.remove("hidden");
+      const info = document.getElementById("paginare-info");
+
+      if (totalPagini <= 1) { wrap.classList.add("hidden"); return; }
+
+      const de_la = (paginaCurenta - 1) * PER_PAGINA + 1;
+      const pana_la = Math.min(paginaCurenta * PER_PAGINA, total);
+      info.textContent = `Se afișează ${de_la}–${pana_la} din ${total} joburi`;
+
+      wrap.classList.remove("hidden");
       let html = "";
 
       if (paginaCurenta > 1)
-        html += `<button onclick="incarcaJoburi(${paginaCurenta - 1})" class="px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-50">← Anterior</button>`;
+        html += `<button onclick="incarcaJoburi(${paginaCurenta - 1})" class="px-4 py-2 rounded-xl border-2 border-violet-300 text-violet-600 hover:bg-violet-50 font-semibold">← Anterior</button>`;
 
       for (let i = Math.max(1, paginaCurenta - 2); i <= Math.min(totalPagini, paginaCurenta + 2); i++) {
-        html += `<button onclick="incarcaJoburi(${i})"
-          class="px-4 py-2 rounded-lg border ${i === paginaCurenta ? 'bg-blue-600 text-white border-blue-600' : 'border-gray-300 hover:bg-gray-50'}">${i}</button>`;
+        html += `<button onclick="incarcaJoburi(${i})" class="px-4 py-2 rounded-xl border-2 font-semibold ${i === paginaCurenta
+          ? 'bg-violet-600 text-white border-violet-600 shadow-md'
+          : 'border-violet-200 text-violet-600 hover:bg-violet-50'}">${i}</button>`;
       }
 
       if (paginaCurenta < totalPagini)
-        html += `<button onclick="incarcaJoburi(${paginaCurenta + 1})" class="px-4 py-2 rounded-lg border border-gray-300 hover:bg-gray-50">Următor →</button>`;
+        html += `<button onclick="incarcaJoburi(${paginaCurenta + 1})" class="px-4 py-2 rounded-xl border-2 border-violet-300 text-violet-600 hover:bg-violet-50 font-semibold">Următor →</button>`;
 
       paginare.innerHTML = html;
+      wrap.scrollIntoView({ behavior: "smooth", block: "nearest" });
     }
 
     // Afișează toast când utilizatorul neautentificat încearcă o acțiune protejată
