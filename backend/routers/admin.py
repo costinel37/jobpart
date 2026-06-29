@@ -198,6 +198,28 @@ def sterge_job_admin(
     return {"mesaj": "Job dezactivat de admin."}
 
 
+@router.delete("/joburi/{job_id}/definitiv")
+def sterge_job_definitiv(
+    job_id: int,
+    db: Session = Depends(get_db),
+    current_user=Depends(require_rol("admin"))
+):
+    job = db.query(models.Job).filter(models.Job.id == job_id).first()
+    if not job:
+        raise HTTPException(status_code=404, detail="Jobul nu există.")
+    titlu = job.titlu
+    db.query(models.Precontract).filter(models.Precontract.job_id == job_id).delete(synchronize_session=False)
+    db.query(models.Application).filter(models.Application.job_id == job_id).delete(synchronize_session=False)
+    db.query(models.Favorite).filter(models.Favorite.job_id == job_id).delete(synchronize_session=False)
+    db.query(models.JobView).filter(models.JobView.job_id == job_id).delete(synchronize_session=False)
+    db.query(models.JobLike).filter(models.JobLike.job_id == job_id).delete(synchronize_session=False)
+    db.query(models.PromovareCerere).filter(models.PromovareCerere.job_id == job_id).delete(synchronize_session=False)
+    db.delete(job)
+    _log_audit(db, current_user.id, "sterge_definitiv_job", "job", job_id, f"Job: {titlu}")
+    db.commit()
+    return {"mesaj": "Job șters definitiv din baza de date."}
+
+
 @router.get("/audit-log")
 def audit_log(
     pagina: int = Query(1, ge=1),
