@@ -89,19 +89,19 @@ def startup():
     coloane_noi = {
         "users": [
             ("newsletter_consimtit", "BOOLEAN DEFAULT FALSE"),
-            ("gdpr_consimtit_la", "DATETIME"),
+            ("gdpr_consimtit_la", "TIMESTAMP"),
             ("data_nasterii", "DATE"),
-            ("parola_schimbata_la", "DATETIME"),
+            ("parola_schimbata_la", "TIMESTAMP"),
             ("email_confirmat", "BOOLEAN DEFAULT FALSE"),
             ("cv_profil_path", "VARCHAR(500)"),
             ("cv_profil_nume", "VARCHAR(255)"),
             ("cautare_urgenta", "BOOLEAN DEFAULT FALSE"),
-            ("cautare_urgenta_pana", "DATETIME"),
+            ("cautare_urgenta_pana", "TIMESTAMP"),
         ],
         "jobs": [
             ("avertisment_expirare", "BOOLEAN DEFAULT FALSE"),
             ("promovat", "BOOLEAN DEFAULT FALSE"),
-            ("promovat_pana", "DATETIME"),
+            ("promovat_pana", "TIMESTAMP"),
         ],
     }
     insp = inspect(engine)
