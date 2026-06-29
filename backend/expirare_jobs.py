@@ -351,15 +351,50 @@ def _verifica_ssl_si_domeniu():
         logger.warning(f"[MONITOR] Alertă trimisă admin: {len(alerte)} probleme")
 
 
+def _verifica_expirare_db_gratuita():
+    """Alertează admin pe Telegram cu câteva zile înainte ca planul gratuit Postgres de pe Render să expire (30 zile)."""
+    from telegram_service import notifica_admin
+
+    PLAN_GRATUIT_ZILE = 30
+    PRAG_ALERTA_ZILE = 7
+
+    creat_la_str = os.getenv("DB_CREAT_LA")
+    if not creat_la_str:
+        logger.info("[MONITOR] DB_CREAT_LA negăsit — alerta de expirare DB gratuită e dezactivată.")
+        return
+
+    try:
+        creat_la = datetime.strptime(creat_la_str, "%Y-%m-%d")
+    except ValueError:
+        logger.warning(f"[MONITOR] DB_CREAT_LA invalid (folosește format YYYY-MM-DD): {creat_la_str}")
+        return
+
+    zile_trecute = (datetime.utcnow() - creat_la).days
+    zile_ramase = PLAN_GRATUIT_ZILE - zile_trecute
+
+    if zile_ramase <= PRAG_ALERTA_ZILE:
+        mesaj = (
+            f"⚠️ <b>Baza de date PostgreSQL gratuită expiră în {max(zile_ramase, 0)} zile!</b>\n\n"
+            "Planul gratuit Render se șterge automat după 30 de zile.\n"
+            "Upgradează la planul Starter pe Render înainte de expirare, "
+            "altfel pierzi din nou toate datele (utilizatori, joburi, aplicări).\n\n"
+            "🔧 Acționează acum!"
+        )
+        notifica_admin(mesaj)
+        logger.warning(f"[MONITOR] Alertă DB gratuită trimisă admin — {zile_ramase} zile rămase")
+
+
 def porneste_monitorizare(interval_secunde: int = 86400):
-    """Verifică SSL și domeniu o dată pe zi și alertează adminul prin Telegram."""
+    """Verifică SSL, domeniu și expirarea DB gratuită o dată pe zi și alertează adminul prin Telegram."""
     _verifica_ssl_si_domeniu()
+    _verifica_expirare_db_gratuita()
 
     def _loop():
         import time
         while True:
             time.sleep(interval_secunde)
             _verifica_ssl_si_domeniu()
+            _verifica_expirare_db_gratuita()
 
     t = threading.Thread(target=_loop, daemon=True)
     t.start()
