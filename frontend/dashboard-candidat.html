@@ -271,22 +271,9 @@
             categorie: document.getElementById("urgenta-categorie").value || null,
           })
         });
-        document.getElementById("urgenta-form-wrap").classList.add("hidden");
-        const rez = document.getElementById("urgenta-rezultat");
-        rez.innerHTML = `
-          <div class="text-center mb-4"><div class="text-5xl mb-2">✅</div>
-          <p class="font-bold text-gray-800 text-lg">Cerere trimisa cu succes!</p>
-          <p class="text-gray-500 text-sm mt-1">${r.mesaj}</p></div>
-          <div class="bg-violet-50 border border-violet-200 rounded-xl p-4 text-sm">
-            <p class="font-bold text-violet-800 mb-2">💳 Detalii plata:</p>
-            <p><b>Titular:</b> ${r.detalii_plata.titular}</p>
-            <p><b>IBAN:</b> ${r.detalii_plata.iban}</p>
-            <p><b>Suma:</b> ${r.detalii_plata.suma}</p>
-            <p><b>Referinta:</b> <span class="font-mono font-bold">${r.detalii_plata.referinta}</span></p>
-          </div>
-          <p class="text-xs text-gray-400 mt-3 text-center">Vei fi activat in maxim 24h dupa confirmarea platii.</p>`;
-        rez.classList.remove("hidden");
-        verificaUrgentaActiva();
+        const p = r.detalii_plata;
+        const url = `/static/plata-urgenta.html?titular=${encodeURIComponent(p.titular)}&iban=${encodeURIComponent(p.iban)}&suma=${encodeURIComponent(p.suma)}&referinta=${encodeURIComponent(p.referinta)}&zile=${encodeURIComponent(r.zile)}`;
+        window.location.href = url;
       } catch(err) {
         alert("Eroare: " + err.message);
         btn.disabled = false; btn.textContent = "Trimite cererea";
