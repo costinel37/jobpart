@@ -469,13 +469,12 @@
         container.innerHTML = aplicari.map(a => `
           <div class="bg-white rounded-xl p-5 mb-3 shadow-sm">
             <div class="flex justify-between items-start flex-wrap gap-3">
-              <div>
+              <div class="flex-1">
                 <p class="font-bold text-gray-800">${escapeHtml(a.candidat_nume || 'Candidat #' + a.candidat_id)}</p>
                 <p class="text-gray-500 text-sm">Aplicat la ${formatData(a.creat_la)}</p>
                 ${a.scrisoare ? `<p class="text-gray-600 mt-2 italic">"${escapeHtml(a.scrisoare)}"</p>` : '<p class="text-gray-400 mt-2 text-sm">Fără scrisoare de intenție</p>'}
                 ${a.cv_nume_original ? `<p class="mt-2 text-sm">📎 <a href="${API_BASE}/upload/cv/${a.cv_path}" target="_blank" class="text-blue-600 hover:underline font-medium">${a.cv_nume_original}</a></p>` : ''}
                 <a href="/static/profil.html?id=${a.candidat_id}" class="text-purple-600 hover:underline text-sm mt-1 inline-block">⭐ Recenzează candidatul</a>
-                ${a.status === 'acceptata' ? `<button onclick="genereazaPrecontract(${a.id}, event)" class="mt-2 text-sm text-blue-600 hover:underline inline-block">📄 Generează precontract</button>` : ''}
               </div>
               <div class="flex flex-col items-end gap-2">
                 ${statusBadge(a.status)}
@@ -486,6 +485,13 @@
                   <option value="acceptata" ${a.status==='acceptata'?'selected':''}>Acceptată</option>
                   <option value="respinsa" ${a.status==='respinsa'?'selected':''}>Respinsă</option>
                 </select>
+                <button onclick="acceptaSiPrecontract(${a.id}, '${a.status}', event)"
+                  class="mt-1 px-4 py-2 rounded-xl text-sm font-semibold transition
+                    ${a.status === 'acceptata'
+                      ? 'bg-blue-600 text-white hover:bg-blue-700'
+                      : 'bg-gray-100 text-gray-500 hover:bg-blue-50 hover:text-blue-600 border border-gray-200'}">
+                  📄 Precontract
+                </button>
               </div>
             </div>
           </div>`).join("");
@@ -502,6 +508,21 @@
         });
         if (jobCurent) await veziAplicari(jobCurent.jobId, jobCurent.titlu);
       } catch (e) { alert(e.message); }
+    }
+
+    async function acceptaSiPrecontract(aplicareId, statusCurent, e) {
+      e.preventDefault();
+      if (statusCurent !== 'acceptata') {
+        try {
+          await apiFetch(`/aplicari/${aplicareId}/status`, {
+            method: "PUT",
+            body: JSON.stringify({ status: 'acceptata' }),
+          });
+        } catch (err) { alert(err.message); return; }
+      }
+      document.getElementById("pc-aplicare-id").value = aplicareId;
+      document.getElementById("pc-mesaj").classList.add("hidden");
+      document.getElementById("modal-precontract").classList.remove("hidden");
     }
 
     async function reinnoiesteJob(jobId) {
