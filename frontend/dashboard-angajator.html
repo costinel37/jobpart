@@ -468,30 +468,26 @@
         }
         container.innerHTML = aplicari.map(a => `
           <div class="bg-white rounded-xl p-5 mb-3 shadow-sm">
-            <div class="flex justify-between items-start flex-wrap gap-3">
-              <div class="flex-1">
+            <div class="flex justify-between items-start gap-3">
+              <div class="flex-1 min-w-0">
                 <p class="font-bold text-gray-800">${escapeHtml(a.candidat_nume || 'Candidat #' + a.candidat_id)}</p>
-                <p class="text-gray-500 text-sm">Aplicat la ${formatData(a.creat_la)}</p>
-                ${a.scrisoare ? `<p class="text-gray-600 mt-2 italic">"${escapeHtml(a.scrisoare)}"</p>` : '<p class="text-gray-400 mt-2 text-sm">Fără scrisoare de intenție</p>'}
+                <p class="text-gray-500 text-sm mb-3">Aplicat la ${formatData(a.creat_la)}</p>
+                <button onclick="acceptaSiPrecontract(${a.id}, '${a.status}', event)"
+                  class="w-full py-2.5 rounded-xl text-sm font-semibold bg-blue-600 text-white hover:bg-blue-700 transition mb-3">
+                  📄 Generează precontract
+                </button>
+                ${a.scrisoare ? `<p class="text-gray-600 text-sm italic">"${escapeHtml(a.scrisoare)}"</p>` : ''}
                 ${a.cv_nume_original ? `<p class="mt-2 text-sm">📎 <a href="${API_BASE}/upload/cv/${a.cv_path}" target="_blank" class="text-blue-600 hover:underline font-medium">${a.cv_nume_original}</a></p>` : ''}
-                <a href="/static/profil.html?id=${a.candidat_id}" class="text-purple-600 hover:underline text-sm mt-1 inline-block">⭐ Recenzează candidatul</a>
               </div>
-              <div class="flex flex-col items-end gap-2">
+              <div class="flex flex-col items-end gap-2 flex-shrink-0">
                 ${statusBadge(a.status)}
                 <select onchange="schimbaStatus(${a.id}, this.value)"
-                  class="text-sm border border-gray-300 rounded-lg px-3 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                  class="text-sm border border-gray-300 rounded-lg px-2 py-1 focus:outline-none focus:ring-2 focus:ring-blue-500">
                   <option value="trimisa" ${a.status==='trimisa'?'selected':''}>Trimisă</option>
                   <option value="vizualizata" ${a.status==='vizualizata'?'selected':''}>Vizualizată</option>
                   <option value="acceptata" ${a.status==='acceptata'?'selected':''}>Acceptată</option>
                   <option value="respinsa" ${a.status==='respinsa'?'selected':''}>Respinsă</option>
                 </select>
-                <button onclick="acceptaSiPrecontract(${a.id}, '${a.status}', event)"
-                  class="mt-1 px-4 py-2 rounded-xl text-sm font-semibold transition
-                    ${a.status === 'acceptata'
-                      ? 'bg-blue-600 text-white hover:bg-blue-700'
-                      : 'bg-gray-100 text-gray-500 hover:bg-blue-50 hover:text-blue-600 border border-gray-200'}">
-                  📄 Precontract
-                </button>
               </div>
             </div>
           </div>`).join("");
