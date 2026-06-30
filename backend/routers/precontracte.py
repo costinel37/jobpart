@@ -229,6 +229,21 @@ def _genereaza_pdf(p: models.Precontract) -> bytes:
     from reportlab.lib import colors
     from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, HRFlowable
     from reportlab.lib.enums import TA_CENTER, TA_JUSTIFY
+    from reportlab.pdfbase import pdfmetrics
+    from reportlab.pdfbase.ttfonts import TTFont
+    import os
+
+    FONT_DIR = "/usr/share/fonts/truetype/dejavu"
+    FONT_NORMAL = os.path.join(FONT_DIR, "DejaVuSans.ttf")
+    FONT_BOLD = os.path.join(FONT_DIR, "DejaVuSans-Bold.ttf")
+    if os.path.exists(FONT_NORMAL) and os.path.exists(FONT_BOLD):
+        pdfmetrics.registerFont(TTFont("DejaVu", FONT_NORMAL))
+        pdfmetrics.registerFont(TTFont("DejaVu-Bold", FONT_BOLD))
+        BASE_FONT = "DejaVu"
+        BOLD_FONT = "DejaVu-Bold"
+    else:
+        BASE_FONT = "Helvetica"
+        BOLD_FONT = "Helvetica-Bold"
 
     buffer = BytesIO()
     doc = SimpleDocTemplate(buffer, pagesize=A4,
@@ -236,13 +251,13 @@ def _genereaza_pdf(p: models.Precontract) -> bytes:
                             topMargin=2.5*cm, bottomMargin=2.5*cm)
 
     styles = getSampleStyleSheet()
-    titlu_style = ParagraphStyle("Titlu", parent=styles["Title"], fontSize=18, spaceAfter=6, alignment=TA_CENTER)
-    subtitlu_style = ParagraphStyle("Subtitlu", parent=styles["Normal"], fontSize=10, textColor=colors.grey, alignment=TA_CENTER, spaceAfter=20)
-    sectiune_style = ParagraphStyle("Sectiune", parent=styles["Heading2"], fontSize=12, textColor=colors.HexColor("#2563eb"), spaceBefore=16, spaceAfter=6)
-    normal_style = ParagraphStyle("Normal2", parent=styles["Normal"], fontSize=10, leading=16)
-    disclaimer_style = ParagraphStyle("Disc", parent=styles["Normal"], fontSize=8, textColor=colors.grey,
+    titlu_style = ParagraphStyle("Titlu", parent=styles["Title"], fontName=BOLD_FONT, fontSize=18, spaceAfter=6, alignment=TA_CENTER)
+    subtitlu_style = ParagraphStyle("Subtitlu", parent=styles["Normal"], fontName=BASE_FONT, fontSize=10, textColor=colors.grey, alignment=TA_CENTER, spaceAfter=20)
+    sectiune_style = ParagraphStyle("Sectiune", parent=styles["Heading2"], fontName=BOLD_FONT, fontSize=12, textColor=colors.HexColor("#2563eb"), spaceBefore=16, spaceAfter=6)
+    normal_style = ParagraphStyle("Normal2", parent=styles["Normal"], fontName=BASE_FONT, fontSize=10, leading=16)
+    disclaimer_style = ParagraphStyle("Disc", parent=styles["Normal"], fontName=BASE_FONT, fontSize=8, textColor=colors.grey,
                                       backColor=colors.HexColor("#f8fafc"), borderPad=8, leading=13, alignment=TA_JUSTIFY)
-    semn_style = ParagraphStyle("Semn", parent=styles["Normal"], fontSize=10, leading=18)
+    semn_style = ParagraphStyle("Semn", parent=styles["Normal"], fontName=BASE_FONT, fontSize=10, leading=18)
 
     def data_fmt(dt):
         if not dt:
@@ -264,8 +279,9 @@ def _genereaza_pdf(p: models.Precontract) -> bytes:
     tabel_parti = Table(date_parti, colWidths=[3*cm, 7*cm, 3*cm, 7*cm])
     tabel_parti.setStyle(TableStyle([
         ("FONTSIZE", (0,0), (-1,-1), 10),
-        ("FONTNAME", (0,0), (0,-1), "Helvetica-Bold"),
-        ("FONTNAME", (2,0), (2,-1), "Helvetica-Bold"),
+        ("FONTNAME", (0,0), (-1,-1), BASE_FONT),
+        ("FONTNAME", (0,0), (0,-1), BOLD_FONT),
+        ("FONTNAME", (2,0), (2,-1), BOLD_FONT),
         ("BOTTOMPADDING", (0,0), (-1,-1), 6),
         ("TOPPADDING", (0,0), (-1,-1), 4),
     ]))
@@ -283,7 +299,8 @@ def _genereaza_pdf(p: models.Precontract) -> bytes:
     tabel_job = Table(date_job, colWidths=[5*cm, 12*cm])
     tabel_job.setStyle(TableStyle([
         ("FONTSIZE", (0,0), (-1,-1), 10),
-        ("FONTNAME", (0,0), (0,-1), "Helvetica-Bold"),
+        ("FONTNAME", (0,0), (-1,-1), BASE_FONT),
+        ("FONTNAME", (0,0), (0,-1), BOLD_FONT),
         ("BOTTOMPADDING", (0,0), (-1,-1), 6),
         ("TOPPADDING", (0,0), (-1,-1), 4),
         ("ROWBACKGROUNDS", (0,0), (-1,-1), [colors.white, colors.HexColor("#f8fafc")]),
@@ -320,6 +337,7 @@ def _genereaza_pdf(p: models.Precontract) -> bytes:
         ("BACKGROUND", (1,0), (1,0), colors.HexColor("#eff6ff")),
         ("PADDING", (0,0), (-1,-1), 10),
         ("FONTSIZE", (0,0), (-1,-1), 10),
+        ("FONTNAME", (0,0), (-1,-1), BASE_FONT),
         ("LEFTPADDING", (0,0), (-1,-1), 14),
     ]))
     elemente.append(tabel_semn)
@@ -328,7 +346,7 @@ def _genereaza_pdf(p: models.Precontract) -> bytes:
     elemente.append(HRFlowable(width="100%", thickness=0.5, color=colors.HexColor("#e2e8f0")))
     elemente.append(Paragraph(
         f"Document generat pe platforma JobPart · ID #{p.id} · {datetime.utcnow().strftime('%d.%m.%Y')}",
-        ParagraphStyle("Footer", parent=styles["Normal"], fontSize=8, textColor=colors.grey, alignment=TA_CENTER, spaceBefore=8)
+        ParagraphStyle("Footer", parent=styles["Normal"], fontName=BASE_FONT, fontSize=8, textColor=colors.grey, alignment=TA_CENTER, spaceBefore=8)
     ))
 
     doc.build(elemente)
