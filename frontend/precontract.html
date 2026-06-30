@@ -176,10 +176,10 @@
 
       <!-- Descarcare PDF -->
       <div id="btn-pdf-bloc" class="hidden mt-6 text-center">
-        <a id="btn-pdf" href="#" target="_blank"
+        <button id="btn-pdf" onclick="descarcaPDF()"
           class="inline-flex items-center gap-2 bg-green-600 text-white px-8 py-3 rounded-xl font-semibold hover:bg-green-700 transition">
           📄 Descarcă PDF semnat
-        </a>
+        </button>
       </div>
 
     </div>
@@ -190,6 +190,35 @@
     const precontractId = new URLSearchParams(window.location.search).get("id");
     let datePrecontract = null;
     let userCurent = null;
+
+    async function descarcaPDF() {
+      const btn = document.getElementById("btn-pdf");
+      btn.disabled = true;
+      btn.textContent = "Se generează...";
+      try {
+        const token = getToken();
+        const res = await fetch(`${API_BASE}/precontracte/${precontractId}/pdf`, {
+          headers: { "Authorization": `Bearer ${token}` }
+        });
+        if (!res.ok) {
+          const err = await res.json().catch(() => ({}));
+          alert(err.detail || "Eroare la descărcare.");
+          return;
+        }
+        const blob = await res.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `precontract_${precontractId}.pdf`;
+        a.click();
+        URL.revokeObjectURL(url);
+      } catch (e) {
+        alert("Eroare la descărcare: " + e.message);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "📄 Descarcă PDF semnat";
+      }
+    }
 
     async function init() {
       if (!precontractId) {
@@ -213,7 +242,6 @@
       if (p.status === "semnat") {
         document.getElementById("banner-semnat").classList.remove("hidden");
         document.getElementById("btn-pdf-bloc").classList.remove("hidden");
-        document.getElementById("btn-pdf").href = `/api/precontracte/${p.id}/pdf`;
       } else if (p.status === "refuzat") {
         document.getElementById("banner-refuzat").classList.remove("hidden");
       } else if (userCurent && userCurent.id === p.angajator_id) {
