@@ -439,6 +439,8 @@
       }
     }
 
+    let jobCurent = null;
+
     async function incarcaJoburiPentruAplicari() {
       const jobs = await apiFetch("/jobs/mele/toate");
       const container = document.getElementById("aplicari-angajator-list");
@@ -453,6 +455,7 @@
     }
 
     async function veziAplicari(jobId, titlu) {
+      jobCurent = { jobId, titlu };
       document.getElementById("job-selectat-titlu").textContent = `Aplicări pentru: ${titlu}`;
       const container = document.getElementById("aplicari-pentru-job");
       document.getElementById("aplicari-detalii").classList.remove("hidden");
@@ -497,6 +500,7 @@
           method: "PUT",
           body: JSON.stringify({ status }),
         });
+        if (jobCurent) await veziAplicari(jobCurent.jobId, jobCurent.titlu);
       } catch (e) { alert(e.message); }
     }
 
