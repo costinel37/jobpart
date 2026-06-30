@@ -83,7 +83,7 @@ def trimite_cerere_urgenta(
         "zile": cerere.zile,
         "mesaj": f"Cererea a fost trimisa! Trimite {PRET_RON} RON prin transfer bancar si vei fi activat in maxim 24h.",
         "detalii_plata": {
-            "titular": "JobPart SRL",
+            "titular": "JobPart",
             "iban": "RO49AAAA1B31007593840000",
             "suma": f"{PRET_RON} RON",
             "referinta": f"URGENT-{cerere.id}-{current_user.id}",
