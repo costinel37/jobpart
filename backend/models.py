@@ -74,6 +74,8 @@ class Job(Base):
     creat_la = Column(DateTime, default=datetime.utcnow)
     angajator_id = Column(Integer, ForeignKey("users.id"))
 
+    rss_guid = Column(String(500), nullable=True, index=True)
+
     angajator = relationship("User", back_populates="joburi_postate")
     aplicari = relationship("Application", back_populates="job")
     favorite = relationship("Favorite", back_populates="job")
@@ -270,6 +272,21 @@ class CautareUrgenta(Base):
     procesata_la = Column(DateTime, nullable=True)
 
     candidat = relationship("User", foreign_keys=[candidat_id])
+
+
+class RssFeed(Base):
+    __tablename__ = "rss_feeds"
+
+    id = Column(Integer, primary_key=True, index=True)
+    angajator_id = Column(Integer, ForeignKey("users.id"), unique=True, nullable=False)
+    url = Column(String(500), nullable=False)
+    ultima_sincronizare = Column(DateTime, nullable=True)
+    joburi_importate = Column(Integer, default=0)
+    eroare = Column(Text, nullable=True)
+    activ = Column(Boolean, default=True)
+    creat_la = Column(DateTime, default=datetime.utcnow)
+
+    angajator = relationship("User")
 
 
 class Precontract(Base):

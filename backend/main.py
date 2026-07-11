@@ -12,12 +12,12 @@ import os
 
 from database import engine
 import models
-from routers import auth, jobs, applications, admin, upload, reviews, favorite, mesaje, notificari, export, promotii, precontracte, alerts, urgenta
+from routers import auth, jobs, applications, admin, upload, reviews, favorite, mesaje, notificari, export, promotii, precontracte, alerts, urgenta, import_rss
 from security import (
     limiter, SecurityHeadersMiddleware,
     RequestLoggingMiddleware, eroare_rate_limit
 )
-from expirare_jobs import porneste_task_expirare, porneste_keep_alive, porneste_monitorizare
+from expirare_jobs import porneste_task_expirare, porneste_keep_alive, porneste_monitorizare, porneste_sync_rss
 from auth import hash_parola
 from database import SessionLocal
 
@@ -78,6 +78,7 @@ app.include_router(promotii.router)
 app.include_router(precontracte.router)
 app.include_router(alerts.router)
 app.include_router(urgenta.router)
+app.include_router(import_rss.router)
 
 frontend_path = os.path.join(os.path.dirname(__file__), "..", "frontend")
 app.mount("/static", StaticFiles(directory=frontend_path), name="static")
@@ -102,6 +103,7 @@ def startup():
             ("avertisment_expirare", "BOOLEAN DEFAULT FALSE"),
             ("promovat", "BOOLEAN DEFAULT FALSE"),
             ("promovat_pana", "TIMESTAMP"),
+            ("rss_guid", "VARCHAR(500)"),
         ],
     }
     insp = inspect(engine)
@@ -152,6 +154,7 @@ def startup():
     porneste_task_expirare(interval_secunde=300)
     porneste_keep_alive(interval_secunde=600)
     porneste_monitorizare(interval_secunde=86400)
+    porneste_sync_rss(interval_secunde=21600)
 
 
 @app.exception_handler(500)

@@ -401,6 +401,24 @@ def porneste_monitorizare(interval_secunde: int = 86400):
     logger.info(f"[MONITOR] Monitoring pornit, interval: {interval_secunde}s")
 
 
+def porneste_sync_rss(interval_secunde: int = 21600):
+    """Sincronizează toate feedurile RSS la fiecare 6 ore."""
+    import time
+    from routers.import_rss import sync_toate_feedurile
+
+    def _loop():
+        while True:
+            time.sleep(interval_secunde)
+            try:
+                sync_toate_feedurile()
+            except Exception as e:
+                logger.warning(f"[RSS AUTO-SYNC] Eroare: {e}")
+
+    t = threading.Thread(target=_loop, daemon=True)
+    t.start()
+    logger.info(f"[RSS AUTO-SYNC] Pornit, interval: {interval_secunde}s")
+
+
 def porneste_keep_alive(interval_secunde: int = 600):
     """Ping la propria adresă ca să nu adoarmă pe Render free tier."""
     import time
