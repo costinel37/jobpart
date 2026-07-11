@@ -289,6 +289,21 @@ class RssFeed(Base):
     angajator = relationship("User")
 
 
+class PartenerAplicatie(Base):
+    __tablename__ = "partener_aplicatii"
+
+    id = Column(Integer, primary_key=True, index=True)
+    nume_companie = Column(String(200), nullable=False)
+    website = Column(String(500), nullable=False)
+    email = Column(String(200), nullable=False)
+    url_rss = Column(String(500), nullable=True)
+    tara = Column(String(10), nullable=True)
+    cui = Column(String(30), nullable=True)
+    descriere = Column(Text, nullable=True)
+    status = Column(String(20), default="in_asteptare")  # in_asteptare / aprobata / respinsa
+    creat_la = Column(DateTime, default=datetime.utcnow)
+
+
 class Precontract(Base):
     __tablename__ = "precontracte"
 

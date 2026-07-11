@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
+from typing import Optional
 from datetime import datetime, timedelta
 import urllib.request
 import xml.etree.ElementTree as ET
@@ -13,7 +14,70 @@ from auth import require_rol
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter(prefix="/api/import/rss", tags=["Import RSS"])
+router = APIRouter(tags=["Import RSS / Parteneri"])
+
+# ---------------------------------------------------------------------------
+# Anti-fraud filter
+# ---------------------------------------------------------------------------
+
+_BLACKLIST = [
+    "bitcoin", "crypto", "cryptocurrency", "nft", "ethereum", "litecoin",
+    "forex", "trading binar", "binary options", "optiuni binare",
+    "investitie garantata", "castig garantat", "profit garantat",
+    "randament garantat", "venit garantat", "guaranteed income",
+    "guaranteed profit", "guaranteed earnings",
+    "mlm", "network marketing", "vanzari directe piramida",
+    "schema ponzi", "ponzi scheme", "piramida financiara", "financial pyramid",
+    "recrutezi membrii si castigi", "adaugi colegi si primesti",
+    "escorta", "escort service", "adult entertainment", "onlyfans",
+    "casino", "cazino", "pacanele", "jocuri de noroc", "pariuri sportive",
+    "betting", "gambling",
+    "castigi mii de euro acasa", "muncesti de acasa si castigi",
+    "earn thousands from home", "make money fast", "get rich quick",
+    "passive income guaranteed", "venit pasiv garantat",
+    "forex robot", "trading automat garantat", "crypto mining",
+    "work from home earn thousands",
+]
+
+
+def _verifica_frauda(titlu: str, descriere: str) -> tuple[bool, str]:
+    text = (titlu + " " + (descriere or "")).lower()
+
+    for kw in _BLACKLIST:
+        if kw in text:
+            return True, f"keyword suspect: '{kw}'"
+
+    # Salary sanity — part-time >3000 EUR or >15000 RON is unrealistic
+    for m in re.finditer(r"([\d][\d\s\.,]*)(?:euro|eur|€)", text, re.IGNORECASE):
+        try:
+            val = float(re.sub(r"[\s\.]", "", m.group(1)).replace(",", "."))
+            if val > 3000:
+                return True, f"salariu suspect ({m.group(0).strip()})"
+        except ValueError:
+            pass
+    for m in re.finditer(r"([\d][\d\s\.,]*)(?:usd|\$)", text, re.IGNORECASE):
+        try:
+            val = float(re.sub(r"[\s\.]", "", m.group(1)).replace(",", "."))
+            if val > 3000:
+                return True, f"salariu suspect ({m.group(0).strip()})"
+        except ValueError:
+            pass
+    for m in re.finditer(r"([\d][\d\s\.,]*)\s*ron", text, re.IGNORECASE):
+        try:
+            val = float(re.sub(r"[\s\.]", "", m.group(1)).replace(",", "."))
+            if val > 15000:
+                return True, f"salariu suspect ({m.group(0).strip()})"
+        except ValueError:
+            pass
+
+    return False, ""
+
+
+# ---------------------------------------------------------------------------
+# RSS router
+# ---------------------------------------------------------------------------
+
+rss_router = APIRouter(prefix="/api/import/rss", tags=["Import RSS"])
 
 
 class RssBody(BaseModel):
@@ -51,6 +115,7 @@ def sync_feed(feed_id: int):
         companie = angajator.nume if angajator else "Angajator"
 
         importate = 0
+        blocate = 0
         for item in items:
             def get(tag):
                 el = item.find(tag)
@@ -72,6 +137,16 @@ def sync_feed(feed_id: int):
                 continue
 
             descriere = _strip_html(get("description"))
+
+            # Anti-fraud filter — skip suspicious jobs
+            frauda, motiv = _verifica_frauda(titlu, descriere)
+            if frauda:
+                logger.warning(
+                    f"[RSS][ANTI-FRAUDA] Feed {feed_id} — job blocat: '{titlu[:60]}' ({motiv})"
+                )
+                blocate += 1
+                continue
+
             categorie = get("category") or None
 
             job = models.Job(
@@ -94,7 +169,7 @@ def sync_feed(feed_id: int):
         feed.joburi_importate = (feed.joburi_importate or 0) + importate
         feed.eroare = None
         db.commit()
-        logger.info(f"[RSS] Feed {feed_id}: {importate} joburi noi importate")
+        logger.info(f"[RSS] Feed {feed_id}: {importate} joburi importate, {blocate} blocate anti-frauda")
 
     except Exception as e:
         logger.warning(f"[RSS] Eroare feed {feed_id}: {e}")
@@ -127,7 +202,7 @@ def sync_toate_feedurile():
             logger.warning(f"[RSS] Auto-sync eroare feed {feed_id}: {e}")
 
 
-@router.post("")
+@rss_router.post("")
 def inregistreaza_feed(
     body: RssBody,
     background_tasks: BackgroundTasks,
@@ -154,7 +229,7 @@ def inregistreaza_feed(
     return {"id": feed.id, "mesaj": "Feed înregistrat. Importul a început în fundal."}
 
 
-@router.get("")
+@rss_router.get("")
 def get_feed(
     db: Session = Depends(get_db),
     current_user=Depends(require_rol("angajator")),
@@ -174,7 +249,7 @@ def get_feed(
     }
 
 
-@router.post("/sync")
+@rss_router.post("/sync")
 def sync_manual(
     background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
@@ -189,7 +264,7 @@ def sync_manual(
     return {"mesaj": "Sincronizare pornită. Reîncarcă pagina în câteva secunde."}
 
 
-@router.delete("")
+@rss_router.delete("")
 def sterge_feed(
     db: Session = Depends(get_db),
     current_user=Depends(require_rol("angajator")),
@@ -202,3 +277,56 @@ def sterge_feed(
     db.delete(feed)
     db.commit()
     return {"mesaj": "Feed RSS șters."}
+
+
+# ---------------------------------------------------------------------------
+# Partner application router
+# ---------------------------------------------------------------------------
+
+parteneri_router = APIRouter(prefix="/api/parteneri", tags=["Parteneri"])
+
+
+class PartenerBody(BaseModel):
+    nume_companie: str
+    website: str
+    email: str
+    url_rss: Optional[str] = None
+    tara: Optional[str] = None
+    cui: Optional[str] = None
+    descriere: Optional[str] = None
+
+
+@parteneri_router.post("/aplicatie")
+def trimite_aplicatie_partener(body: PartenerBody, db: Session = Depends(get_db)):
+    if not body.nume_companie.strip() or not body.email.strip() or not body.website.strip():
+        raise HTTPException(status_code=400, detail="Câmpurile obligatorii lipsesc.")
+
+    # Basic website format check
+    if not body.website.startswith("http"):
+        raise HTTPException(status_code=400, detail="Website-ul trebuie să înceapă cu https://")
+
+    aplicatie = models.PartenerAplicatie(
+        nume_companie=body.nume_companie[:200],
+        website=body.website[:500],
+        email=body.email[:200],
+        url_rss=body.url_rss[:500] if body.url_rss else None,
+        tara=body.tara,
+        cui=body.cui[:30] if body.cui else None,
+        descriere=body.descriere[:2000] if body.descriere else None,
+    )
+    db.add(aplicatie)
+    db.commit()
+    logger.info(f"[PARTENER] Aplicatie noua: {body.nume_companie} <{body.email}>")
+    return {
+        "mesaj": "Aplicație primită! Te vom contacta la adresa de email în 24-48h după verificare."
+    }
+
+
+# ---------------------------------------------------------------------------
+# Combined router exported to main.py
+# ---------------------------------------------------------------------------
+
+from fastapi import APIRouter as _AR
+router = _AR()
+router.include_router(rss_router)
+router.include_router(parteneri_router)

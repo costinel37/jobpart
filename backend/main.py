@@ -105,6 +105,10 @@ def startup():
             ("promovat_pana", "TIMESTAMP"),
             ("rss_guid", "VARCHAR(500)"),
         ],
+        "partener_aplicatii": [
+            ("tara", "VARCHAR(10)"),
+            ("cui", "VARCHAR(30)"),
+        ],
     }
     insp = inspect(engine)
     with engine.connect() as conn:

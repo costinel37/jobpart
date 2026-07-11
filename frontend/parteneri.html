@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Parteneri & Integrări – JobPart România</title>
+  <meta name="description" content="Integrează feed-ul tău RSS pe JobPart.ro. Politică anti-fraudă strictă, revizie manuală, zero toleranță pentru conținut înșelător." />
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%237c3aed'/><text x='50%' y='50%' font-size='20' text-anchor='middle' dominant-baseline='central' fill='white' font-family='Arial'>J</text></svg>" />
+  <meta name="theme-color" content="#7c3aed" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { background:#f5f0ff; font-family:'Segoe UI',system-ui,sans-serif; }
+    .btn-violet { background:linear-gradient(135deg,#7c3aed,#6d28d9); box-shadow:0 4px 15px rgba(124,58,237,0.4); transition:all .2s; }
+    .btn-violet:hover { box-shadow:0 6px 25px rgba(124,58,237,0.6); transform:translateY(-1px); }
+    .orb { position:absolute; border-radius:50%; background:radial-gradient(circle,rgba(167,139,250,0.3),transparent 70%); pointer-events:none; animation:float 6s ease-in-out infinite; }
+    @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-18px)} }
+    .tab-btn.active { background:#7c3aed; color:#fff; }
+    .tab-btn { transition:all .2s; }
+    .lang-content { display:none; }
+    .lang-content.active { display:block; }
+    input,textarea,select { outline:none; transition:border-color .2s, box-shadow .2s; }
+    input:focus,textarea:focus,select:focus { border-color:#7c3aed; box-shadow:0 0 0 3px rgba(124,58,237,0.12); }
+    .check-item::before { content:"✓"; color:#7c3aed; font-weight:700; margin-right:8px; }
+    .block-item::before { content:"✗"; color:#ef4444; font-weight:700; margin-right:8px; }
+  </style>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <nav class="bg-white/80 backdrop-blur-md shadow-sm sticky top-0 z-50 border-b border-violet-100">
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
+      <a href="/" class="text-2xl font-bold">
+        <span style="background:linear-gradient(135deg,#7c3aed,#a855f7);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">Job</span><span class="text-gray-800">Part</span>
+        <span class="text-xs align-top ml-1 bg-violet-100 text-violet-600 px-1.5 py-0.5 rounded-full font-semibold">✦</span>
+      </a>
+      <div class="flex items-center gap-3">
+        <a href="/static/jobs.html" class="text-gray-600 hover:text-violet-600 font-medium transition text-sm">Joburi</a>
+        <a href="/#angajatori" class="text-gray-600 hover:text-violet-600 font-medium transition text-sm">Angajatori</a>
+        <a href="/static/register.html?rol=angajator" class="btn-violet px-4 py-2 rounded-xl text-white font-semibold text-sm">+ Publică anunț</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Hero -->
+  <section class="relative overflow-hidden py-20 px-4 text-center" style="background:linear-gradient(135deg,#1e0a3c,#3b0764,#6d28d9);">
+    <div class="orb" style="width:350px;height:350px;top:-80px;right:-60px;animation-delay:0s;"></div>
+    <div class="orb" style="width:200px;height:200px;bottom:-40px;left:-30px;animation-delay:2s;"></div>
+    <div class="relative max-w-3xl mx-auto z-10">
+      <div class="inline-flex items-center gap-2 bg-white/10 border border-white/20 text-violet-300 text-sm px-4 py-2 rounded-full mb-6">
+        🤝 Parteneri &amp; Integrări / Partners &amp; Integrations
+      </div>
+      <h1 class="text-4xl md:text-5xl font-bold text-white mb-4">
+        Parteneriat JobPart<br/>
+        <span class="text-violet-300 text-2xl md:text-3xl font-normal">JobPart Partnership</span>
+      </h1>
+      <p class="text-violet-200 text-lg mb-3">Conectăm platformele de recrutare cu candidații part-time din România.</p>
+      <p class="text-violet-300 text-base mb-8 italic">We connect HR platforms with part-time candidates across Romania.</p>
+      <div class="flex flex-col sm:flex-row gap-3 justify-center">
+        <a href="#aplica" class="btn-violet px-8 py-3 rounded-2xl text-white font-bold text-base">Aplică pentru parteneriat →</a>
+        <a href="#anti-frauda" class="border border-white/30 text-white px-8 py-3 rounded-2xl font-semibold text-base hover:bg-white/10 transition">Politică anti-fraudă ↓</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Tabs RO / EN -->
+  <section id="anti-frauda" class="py-16 px-4 max-w-5xl mx-auto">
+    <div class="text-center mb-8">
+      <h2 class="text-3xl font-bold text-gray-900 mb-2">Politică anti-fraudă / Anti-Fraud Policy</h2>
+      <p class="text-gray-500">Alege limba / Select language:</p>
+      <div class="inline-flex mt-4 bg-white border border-gray-200 rounded-2xl p-1 shadow-sm gap-1">
+        <button class="tab-btn active px-6 py-2 rounded-xl font-semibold text-sm" onclick="setLang('ro')">🇷🇴 Română</button>
+        <button class="tab-btn px-6 py-2 rounded-xl font-semibold text-sm text-gray-600" onclick="setLang('en')">🇬🇧 English</button>
+      </div>
+    </div>
+
+    <!-- RO -->
+    <div id="lang-ro" class="lang-content active">
+      <div class="bg-white rounded-3xl shadow-sm border border-violet-100 p-8">
+        <h3 class="text-xl font-bold text-gray-900 mb-4">Cum evităm escrocheriile și frauda</h3>
+        <p class="text-gray-600 mb-6">JobPart.ro implementează un sistem automat de detectare a fraudei pentru <strong>toate</strong> joburile importate prin RSS. Niciun anunț nu este publicat fără să treacă prin filtrele noastre.</p>
+
+        <div class="grid md:grid-cols-2 gap-6 mb-8">
+          <div>
+            <h4 class="font-bold text-gray-800 mb-3 text-sm uppercase tracking-wide">✅ Ce verificăm automat</h4>
+            <ul class="space-y-2 text-gray-600 text-sm">
+              <li class="check-item">Cuvinte cheie asociate cu frauda (50+ termeni)</li>
+              <li class="check-item">Salarii nerealiste pentru part-time (&gt;3.000 EUR/lună)</li>
+              <li class="check-item">Domenii ale angajatorului — SSL activ obligatoriu</li>
+              <li class="check-item">Titlu și descriere — conținut coerent, nelegal</li>
+              <li class="check-item">URL-ul feed-ului RSS — accesibil și valid</li>
+              <li class="check-item">Primele 10 joburi importate — revizie manuală</li>
+            </ul>
+          </div>
+          <div>
+            <h4 class="font-bold text-gray-800 mb-3 text-sm uppercase tracking-wide">🚫 Ce blocăm automat</h4>
+            <ul class="space-y-2 text-gray-600 text-sm">
+              <li class="block-item">Crypto, NFT, Forex, opțiuni binare</li>
+              <li class="block-item">MLM, scheme piramidale, vânzări directe</li>
+              <li class="block-item">Conținut adult, escortă, entertainment 18+</li>
+              <li class="block-item">Cazino, jocuri de noroc, pariuri sportive</li>
+              <li class="block-item">„Câștig garantat", „venit pasiv garantat"</li>
+              <li class="block-item">„Muncești de acasă și câștigi mii de euro"</li>
+            </ul>
+          </div>
+        </div>
+
+        <h4 class="font-bold text-gray-800 mb-4">Procesul de aprobare</h4>
+        <div class="grid sm:grid-cols-4 gap-4 mb-8">
+          <div class="bg-violet-50 rounded-2xl p-4 text-center">
+            <div class="text-2xl mb-2">📤</div>
+            <p class="text-xs font-semibold text-gray-700">1. Trimiți aplicația</p>
+            <p class="text-xs text-gray-500 mt-1">Cu detaliile companiei și URL-ul RSS</p>
+          </div>
+          <div class="bg-violet-50 rounded-2xl p-4 text-center">
+            <div class="text-2xl mb-2">🔍</div>
+            <p class="text-xs font-semibold text-gray-700">2. Verificare automată</p>
+            <p class="text-xs text-gray-500 mt-1">Domain, SSL, RSS valid, cuvinte cheie</p>
+          </div>
+          <div class="bg-violet-50 rounded-2xl p-4 text-center">
+            <div class="text-2xl mb-2">👁</div>
+            <p class="text-xs font-semibold text-gray-700">3. Revizie manuală</p>
+            <p class="text-xs text-gray-500 mt-1">Primele 10 joburi, răspuns 24-48h</p>
+          </div>
+          <div class="bg-violet-50 rounded-2xl p-4 text-center">
+            <div class="text-2xl mb-2">🟢</div>
+            <p class="text-xs font-semibold text-gray-700">4. Activare live</p>
+            <p class="text-xs text-gray-500 mt-1">Joburile apar pe platformă automat</p>
+          </div>
+        </div>
+
+        <div class="bg-red-50 border border-red-200 rounded-2xl p-5">
+          <h4 class="font-bold text-red-700 mb-2">⚠️ Zero toleranță</h4>
+          <p class="text-red-600 text-sm">Orice partener care publică joburi frauduloase, înșelătoare sau ilegale este <strong>blocat permanent</strong> fără drept de contestație. Raportăm cazurile grave autorităților competente (ANPC, Poliție). Candidații pot raporta orice job suspect, iar acesta va fi investigat în maxim 24 de ore.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- EN -->
+    <div id="lang-en" class="lang-content">
+      <div class="bg-white rounded-3xl shadow-sm border border-violet-100 p-8">
+        <h3 class="text-xl font-bold text-gray-900 mb-4">How we prevent scams &amp; fraud</h3>
+        <p class="text-gray-600 mb-6">JobPart.ro implements an automatic fraud detection system for <strong>all</strong> RSS-imported jobs. No listing goes live without passing through our filters.</p>
+
+        <div class="grid md:grid-cols-2 gap-6 mb-8">
+          <div>
+            <h4 class="font-bold text-gray-800 mb-3 text-sm uppercase tracking-wide">✅ What we automatically check</h4>
+            <ul class="space-y-2 text-gray-600 text-sm">
+              <li class="check-item">Suspicious keywords (50+ blocked terms)</li>
+              <li class="check-item">Unrealistic salaries for part-time (&gt;3,000 EUR/month)</li>
+              <li class="check-item">Employer domain — active SSL required</li>
+              <li class="check-item">Job title &amp; description — coherent, legal content</li>
+              <li class="check-item">RSS feed URL — accessible and valid XML</li>
+              <li class="check-item">First 10 imported jobs — manual review</li>
+            </ul>
+          </div>
+          <div>
+            <h4 class="font-bold text-gray-800 mb-3 text-sm uppercase tracking-wide">🚫 What we automatically block</h4>
+            <ul class="space-y-2 text-gray-600 text-sm">
+              <li class="block-item">Crypto, NFT, Forex, binary options</li>
+              <li class="block-item">MLM, pyramid schemes, network marketing</li>
+              <li class="block-item">Adult content, escort, 18+ entertainment</li>
+              <li class="block-item">Casino, gambling, sports betting</li>
+              <li class="block-item">"Guaranteed income", "guaranteed passive earnings"</li>
+              <li class="block-item">"Work from home and earn thousands"</li>
+            </ul>
+          </div>
+        </div>
+
+        <h4 class="font-bold text-gray-800 mb-4">Approval process</h4>
+        <div class="grid sm:grid-cols-4 gap-4 mb-8">
+          <div class="bg-violet-50 rounded-2xl p-4 text-center">
+            <div class="text-2xl mb-2">📤</div>
+            <p class="text-xs font-semibold text-gray-700">1. Submit application</p>
+            <p class="text-xs text-gray-500 mt-1">Company details and RSS feed URL</p>
+          </div>
+          <div class="bg-violet-50 rounded-2xl p-4 text-center">
+            <div class="text-2xl mb-2">🔍</div>
+            <p class="text-xs font-semibold text-gray-700">2. Automatic checks</p>
+            <p class="text-xs text-gray-500 mt-1">Domain, SSL, valid RSS, keywords</p>
+          </div>
+          <div class="bg-violet-50 rounded-2xl p-4 text-center">
+            <div class="text-2xl mb-2">👁</div>
+            <p class="text-xs font-semibold text-gray-700">3. Manual review</p>
+            <p class="text-xs text-gray-500 mt-1">First 10 jobs reviewed, reply 24-48h</p>
+          </div>
+          <div class="bg-violet-50 rounded-2xl p-4 text-center">
+            <div class="text-2xl mb-2">🟢</div>
+            <p class="text-xs font-semibold text-gray-700">4. Go live</p>
+            <p class="text-xs text-gray-500 mt-1">Jobs appear on the platform automatically</p>
+          </div>
+        </div>
+
+        <div class="bg-red-50 border border-red-200 rounded-2xl p-5">
+          <h4 class="font-bold text-red-700 mb-2">⚠️ Zero tolerance</h4>
+          <p class="text-red-600 text-sm">Any partner publishing fraudulent, misleading, or illegal jobs is <strong>permanently banned</strong> with no right of appeal. Serious cases are reported to the relevant authorities. Candidates can report any suspicious job listing, which will be investigated within 24 hours.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Anti-fraud filter grid -->
+  <section class="py-12 px-4" style="background:linear-gradient(180deg,#f5f0ff,#ede9fe);">
+    <div class="max-w-5xl mx-auto">
+      <h2 class="text-2xl font-bold text-gray-900 text-center mb-2">Filtrele noastre anti-fraudă</h2>
+      <p class="text-center text-gray-500 mb-8 text-sm">Our anti-fraud filters — active on every import</p>
+      <div class="grid sm:grid-cols-2 md:grid-cols-3 gap-5">
+        <div class="bg-white rounded-2xl p-5 shadow-sm border border-violet-100">
+          <div class="text-2xl mb-2">🔤</div>
+          <h4 class="font-bold text-gray-800 mb-1">Keyword Filter</h4>
+          <p class="text-gray-500 text-sm">50+ cuvinte cheie blocate automat: crypto, forex, MLM, scheme, escortă, cazino și variante ale acestora. / 50+ blocked terms auto-detected in titles and descriptions.</p>
+        </div>
+        <div class="bg-white rounded-2xl p-5 shadow-sm border border-violet-100">
+          <div class="text-2xl mb-2">💰</div>
+          <h4 class="font-bold text-gray-800 mb-1">Salary Sanity Check</h4>
+          <p class="text-gray-500 text-sm">Joburile part-time cu salariu &gt;3.000 EUR/lună sau &gt;15.000 RON/lună sunt blocate automat ca nerealiste. / Unrealistic pay for part-time work is auto-rejected.</p>
+        </div>
+        <div class="bg-white rounded-2xl p-5 shadow-sm border border-violet-100">
+          <div class="text-2xl mb-2">🌐</div>
+          <h4 class="font-bold text-gray-800 mb-1">Domain &amp; SSL Check</h4>
+          <p class="text-gray-500 text-sm">Verificăm că domeniul partenerului are SSL activ. Feed-urile HTTP nesecurizate sunt refuzate. / Insecure or non-SSL domains are rejected.</p>
+        </div>
+        <div class="bg-white rounded-2xl p-5 shadow-sm border border-violet-100">
+          <div class="text-2xl mb-2">👁</div>
+          <h4 class="font-bold text-gray-800 mb-1">Manual Review</h4>
+          <p class="text-gray-500 text-sm">Primele 10 joburi importate sunt revizuite manual de echipa JobPart înainte de activare. / First batch always gets human eyes before going live.</p>
+        </div>
+        <div class="bg-white rounded-2xl p-5 shadow-sm border border-violet-100">
+          <div class="text-2xl mb-2">🚨</div>
+          <h4 class="font-bold text-gray-800 mb-1">Candidate Reporting</h4>
+          <p class="text-gray-500 text-sm">Candidații pot raporta orice anunț suspect. Raportările sunt investigate în 24h și duc la suspendarea imediată dacă se confirmă frauda. / Any job can be flagged by users.</p>
+        </div>
+        <div class="bg-white rounded-2xl p-5 shadow-sm border border-violet-100">
+          <div class="text-2xl mb-2">🚫</div>
+          <h4 class="font-bold text-gray-800 mb-1">Auto-Blacklist</h4>
+          <p class="text-gray-500 text-sm">Partenerii care încalcă regulile sunt adăugați automat pe lista neagră și blocați definitiv. Domeniul este blocat la nivel de feed. / Violating partners are permanently banned.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Application form -->
+  <section id="aplica" class="py-16 px-4">
+    <div class="max-w-2xl mx-auto">
+      <div class="text-center mb-10">
+        <h2 class="text-3xl font-bold text-gray-900 mb-2">Aplică pentru parteneriat</h2>
+        <p class="text-gray-500">Apply for partnership</p>
+      </div>
+
+      <form id="form-partener" class="bg-white rounded-3xl shadow-sm border border-violet-100 p-8 space-y-5" onsubmit="trimiteAplicatie(event)">
+
+        <div class="grid sm:grid-cols-2 gap-5">
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-1">Nume companie <span class="text-red-500">*</span><br/><span class="font-normal text-gray-400">Company name</span></label>
+            <input type="text" id="f-companie" required placeholder="Ex: ABC Recruiting SRL"
+              class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm bg-gray-50" />
+          </div>
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-1">Website <span class="text-red-500">*</span></label>
+            <input type="url" id="f-website" required placeholder="https://compania-ta.ro"
+              class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm bg-gray-50" />
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-1">Email contact <span class="text-red-500">*</span></label>
+          <input type="email" id="f-email" required placeholder="hr@compania-ta.ro"
+            class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm bg-gray-50" />
+        </div>
+
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-1">URL feed RSS <span class="text-gray-400 font-normal">(opțional / optional)</span></label>
+          <input type="url" id="f-rss" placeholder="https://compania-ta.ro/jobs.xml"
+            class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm bg-gray-50" />
+          <p class="text-xs text-gray-400 mt-1">Lasă gol dacă vrei să discuți mai întâi / Leave blank to discuss first</p>
+        </div>
+
+        <div class="grid sm:grid-cols-2 gap-5">
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-1">Țară / Country <span class="text-red-500">*</span></label>
+            <select id="f-tara" required class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm bg-gray-50">
+              <option value="">Selectează / Select</option>
+              <option value="RO" selected>România</option>
+              <option value="MD">Moldova</option>
+              <option value="EU">Altă țară UE / Other EU</option>
+              <option value="OTHER">Altă țară / Other</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-sm font-semibold text-gray-700 mb-1">CUI / CIF <span class="text-gray-400 font-normal">(opțional)</span></label>
+            <input type="text" id="f-cui" placeholder="RO12345678"
+              class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm bg-gray-50" />
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-sm font-semibold text-gray-700 mb-1">Descriere scurtă <span class="text-red-500">*</span> <span class="text-gray-400 font-normal">/ Short description</span></label>
+          <textarea id="f-descriere" required rows="3" placeholder="Ce face compania ta și ce tip de joburi vrei să publici pe JobPart... / What your company does and what jobs you want to list..."
+            class="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm bg-gray-50 resize-none"></textarea>
+        </div>
+
+        <div class="space-y-3 pt-2 border-t border-gray-100">
+          <label class="flex items-start gap-3 cursor-pointer">
+            <input type="checkbox" id="f-acord1" required class="mt-0.5 accent-violet-600 w-4 h-4 flex-shrink-0" />
+            <span class="text-sm text-gray-600">Confirm că toate joburile publicate respectă legislația română și europeană a muncii. / I confirm all posted jobs comply with Romanian and EU labor law.</span>
+          </label>
+          <label class="flex items-start gap-3 cursor-pointer">
+            <input type="checkbox" id="f-acord2" required class="mt-0.5 accent-violet-600 w-4 h-4 flex-shrink-0" />
+            <span class="text-sm text-gray-600">Înțeleg că JobPart poate bloca sau șterge orice anunț care încalcă politica anti-fraudă, fără notificare prealabilă. / I understand JobPart may remove any listing violating the anti-fraud policy without prior notice.</span>
+          </label>
+          <label class="flex items-start gap-3 cursor-pointer">
+            <input type="checkbox" id="f-acord3" required class="mt-0.5 accent-violet-600 w-4 h-4 flex-shrink-0" />
+            <span class="text-sm text-gray-600">Am citit și accept <a href="/static/termeni.html" class="text-violet-600 underline" target="_blank">Termenii și condițiile</a> JobPart. / I have read and accept JobPart's <a href="/static/termeni.html" class="text-violet-600 underline" target="_blank">Terms &amp; Conditions</a>.</span>
+          </label>
+        </div>
+
+        <div id="form-status" class="hidden rounded-xl px-4 py-3 text-sm font-medium"></div>
+
+        <button type="submit" id="btn-submit" class="btn-violet w-full py-4 rounded-2xl text-white font-bold text-base">
+          Trimite aplicația / Submit application
+        </button>
+      </form>
+
+      <!-- What happens next -->
+      <div class="mt-8 bg-violet-50 rounded-2xl p-6 border border-violet-100 text-sm text-gray-600">
+        <p class="font-bold text-gray-800 mb-3">Ce se întâmplă după / What happens next:</p>
+        <div class="space-y-2">
+          <p>📧 Primești un email de confirmare în câteva minute / You'll receive a confirmation email in minutes</p>
+          <p>🔍 Echipa noastră verifică aplicația în 24-48h / Our team reviews your application within 24-48h</p>
+          <p>✅ La aprobare, poți înregistra feed-ul RSS din dashboard / Upon approval, activate RSS feed from your dashboard</p>
+          <p>🔄 Joburile se sincronizează automat la fiecare 6 ore / Jobs auto-sync every 6 hours</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer minimal -->
+  <footer class="py-8 px-4 border-t border-gray-200 bg-white text-center text-sm text-gray-400">
+    <p>© 2024 JobPart România • <a href="/static/termeni.html" class="hover:text-violet-600">Termeni</a> • <a href="/static/confidentialitate.html" class="hover:text-violet-600">Confidențialitate</a> • <a href="/" class="hover:text-violet-600">jobpart.ro</a></p>
+  </footer>
+
+  <script>
+    const API = '';
+
+    function setLang(lang) {
+      document.querySelectorAll('.lang-content').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.getElementById('lang-' + lang).classList.add('active');
+      event.target.classList.add('active');
+    }
+
+    async function trimiteAplicatie(e) {
+      e.preventDefault();
+      const btn = document.getElementById('btn-submit');
+      const status = document.getElementById('form-status');
+      btn.disabled = true;
+      btn.textContent = 'Se trimite...';
+      status.className = 'hidden rounded-xl px-4 py-3 text-sm font-medium';
+
+      const body = {
+        nume_companie: document.getElementById('f-companie').value.trim(),
+        website: document.getElementById('f-website').value.trim(),
+        email: document.getElementById('f-email').value.trim(),
+        url_rss: document.getElementById('f-rss').value.trim() || null,
+        tara: document.getElementById('f-tara').value,
+        cui: document.getElementById('f-cui').value.trim() || null,
+        descriere: document.getElementById('f-descriere').value.trim(),
+      };
+
+      try {
+        const r = await fetch('/api/parteneri/aplicatie', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(body),
+        });
+        const data = await r.json();
+        if (r.ok) {
+          status.className = 'rounded-xl px-4 py-3 text-sm font-medium bg-green-50 text-green-700 border border-green-200';
+          status.textContent = '✅ ' + (data.mesaj || 'Aplicație trimisă! Vei fi contactat în 24-48h.');
+          document.getElementById('form-partener').reset();
+        } else {
+          throw new Error(data.detail || 'Eroare la trimitere.');
+        }
+      } catch (err) {
+        status.className = 'rounded-xl px-4 py-3 text-sm font-medium bg-red-50 text-red-700 border border-red-200';
+        status.textContent = '❌ ' + err.message;
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Trimite aplicația / Submit application';
+      }
+    }
+  </script>
+</body>
+</html>
