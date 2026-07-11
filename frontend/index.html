@@ -251,21 +251,81 @@
     </div>
   </section>
 
-  <!-- CTA Angajatori -->
-  <section class="py-16 px-4 relative overflow-hidden" style="background:linear-gradient(135deg,#1e0a3c,#3b0764,#4c1d95);">
-    <div class="orb" style="width:350px;height:350px;top:-80px;right:-50px;background:radial-gradient(circle,rgba(167,139,250,0.2),transparent 70%);animation-delay:0.5s;"></div>
-    <div class="orb" style="width:200px;height:200px;bottom:-30px;left:10%;background:radial-gradient(circle,rgba(192,132,252,0.15),transparent 70%);animation-delay:2.5s;"></div>
-    <div class="max-w-3xl mx-auto text-center relative z-10">
-      <div class="inline-flex items-center gap-2 bg-white/10 border border-white/20 text-violet-300 text-sm px-4 py-2 rounded-full mb-6">
-        🚀 Angajatori
+  <!-- FOR EMPLOYERS / PARTENERI -->
+  <section id="angajatori" class="py-20 px-4" style="background:linear-gradient(180deg,#f5f0ff 0%,#ede9fe 100%);">
+    <div class="max-w-6xl mx-auto">
+
+      <!-- Header -->
+      <div class="text-center mb-14">
+        <div class="inline-flex items-center gap-2 bg-violet-100 text-violet-700 text-sm font-semibold px-4 py-2 rounded-full mb-4">
+          🏢 Pentru Angajatori &amp; Parteneri
+        </div>
+        <h2 class="text-4xl font-bold text-gray-900 mb-4">Găsești candidatul potrivit <br class="hidden md:block"/>în mai puțin de 24 de ore</h2>
+        <p class="text-gray-500 text-lg max-w-2xl mx-auto">Postează joburi part-time gratuit, vizibile <strong>365 de zile</strong>, și primești aplicări direct pe platformă — cu precontract digital inclus.</p>
       </div>
-      <h2 class="text-4xl font-bold mb-4 text-white">Ești angajator?</h2>
-      <p class="text-violet-300 mb-8 text-lg">Postează joburi part-time și găsește candidații potriviți rapid și ușor.</p>
-      <a href="/static/register.html?rol=angajator"
-         class="inline-block bg-white text-violet-700 px-10 py-4 rounded-2xl font-bold text-lg hover:bg-violet-50 transition"
-         style="box-shadow:0 8px 30px rgba(139,92,246,0.4)">
-        Înregistrează-te gratuit ✦
-      </a>
+
+      <!-- Beneficii grid -->
+      <div class="grid md:grid-cols-3 gap-6 mb-14">
+        <div class="bg-white rounded-2xl p-6 shadow-sm border border-violet-100">
+          <div class="text-3xl mb-3">🆓</div>
+          <h3 class="font-bold text-gray-800 text-lg mb-2">100% Gratuit</h3>
+          <p class="text-gray-500 text-sm">Postezi joburi fără niciun cost. Anunțul rămâne activ <strong>365 de zile</strong> fără abonament sau taxe ascunse.</p>
+        </div>
+        <div class="bg-white rounded-2xl p-6 shadow-sm border border-violet-100">
+          <div class="text-3xl mb-3">⚡</div>
+          <h3 class="font-bold text-gray-800 text-lg mb-2">Candidați rapizi</h3>
+          <p class="text-gray-500 text-sm">Primești aplicări în aceeași zi. Studenți, pensionari și persoane disponibile imediat te contactează direct.</p>
+        </div>
+        <div class="bg-white rounded-2xl p-6 shadow-sm border border-violet-100">
+          <div class="text-3xl mb-3">📄</div>
+          <h3 class="font-bold text-gray-800 text-lg mb-2">Precontract digital</h3>
+          <p class="text-gray-500 text-sm">Generezi precontractul direct din aplicație — semnat electronic de ambele părți, fără hârtii sau deplasări.</p>
+        </div>
+        <div class="bg-white rounded-2xl p-6 shadow-sm border border-violet-100">
+          <div class="text-3xl mb-3">📡</div>
+          <h3 class="font-bold text-gray-800 text-lg mb-2">Import RSS automat</h3>
+          <p class="text-gray-500 text-sm">Ai un ATS sau site cu joburi? Conectezi feed-ul RSS și joburile se importă automat pe JobPart la fiecare 6 ore.</p>
+        </div>
+        <div class="bg-white rounded-2xl p-6 shadow-sm border border-violet-100">
+          <div class="text-3xl mb-3">📊</div>
+          <h3 class="font-bold text-gray-800 text-lg mb-2">Dashboard complet</h3>
+          <p class="text-gray-500 text-sm">Gestionezi toate joburile, aplicările și candidații dintr-un singur loc, de pe orice dispozitiv.</p>
+        </div>
+        <div class="bg-white rounded-2xl p-6 shadow-sm border border-violet-100">
+          <div class="text-3xl mb-3">🔔</div>
+          <h3 class="font-bold text-gray-800 text-lg mb-2">Notificări instant</h3>
+          <p class="text-gray-500 text-sm">Primești notificare imediată la fiecare aplicare nouă. Nu ratezi niciun candidat potrivit.</p>
+        </div>
+      </div>
+
+      <!-- CTA Angajatori -->
+      <div class="bg-violet-700 rounded-3xl p-10 text-center text-white mb-10" style="background:linear-gradient(135deg,#6d28d9,#7c3aed);">
+        <h3 class="text-3xl font-bold mb-3">Începe să recrutezi gratuit</h3>
+        <p class="text-violet-200 mb-7 text-lg">Înregistrare în 2 minute. Primul job postat imediat.</p>
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+          <a href="/static/register.html?rol=angajator"
+             class="inline-block bg-white text-violet-700 px-10 py-4 rounded-2xl font-bold text-lg hover:bg-violet-50 transition"
+             style="box-shadow:0 8px 30px rgba(0,0,0,0.2)">
+            Creează cont angajator ✦
+          </a>
+          <a href="/static/login.html"
+             class="inline-block border-2 border-white/40 text-white px-10 py-4 rounded-2xl font-semibold text-lg hover:bg-white/10 transition">
+            Am deja cont →
+          </a>
+        </div>
+      </div>
+
+      <!-- Parteneri -->
+      <div class="bg-white rounded-2xl border border-gray-200 p-8 text-center shadow-sm">
+        <div class="text-2xl mb-3">🤝</div>
+        <h3 class="text-xl font-bold text-gray-800 mb-2">Parteneri &amp; Platforme</h3>
+        <p class="text-gray-500 text-sm max-w-xl mx-auto mb-5">Ești o platformă de recrutare, agenție HR sau agregator de joburi? Integrăm feed-ul tău RSS și distribuim ofertele tale pe JobPart.ro automat.</p>
+        <a href="mailto:costinelzala40@gmail.com?subject=Parteneriat JobPart"
+           class="inline-block bg-gray-900 text-white px-8 py-3 rounded-xl font-semibold hover:bg-gray-800 transition text-sm">
+          Contactează-ne pentru parteneriat →
+        </a>
+      </div>
+
     </div>
   </section>
 
