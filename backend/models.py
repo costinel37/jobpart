@@ -75,6 +75,8 @@ class Job(Base):
     angajator_id = Column(Integer, ForeignKey("users.id"))
 
     rss_guid = Column(String(500), nullable=True, index=True)
+    blocat_antifrauda = Column(Boolean, default=False)
+    motiv_blocare = Column(String(500), nullable=True)
 
     angajator = relationship("User", back_populates="joburi_postate")
     aplicari = relationship("Application", back_populates="job")

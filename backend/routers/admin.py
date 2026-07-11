@@ -151,6 +151,10 @@ def statistici(
     total_joburi = db.query(models.Job).filter(models.Job.activ == True).count()
     total_aplicari = db.query(models.Application).count()
     aplicari_acceptate = db.query(models.Application).filter(models.Application.status == "acceptata").count()
+    joburi_blocate = db.query(models.Job).filter(models.Job.blocat_antifrauda == True).count()
+    parteneri_in_asteptare = db.query(models.PartenerAplicatie).filter(
+        models.PartenerAplicatie.status == "in_asteptare"
+    ).count()
 
     return {
         "utilizatori": total_utilizatori,
@@ -159,6 +163,8 @@ def statistici(
         "joburi_active": total_joburi,
         "total_aplicari": total_aplicari,
         "aplicari_acceptate": aplicari_acceptate,
+        "joburi_blocate": joburi_blocate,
+        "parteneri_in_asteptare": parteneri_in_asteptare,
     }
 
 
@@ -250,6 +256,107 @@ def audit_log(
             for i in intrari
         ]
     }
+
+
+@router.get("/joburi-blocate")
+def joburi_blocate(
+    pagina: int = Query(1, ge=1),
+    per_pagina: int = Query(50, ge=1, le=200),
+    db: Session = Depends(get_db),
+    current_user=Depends(require_rol("admin")),
+):
+    total = db.query(models.Job).filter(models.Job.blocat_antifrauda == True).count()
+    joburi = (
+        db.query(models.Job)
+        .filter(models.Job.blocat_antifrauda == True)
+        .order_by(models.Job.creat_la.desc())
+        .offset((pagina - 1) * per_pagina)
+        .limit(per_pagina)
+        .all()
+    )
+    return {
+        "total": total,
+        "joburi": [
+            {
+                "id": j.id,
+                "titlu": j.titlu,
+                "companie": j.companie,
+                "oras": j.oras,
+                "descriere": (j.descriere or "")[:200],
+                "motiv_blocare": j.motiv_blocare,
+                "angajator_id": j.angajator_id,
+                "creat_la": j.creat_la.isoformat(),
+            }
+            for j in joburi
+        ],
+    }
+
+
+@router.put("/joburi/{job_id}/aproba-antifrauda")
+def aproba_job_antifrauda(
+    job_id: int,
+    db: Session = Depends(get_db),
+    current_user=Depends(require_rol("admin")),
+):
+    job = db.query(models.Job).filter(models.Job.id == job_id).first()
+    if not job:
+        raise HTTPException(status_code=404, detail="Jobul nu există.")
+    job.activ = True
+    job.blocat_antifrauda = False
+    job.motiv_blocare = None
+    _log_audit(db, current_user.id, "aproba_antifrauda", "job", job_id, f"Job aprobat: {job.titlu}")
+    db.commit()
+    return {"mesaj": "Job aprobat și activat pe platformă."}
+
+
+@router.get("/parteneri")
+def aplicatii_parteneri(
+    db: Session = Depends(get_db),
+    current_user=Depends(require_rol("admin")),
+):
+    aplicatii = (
+        db.query(models.PartenerAplicatie)
+        .order_by(models.PartenerAplicatie.creat_la.desc())
+        .all()
+    )
+    return [
+        {
+            "id": a.id,
+            "nume_companie": a.nume_companie,
+            "website": a.website,
+            "email": a.email,
+            "url_rss": a.url_rss,
+            "tara": a.tara,
+            "cui": a.cui,
+            "descriere": a.descriere,
+            "status": a.status,
+            "creat_la": a.creat_la.isoformat(),
+        }
+        for a in aplicatii
+    ]
+
+
+@router.put("/parteneri/{aplicatie_id}/status")
+def actualizeaza_status_partener(
+    aplicatie_id: int,
+    status: str,
+    db: Session = Depends(get_db),
+    current_user=Depends(require_rol("admin")),
+):
+    if status not in ["aprobata", "respinsa", "in_asteptare"]:
+        raise HTTPException(status_code=400, detail="Status invalid.")
+    apl = db.query(models.PartenerAplicatie).filter(
+        models.PartenerAplicatie.id == aplicatie_id
+    ).first()
+    if not apl:
+        raise HTTPException(status_code=404, detail="Aplicație negăsită.")
+    apl.status = status
+    _log_audit(
+        db, current_user.id, f"partener_{status}", "partener", aplicatie_id,
+        f"{apl.nume_companie} ({apl.email}) -> {status}"
+    )
+    db.commit()
+    return {"mesaj": f"Status actualizat: {status}."}
 
 
 class NewsletterBody(BaseModel):

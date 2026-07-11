@@ -45,6 +45,10 @@
         class="tab-btn px-5 py-3 font-semibold text-gray-500 hover:text-gray-700 border-b-2 border-transparent">📬 Newsletter</button>
       <button onclick="switchTab('urgenta')" id="tab-urgenta"
         class="tab-btn px-5 py-3 font-semibold text-gray-500 hover:text-gray-700 border-b-2 border-transparent">🚨 Job Urgent</button>
+      <button onclick="switchTab('frauda')" id="tab-frauda"
+        class="tab-btn px-5 py-3 font-semibold text-gray-500 hover:text-gray-700 border-b-2 border-transparent">🛡 Anti-Fraudă</button>
+      <button onclick="switchTab('parteneri')" id="tab-parteneri"
+        class="tab-btn px-5 py-3 font-semibold text-gray-500 hover:text-gray-700 border-b-2 border-transparent">🤝 Parteneri</button>
     </div>
 
     <!-- Tab: Utilizatori -->
@@ -143,6 +147,30 @@
       <div id="urgenta-list"><div class="text-center py-10 text-gray-400">Se incarca...</div></div>
     </div>
 
+    <!-- Tab: Anti-Fraudă -->
+    <div id="content-frauda" class="hidden">
+      <div class="flex items-center justify-between mb-5">
+        <div>
+          <h2 class="text-xl font-bold text-gray-800">🛡 Joburi blocate anti-fraudă</h2>
+          <p class="text-sm text-gray-400 mt-1">Joburi importate prin RSS, reținute de filtrul automat. Aprobă sau șterge definitiv.</p>
+        </div>
+        <button onclick="incarcaJoburiBlocate()" class="text-sm text-gray-500 hover:text-gray-700 border border-gray-200 rounded-lg px-3 py-1">↻ Reîncarcă</button>
+      </div>
+      <div id="frauda-list"><div class="text-center py-10 text-gray-400">Se încarcă...</div></div>
+    </div>
+
+    <!-- Tab: Parteneri -->
+    <div id="content-parteneri" class="hidden">
+      <div class="flex items-center justify-between mb-5">
+        <div>
+          <h2 class="text-xl font-bold text-gray-800">🤝 Aplicații parteneri</h2>
+          <p class="text-sm text-gray-400 mt-1">Companii care au aplicat pentru integrare RSS sau parteneriat.</p>
+        </div>
+        <button onclick="incarcaParteneri()" class="text-sm text-gray-500 hover:text-gray-700 border border-gray-200 rounded-lg px-3 py-1">↻ Reîncarcă</button>
+      </div>
+      <div id="parteneri-list"><div class="text-center py-10 text-gray-400">Se încarcă...</div></div>
+    </div>
+
   </div>
 
   <script src="/static/js/api.js"></script>
@@ -152,7 +180,7 @@
     document.getElementById("admin-name").textContent = user?.nume || "";
 
     function switchTab(tab) {
-      ["utilizatori", "joburi", "promotii", "newsletter", "urgenta"].forEach(t => {
+      ["utilizatori", "joburi", "promotii", "newsletter", "urgenta", "frauda", "parteneri"].forEach(t => {
         document.getElementById(`content-${t}`).classList.toggle("hidden", t !== tab);
         const btn = document.getElementById(`tab-${t}`);
         if (t === tab) btn.className = "tab-btn px-5 py-3 font-semibold text-blue-600 border-b-2 border-blue-600";
@@ -161,6 +189,8 @@
       if (tab === "joburi") incarcaToateJoburile();
       if (tab === "promotii") { incarcaCereriPromo(filtruPromoActiv); incarcaStatisticiPromo(); }
       if (tab === "urgenta") incarcaCereriUrgenta();
+      if (tab === "frauda") incarcaJoburiBlocate();
+      if (tab === "parteneri") incarcaParteneri();
     }
 
     async function incarcaStatistici() {
@@ -173,6 +203,8 @@
           { label: "Joburi active", value: s.joburi_active, icon: "💼", color: "green" },
           { label: "Aplicări totale", value: s.total_aplicari, icon: "📋", color: "yellow" },
           { label: "Aplicări acceptate", value: s.aplicari_acceptate, icon: "✅", color: "emerald" },
+          { label: "Joburi blocate (anti-fraudă)", value: s.joburi_blocate ?? 0, icon: "🛡", color: "red" },
+          { label: "Parteneri în așteptare", value: s.parteneri_in_asteptare ?? 0, icon: "🤝", color: "orange" },
         ];
         document.getElementById("statistici").innerHTML = statItems.map(s => `
           <div class="bg-white rounded-xl shadow-sm p-5 text-center">
@@ -442,6 +474,138 @@
       } catch(e) { alert("Eroare: " + e.message); }
     }
     // ===== FIN PROMOTII =====
+
+    // ===== ANTI-FRAUDA =====
+
+    async function incarcaJoburiBlocate(pagina = 1) {
+      const container = document.getElementById("frauda-list");
+      container.innerHTML = '<div class="text-center py-10 text-gray-400">Se încarcă...</div>';
+      try {
+        const data = await apiFetch(`/admin/joburi-blocate?pagina=${pagina}&per_pagina=50`);
+        if (!data.joburi.length) {
+          container.innerHTML = '<div class="text-center py-12 text-green-600 font-medium">✅ Niciun job blocat în așteptare.</div>';
+          return;
+        }
+        container.innerHTML = `
+          <div class="bg-white rounded-xl shadow-sm overflow-x-auto">
+            <table class="w-full text-sm">
+              <thead class="bg-red-50 border-b">
+                <tr>
+                  <th class="text-left px-4 py-3 text-gray-600 font-medium">Titlu job</th>
+                  <th class="text-left px-4 py-3 text-gray-600 font-medium">Companie</th>
+                  <th class="text-left px-4 py-3 text-gray-600 font-medium">Motiv blocare</th>
+                  <th class="text-left px-4 py-3 text-gray-600 font-medium">Data</th>
+                  <th class="text-left px-4 py-3 text-gray-600 font-medium">Acțiuni</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${data.joburi.map(j => `
+                  <tr class="border-b hover:bg-gray-50" id="frauda-row-${j.id}">
+                    <td class="px-4 py-3">
+                      <div class="font-medium text-gray-800">${j.titlu}</div>
+                      <div class="text-xs text-gray-400 mt-0.5">${j.oras}</div>
+                      <div class="text-xs text-gray-400 mt-0.5 italic line-clamp-1">${j.descriere}</div>
+                    </td>
+                    <td class="px-4 py-3 text-gray-600">${j.companie}</td>
+                    <td class="px-4 py-3">
+                      <span class="inline-block bg-red-100 text-red-700 text-xs px-2 py-1 rounded-full font-medium">
+                        ⚠ ${j.motiv_blocare || 'necunoscut'}
+                      </span>
+                    </td>
+                    <td class="px-4 py-3 text-gray-400 text-xs">${new Date(j.creat_la).toLocaleDateString('ro-RO')}</td>
+                    <td class="px-4 py-3">
+                      <div class="flex gap-2">
+                        <button onclick="aprobJobBlocat(${j.id})"
+                          class="px-3 py-1.5 bg-green-600 text-white rounded-lg text-xs font-medium hover:bg-green-700">
+                          ✓ Aprobă
+                        </button>
+                        <button onclick="stergeJobDefinitiv(${j.id})"
+                          class="px-3 py-1.5 bg-red-500 text-white rounded-lg text-xs font-medium hover:bg-red-600">
+                          ✗ Șterge
+                        </button>
+                      </div>
+                    </td>
+                  </tr>`).join("")}
+              </tbody>
+            </table>
+          </div>
+          <div class="text-xs text-gray-400 mt-3 text-right">Total: ${data.total} joburi în revizie</div>
+        `;
+      } catch(e) {
+        container.innerHTML = `<div class="text-red-400 text-center py-8">Eroare: ${e.message}</div>`;
+      }
+    }
+
+    async function aprobJobBlocat(jobId) {
+      if (!confirm("Aprobă acest job și îl face vizibil pe platformă?")) return;
+      try {
+        await apiFetch(`/admin/joburi/${jobId}/aproba-antifrauda`, { method: "PUT" });
+        document.getElementById(`frauda-row-${jobId}`)?.remove();
+      } catch(e) { alert("Eroare: " + e.message); }
+    }
+
+    // ===== PARTENERI =====
+
+    async function incarcaParteneri() {
+      const container = document.getElementById("parteneri-list");
+      container.innerHTML = '<div class="text-center py-10 text-gray-400">Se încarcă...</div>';
+      try {
+        const data = await apiFetch("/admin/parteneri");
+        if (!data.length) {
+          container.innerHTML = '<div class="text-center py-12 text-gray-400">Nicio aplicație de parteneriat primită.</div>';
+          return;
+        }
+        const statusBadge = s => ({
+          in_asteptare: '<span class="bg-yellow-100 text-yellow-700 text-xs px-2 py-0.5 rounded-full font-medium">În așteptare</span>',
+          aprobata:     '<span class="bg-green-100 text-green-700 text-xs px-2 py-0.5 rounded-full font-medium">Aprobată</span>',
+          respinsa:     '<span class="bg-red-100 text-red-700 text-xs px-2 py-0.5 rounded-full font-medium">Respinsă</span>',
+        }[s] || s);
+
+        container.innerHTML = `
+          <div class="space-y-4">
+            ${data.map(a => `
+              <div class="bg-white rounded-2xl border border-gray-200 p-5" id="partener-card-${a.id}">
+                <div class="flex items-start justify-between gap-4 flex-wrap">
+                  <div class="flex-1 min-w-0">
+                    <div class="flex items-center gap-3 flex-wrap mb-1">
+                      <span class="font-bold text-gray-800">${a.nume_companie}</span>
+                      ${statusBadge(a.status)}
+                      ${a.tara ? `<span class="text-xs text-gray-400">${a.tara}</span>` : ''}
+                    </div>
+                    <div class="text-sm text-gray-500 mb-1">
+                      <a href="${a.website}" target="_blank" class="text-blue-600 hover:underline">${a.website}</a>
+                      · <a href="mailto:${a.email}" class="hover:underline">${a.email}</a>
+                      ${a.cui ? `· CUI: ${a.cui}` : ''}
+                    </div>
+                    ${a.url_rss ? `<div class="text-xs text-gray-400 mb-1">RSS: <a href="${a.url_rss}" target="_blank" class="text-violet-600 hover:underline">${a.url_rss}</a></div>` : ''}
+                    ${a.descriere ? `<p class="text-sm text-gray-600 mt-2 line-clamp-2">${a.descriere}</p>` : ''}
+                    <div class="text-xs text-gray-400 mt-2">${new Date(a.creat_la).toLocaleString('ro-RO')}</div>
+                  </div>
+                  <div class="flex gap-2 flex-shrink-0">
+                    <button onclick="schimbaStatusPartener(${a.id},'aprobata')"
+                      class="px-3 py-1.5 bg-green-600 text-white rounded-lg text-xs font-medium hover:bg-green-700">
+                      ✓ Aprobă
+                    </button>
+                    <button onclick="schimbaStatusPartener(${a.id},'respinsa')"
+                      class="px-3 py-1.5 bg-red-500 text-white rounded-lg text-xs font-medium hover:bg-red-600">
+                      ✗ Respinge
+                    </button>
+                  </div>
+                </div>
+              </div>`).join("")}
+          </div>
+        `;
+      } catch(e) {
+        container.innerHTML = `<div class="text-red-400 text-center py-8">Eroare: ${e.message}</div>`;
+      }
+    }
+
+    async function schimbaStatusPartener(id, status) {
+      try {
+        const data = await apiFetch(`/admin/parteneri/${id}/status?status=${status}`, { method: "PUT" });
+        incarcaParteneri();
+      } catch(e) { alert("Eroare: " + e.message); }
+    }
 
     incarcaStatistici();
     incarcaUtilizatori();

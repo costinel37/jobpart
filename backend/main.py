@@ -104,6 +104,8 @@ def startup():
             ("promovat", "BOOLEAN DEFAULT FALSE"),
             ("promovat_pana", "TIMESTAMP"),
             ("rss_guid", "VARCHAR(500)"),
+            ("blocat_antifrauda", "BOOLEAN DEFAULT FALSE"),
+            ("motiv_blocare", "VARCHAR(500)"),
         ],
         "partener_aplicatii": [
             ("tara", "VARCHAR(10)"),

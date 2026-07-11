@@ -138,16 +138,31 @@ def sync_feed(feed_id: int):
 
             descriere = _strip_html(get("description"))
 
-            # Anti-fraud filter — skip suspicious jobs
+            categorie = get("category") or None
+
+            # Anti-fraud filter — save as inactive for admin review instead of dropping
             frauda, motiv = _verifica_frauda(titlu, descriere)
             if frauda:
                 logger.warning(
-                    f"[RSS][ANTI-FRAUDA] Feed {feed_id} — job blocat: '{titlu[:60]}' ({motiv})"
+                    f"[RSS][ANTI-FRAUDA] Feed {feed_id} — job pus in revizie: '{titlu[:60]}' ({motiv})"
                 )
+                job = models.Job(
+                    titlu=titlu[:200],
+                    descriere=descriere or titlu,
+                    companie=companie,
+                    oras=angajator.oras or "România",
+                    tip_program="part-time",
+                    categorie=categorie[:100] if categorie else None,
+                    activ=False,
+                    blocat_antifrauda=True,
+                    motiv_blocare=motiv[:500],
+                    expira_la=datetime.utcnow() + timedelta(days=365),
+                    angajator_id=feed.angajator_id,
+                    rss_guid=guid[:500],
+                )
+                db.add(job)
                 blocate += 1
                 continue
-
-            categorie = get("category") or None
 
             job = models.Job(
                 titlu=titlu[:200],
