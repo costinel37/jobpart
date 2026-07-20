@@ -90,7 +90,9 @@ def info_cv_profil(current_user=Depends(get_user_curent)):
 
 
 @router.get("/cv/{nume_fisier}")
+@limiter.limit("60/minute")
 async def descarca_cv(
+    request: Request,
     nume_fisier: str,
     db: Session = Depends(get_db),
     current_user=Depends(get_user_curent)

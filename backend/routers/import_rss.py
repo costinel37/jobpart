@@ -1,9 +1,11 @@
-from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
+from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks, Request
 from sqlalchemy.orm import Session
 from pydantic import BaseModel
 from typing import Optional
 from datetime import datetime, timedelta
 import urllib.request
+import urllib.parse
+import ipaddress
 import xml.etree.ElementTree as ET
 import re
 import logging
@@ -11,6 +13,7 @@ import logging
 from database import get_db, SessionLocal
 import models
 from auth import require_rol
+from security import limiter
 
 logger = logging.getLogger(__name__)
 
@@ -71,6 +74,45 @@ def _verifica_frauda(titlu: str, descriere: str) -> tuple[bool, str]:
             pass
 
     return False, ""
+
+
+# ---------------------------------------------------------------------------
+# SSRF protection — block private/internal IP ranges
+# ---------------------------------------------------------------------------
+
+_PRIVATE_NETS = [
+    ipaddress.ip_network("10.0.0.0/8"),
+    ipaddress.ip_network("172.16.0.0/12"),
+    ipaddress.ip_network("192.168.0.0/16"),
+    ipaddress.ip_network("127.0.0.0/8"),
+    ipaddress.ip_network("169.254.0.0/16"),   # AWS/GCP metadata
+    ipaddress.ip_network("100.64.0.0/10"),
+    ipaddress.ip_network("::1/128"),
+    ipaddress.ip_network("fc00::/7"),
+]
+
+
+def _valideaza_url_rss(url: str) -> None:
+    """Ridică HTTPException dacă URL-ul pointează spre o resursă internă (SSRF)."""
+    if not url.startswith(("http://", "https://")):
+        raise HTTPException(status_code=400, detail="URL-ul trebuie să înceapă cu https://")
+    try:
+        parsed = urllib.parse.urlparse(url)
+        host = parsed.hostname or ""
+        # Blochează localhost și variante
+        if host in ("localhost", "127.0.0.1", "::1", "0.0.0.0"):
+            raise HTTPException(status_code=400, detail="URL intern nepermis.")
+        # Blochează IP-uri private/rezervate
+        try:
+            addr = ipaddress.ip_address(host)
+            if any(addr in net for net in _PRIVATE_NETS):
+                raise HTTPException(status_code=400, detail="URL intern nepermis.")
+        except ValueError:
+            pass  # e hostname, nu IP — OK
+    except HTTPException:
+        raise
+    except Exception:
+        raise HTTPException(status_code=400, detail="URL RSS invalid.")
 
 
 # ---------------------------------------------------------------------------
@@ -218,14 +260,15 @@ def sync_toate_feedurile():
 
 
 @rss_router.post("")
+@limiter.limit("5/minute")
 def inregistreaza_feed(
+    request: Request,
     body: RssBody,
     background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
     current_user=Depends(require_rol("angajator")),
 ):
-    if not body.url.startswith("http"):
-        raise HTTPException(status_code=400, detail="URL invalid.")
+    _valideaza_url_rss(body.url)
 
     feed = db.query(models.RssFeed).filter(
         models.RssFeed.angajator_id == current_user.id
@@ -312,7 +355,8 @@ class PartenerBody(BaseModel):
 
 
 @parteneri_router.post("/aplicatie")
-def trimite_aplicatie_partener(body: PartenerBody, db: Session = Depends(get_db)):
+@limiter.limit("5/hour")
+def trimite_aplicatie_partener(request: Request, body: PartenerBody, db: Session = Depends(get_db)):
     if not body.nume_companie.strip() or not body.email.strip() or not body.website.strip():
         raise HTTPException(status_code=400, detail="Câmpurile obligatorii lipsesc.")
 

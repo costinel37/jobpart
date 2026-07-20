@@ -199,7 +199,8 @@ def get_me(current_user=Depends(get_user_curent)):
 
 
 @router.put("/me", response_model=schemas.UserOut)
-def update_me(data: schemas.UserUpdate, db: Session = Depends(get_db), current_user=Depends(get_user_curent)):
+@limiter.limit("20/minute")
+def update_me(request: Request, data: schemas.UserUpdate, db: Session = Depends(get_db), current_user=Depends(get_user_curent)):
     for field, value in data.model_dump(exclude_unset=True).items():
         setattr(current_user, field, value)
     db.commit()
@@ -216,7 +217,7 @@ class SchimbaParolaDate(BaseModel):
 @limiter.limit("5/minute")
 def schimba_parola(request: Request, data: SchimbaParolaDate, db: Session = Depends(get_db), current_user=Depends(get_user_curent)):
     if len(data.parola_noua) < 8:
-        raise HTTPException(status_code=400, detail="Parola trebuie să aibă minim 6 caractere.")
+        raise HTTPException(status_code=400, detail="Parola trebuie să aibă minim 8 caractere.")
     if not verifica_parola(data.parola_curenta, current_user.parola_hash):
         raise HTTPException(status_code=400, detail="Parola curentă este incorectă.")
     current_user.parola_hash = hash_parola(data.parola_noua)
