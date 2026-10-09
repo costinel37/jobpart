@@ -42,7 +42,7 @@ class UserRegister(BaseModel):
         return v
 
 class UserLogin(BaseModel):
-    email: EmailStr
+    identificator: str  # email sau număr de telefon
     parola: str
 
 class Token(BaseModel):

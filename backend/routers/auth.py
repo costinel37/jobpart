@@ -4,6 +4,7 @@ from datetime import datetime, timedelta
 from pydantic import BaseModel
 import secrets
 import threading
+import re
 from database import get_db
 import models, schemas
 from auth import hash_parola, verifica_parola, creeaza_token, get_user_curent
@@ -65,12 +66,24 @@ def register(request: Request, user_data: schemas.UserRegister, db: Session = De
 @router.post("/login", response_model=schemas.Token)
 @limiter.limit("10/minute")
 def login(request: Request, credentials: schemas.UserLogin, db: Session = Depends(get_db)):
+    identificator = credentials.identificator.strip()
+    # Caută mai întâi după email
     user = db.query(models.User).filter(
-        models.User.email == credentials.email.lower().strip()
+        models.User.email == identificator.lower()
     ).first()
+    # Dacă nu există, caută după număr de telefon
+    if not user:
+        tel = re.sub(r"[\s\-\(\)]", "", identificator)
+        user = db.query(models.User).filter(
+            models.User.telefon == identificator
+        ).first()
+        if not user and tel != identificator:
+            user = db.query(models.User).filter(
+                models.User.telefon == tel
+            ).first()
 
     if not user or not verifica_parola(credentials.parola, user.parola_hash):
-        raise HTTPException(status_code=401, detail="Email sau parolă incorectă.")
+        raise HTTPException(status_code=401, detail="Email/telefon sau parolă incorectă.")
     if not user.activ:
         raise HTTPException(status_code=403, detail="Contul tău a fost dezactivat.")
 
