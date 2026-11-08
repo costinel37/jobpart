@@ -17,6 +17,7 @@
       <div class="flex items-center gap-4">
         <a href="/static/jobs.html" class="text-gray-600 hover:text-blue-600">Joburi</a>
         <a href="/static/favorite.html" class="text-gray-600 hover:text-blue-600">❤️ Salvate</a>
+        <a href="/static/chat.html" class="relative inline-flex items-center gap-1 font-semibold text-violet-700 hover:text-violet-900">💬 Chat<span id="chat-unread" class="hidden absolute -top-2 -right-4 bg-lime-400 text-gray-900 text-xs font-bold rounded-full px-1.5 min-w-[1.2rem] text-center"></span></a>
         <a href="/static/mesaje.html" class="text-gray-600 hover:text-blue-600">✉️ Mesaje</a>
         <a href="/static/notificari.html" id="nav-notif-bell" class="relative inline-flex items-center text-gray-600 hover:text-blue-600">
           <span class="text-xl">🔔</span>
@@ -106,6 +107,13 @@
 
     <!-- Tab CV -->
     <div id="content-cv" class="hidden">
+      <a href="/static/cv-builder.html" class="max-w-3xl mb-4 flex items-center gap-4 p-5 rounded-2xl text-white shadow-lg hover:-translate-y-0.5 transition"
+         style="background:linear-gradient(135deg,#0A0A0F,#3b1d7a);border:2px solid #B4FF39">
+        <span class="text-4xl">⚡</span>
+        <span class="flex-1"><b class="text-lg block">Fă-ți CV-ul în 2 minute</b>
+          <span class="text-sm opacity-80">Răspunzi la câteva întrebări rapide, primești CV-ul gata de trimis și joburile potrivite pentru tine.</span></span>
+        <span class="font-bold px-4 py-2 rounded-xl text-gray-900" style="background:#B4FF39">Start →</span>
+      </a>
       <div class="bg-white rounded-xl shadow-sm p-6 max-w-3xl">
         <div class="flex justify-between items-start flex-wrap gap-3 mb-6">
           <div>
@@ -420,6 +428,14 @@
     incarcaProfil();
     incarcaCV();
     initNotifBell();
+    // Badge mesaje necitite în chat (actualizat la 30 s)
+    (function chatBadge() {
+      const el = document.getElementById("chat-unread");
+      const upd = () => apiFetch("/v2/chat/unread").then(d => {
+        if (!d) return; el.textContent = d.unread > 9 ? "9+" : d.unread; el.classList.toggle("hidden", !d.unread);
+      }).catch(() => {});
+      upd(); setInterval(upd, 30000);
+    })();
 
     // ── MODAL URGENTA ─────────────────────────────────────────
     async function verificaUrgentaActiva() {

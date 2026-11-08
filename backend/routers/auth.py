@@ -276,6 +276,17 @@ def sterge_cont(data: StergeContDate, db: Session = Depends(get_db), current_use
         (models.Message.destinatar_id == current_user.id)
     ).delete(synchronize_session=False)
 
+    # Șterge CV-ul structurat, setările v2, orele libere și conversațiile de chat (GDPR art. 17)
+    import models_v2 as _m2
+    db.query(models.CandidatCV).filter(models.CandidatCV.user_id == current_user.id).delete(synchronize_session=False)
+    db.query(_m2.AvailabilitySlot).filter(_m2.AvailabilitySlot.user_id == current_user.id).delete(synchronize_session=False)
+    db.query(_m2.UserSettings).filter(_m2.UserSettings.user_id == current_user.id).delete(synchronize_session=False)
+    app_ids = [a.id for a in db.query(models.Application.id).join(models.Job, models.Job.id == models.Application.job_id).filter(
+        (models.Application.candidat_id == current_user.id) | (models.Job.angajator_id == current_user.id)).all()]
+    if app_ids:
+        db.query(_m2.ChatMessage).filter(_m2.ChatMessage.application_id.in_(app_ids)).delete(synchronize_session=False)
+    db.query(_m2.ChatMessage).filter(_m2.ChatMessage.sender_id == current_user.id).delete(synchronize_session=False)
+
     # Șterge tokenurile de verificare/resetare
     db.query(models.EmailVerification).filter(models.EmailVerification.user_id == current_user.id).delete()
     db.query(models.PasswordReset).filter(models.PasswordReset.user_id == current_user.id).delete()

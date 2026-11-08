@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>JobPart — CV în 2 minute</title>
+  <meta name="robots" content="noindex" />
+  <meta name="theme-color" content="#0A0A0F" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=Unbounded:wght@600;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/css/neo.css" />
+  <style>
+    body { min-height: 100dvh; background:
+      radial-gradient(60% 40% at 0% 0%, color-mix(in srgb, var(--violet) 22%, transparent), transparent 70%),
+      radial-gradient(50% 40% at 100% 100%, color-mix(in srgb, var(--neon) 12%, transparent), transparent 70%), var(--bg); }
+    .wrap { max-width: 720px; margin: 0 auto; padding: 20px 16px 120px; }
+    header { display: flex; align-items: center; gap: .75rem; margin-bottom: 1.2rem; }
+    .logo { font: 800 1.05rem var(--font-display); color: var(--ink); text-decoration: none; margin-right: auto; }
+    .logo span { color: var(--neon); }
+
+    .progress { height: 10px; border-radius: 999px; background: var(--surface-2); border: 1.5px solid var(--line); overflow: hidden; }
+    .progress i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--neon), var(--violet)); transition: width .5s cubic-bezier(.3,1.3,.5,1); }
+    .stepinfo { display: flex; justify-content: space-between; font: 700 .8rem var(--font-body); color: var(--muted); margin: .5rem 0 1.6rem; }
+    .xp { color: var(--neon); }
+
+    .stage { position: relative; min-height: 420px; }
+    .step { animation: slideIn .45s cubic-bezier(.2,1.2,.4,1) both; }
+    .step.out { animation: slideOut .25s ease both; }
+    .step.back-in { animation: slideBack .45s cubic-bezier(.2,1.2,.4,1) both; }
+    @keyframes slideIn { from { opacity: 0; transform: translateX(40px) rotate(1deg); } to { opacity: 1; transform: none; } }
+    @keyframes slideBack { from { opacity: 0; transform: translateX(-40px) rotate(-1deg); } to { opacity: 1; transform: none; } }
+    @keyframes slideOut { to { opacity: 0; transform: translateY(-10px) scale(.98); } }
+
+    .emoji { font-size: 3rem; display: inline-block; animation: wobble 2.6s ease-in-out infinite; }
+    @keyframes wobble { 50% { transform: rotate(-10deg) scale(1.08); } }
+    h1 { font-size: clamp(1.6rem, 6vw, 2.4rem); line-height: 1.08; margin: .4rem 0 .5rem; }
+    h1 em { font-style: normal; color: var(--neon); }
+    .lead { color: var(--muted); margin: 0 0 1.4rem; }
+
+    .opts { display: flex; flex-wrap: wrap; gap: .55rem; }
+    .opt { font: 700 .95rem var(--font-body); padding: .7rem 1rem; border-radius: 14px; cursor: pointer; color: var(--ink);
+      background: var(--surface); border: 2px solid var(--line); transition: transform .15s, background .2s, border-color .2s, box-shadow .2s; }
+    .opt:hover { transform: translateY(-3px); border-color: var(--violet); }
+    .opt[aria-pressed="true"] { background: var(--neon); color: #0A0A0F; border-color: #0A0A0F; box-shadow: 4px 4px 0 var(--violet); animation: picked .35s cubic-bezier(.3,1.8,.5,1); }
+    @keyframes picked { 40% { transform: scale(1.12) rotate(-2deg); } }
+    .custom { display: flex; gap: .5rem; margin-top: 1rem; }
+    .custom input, .field input, .field select, .field textarea { flex: 1; width: 100%; font: 600 .95rem var(--font-body); color: var(--ink);
+      background: var(--surface); border: 2px solid var(--line); border-radius: 14px; padding: .75rem .9rem; }
+    .custom input:focus, .field input:focus, .field select:focus { outline: none; border-color: var(--violet); }
+    .field { margin-top: .9rem; }
+    .field label { display: block; font: 700 .8rem var(--font-body); color: var(--muted); margin-bottom: .35rem; }
+    .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: .7rem; }
+    @media (max-width: 520px) { .grid2 { grid-template-columns: 1fr; } }
+
+    .lang { display: flex; align-items: center; gap: .6rem; padding: .6rem .8rem; border-radius: 14px; background: var(--surface); border: 2px solid var(--line); margin-top: .5rem; animation: slideIn .3s both; }
+    .lang b { flex: 1; }
+    .levels { display: flex; gap: .25rem; flex-wrap: wrap; }
+    .levels button { font: 700 .72rem var(--font-body); padding: .3rem .45rem; border-radius: 8px; border: 1.5px solid var(--line); background: var(--surface-2); color: var(--ink); cursor: pointer; }
+    .levels button[aria-pressed="true"] { background: var(--violet); color: #fff; border-color: var(--violet); }
+
+    .xpcard { padding: .9rem 1rem; border-radius: 16px; background: var(--surface); border: 2px solid var(--line); margin-top: .6rem; display: flex; gap: .8rem; align-items: center; animation: slideIn .35s both; }
+    .xpcard .t { flex: 1; min-width: 0; }
+    .xpcard small { color: var(--muted); }
+    .x { background: none; border: 0; color: var(--muted); font-size: 1.1rem; cursor: pointer; }
+
+    .consent { display: flex; gap: .8rem; padding: 1rem; border-radius: 16px; background: var(--surface); border: 2px solid var(--line); cursor: pointer; margin-top: .7rem; }
+    .consent input { width: 22px; height: 22px; accent-color: var(--neon); flex: none; margin-top: 2px; }
+
+    .nav { position: fixed; left: 0; right: 0; bottom: 0; padding: 14px 16px max(14px, env(safe-area-inset-bottom)); display: flex; gap: .6rem; justify-content: center;
+      background: linear-gradient(transparent, var(--bg) 40%); z-index: 10; }
+    .nav .btn { min-width: 140px; }
+
+    /* Card candidat (ATS) */
+    .cvcard { background: var(--surface); border: 2px solid var(--line); border-radius: 22px; padding: 1.3rem; box-shadow: 8px 8px 0 var(--violet); animation: slideIn .6s both; }
+    .cvcard h2 { margin: 0; font-size: 1.5rem; }
+    .cvcard .role { color: var(--neon); font: 800 1rem var(--font-display); margin: .2rem 0 .8rem; }
+    .cvrow { display: grid; grid-template-columns: 120px 1fr; gap: .6rem; padding: .55rem 0; border-top: 1px dashed var(--line); font-size: .9rem; }
+    .cvrow b { color: var(--muted); font-size: .75rem; text-transform: uppercase; letter-spacing: .05em; padding-top: .15rem; }
+    @media (max-width: 520px) { .cvrow { grid-template-columns: 1fr; gap: .2rem; } }
+
+    .jobs { display: grid; gap: .7rem; margin-top: 1rem; }
+    .job { display: block; text-decoration: none; color: inherit; background: var(--surface); border: 2px solid var(--line); border-radius: 18px; padding: 1rem;
+      transition: transform .15s, border-color .2s; animation: slideIn .45s both; }
+    .job:hover { transform: translateY(-3px); border-color: var(--neon); }
+    .job .t { font: 800 1.05rem var(--font-display); }
+    .why { display: flex; flex-wrap: wrap; gap: .35rem; margin-top: .55rem; }
+
+    .level-up { position: fixed; top: 18px; left: 50%; transform: translateX(-50%); z-index: 60; background: var(--neon); color: #0A0A0F;
+      font: 800 .9rem var(--font-display); padding: .5rem 1rem; border-radius: 999px; box-shadow: 4px 4px 0 var(--violet); animation: lv 1.4s ease both; pointer-events: none; }
+    @keyframes lv { 0% { opacity: 0; transform: translate(-50%, -20px) scale(.8); } 15%, 75% { opacity: 1; transform: translate(-50%, 0) scale(1); } 100% { opacity: 0; transform: translate(-50%, -10px); } }
+    #confetti { position: fixed; inset: 0; pointer-events: none; z-index: 50; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <a class="logo" href="/">JOB<span>PART</span></a>
+      <a class="btn btn-ghost" href="/static/dashboard-candidat.html" style="padding:.45rem .7rem">Dashboard</a>
+    </header>
+    <div class="progress" aria-hidden="true"><i id="bar"></i></div>
+    <div class="stepinfo"><span id="stepLbl">Pasul 1</span><span class="xp" id="xp">0 XP</span></div>
+    <div class="stage" id="stage" aria-live="polite">
+      <div class="skel" style="height:56px;width:56px;border-radius:16px"></div>
+      <div class="skel" style="height:40px;width:80%;margin:1rem 0 .6rem"></div>
+      <div class="skel" style="height:16px;width:60%;margin-bottom:1.4rem"></div>
+      <div style="display:flex;gap:.5rem;flex-wrap:wrap"><div class="skel" style="height:44px;width:110px;border-radius:14px"></div><div class="skel" style="height:44px;width:90px;border-radius:14px"></div><div class="skel" style="height:44px;width:130px;border-radius:14px"></div></div>
+    </div>
+  </div>
+  <div class="nav" id="nav">
+    <button class="btn btn-ghost" id="prev">← Înapoi</button>
+    <button class="btn btn-neon" id="next">Continuă →</button>
+  </div>
+  <canvas id="confetti"></canvas>
+  <div class="toast" id="toast" role="status"></div>
+
+  <script src="/static/js/api.js"></script>
+  <script>
+  (() => {
+    const $ = s => document.querySelector(s);
+    const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+    const toast = m => { const e = $("#toast"); e.textContent = m; e.classList.add("show"); clearTimeout(e._t); e._t = setTimeout(() => e.classList.remove("show"), 2800); };
+    const theme = (() => { try { return localStorage.getItem("jp_theme"); } catch { return null; } })();
+    if (theme) document.documentElement.dataset.theme = theme;
+    const token = typeof getToken === "function" ? getToken() : null;
+    if (!token) { location.href = "/static/login.html"; return; }
+    const H = { Authorization: `Bearer ${token}`, "Content-Type": "application/json" };
+
+    const ROLES = ["Barista", "Ospătar", "Casier", "Livrator", "Promoter", "Ajutor bucătar", "Babysitter", "Meditator",
+      "Social media", "Content creator", "Customer support", "Data entry", "Asistent vânzări", "Recepționer", "Curier", "Event staff"];
+    const SKILLS = ["Lucru cu clienții", "Comunicare", "Lucru în echipă", "Punctualitate", "Casă de marcat", "Latte art", "Excel", "Canva",
+      "Social media", "Fotografie", "Video editing", "Vânzări", "Engleză conversațională", "Organizare evenimente", "Gătit",
+      "Curățenie", "Bicicletă / trotinetă", "Permis cat. B", "Copii / babysitting", "Programare", "Design", "Tastare rapidă"];
+    const LANGS = ["Română", "Engleză", "Germană", "Franceză", "Spaniolă", "Italiană", "Maghiară"];
+    const LEVELS = ["A1", "A2", "B1", "B2", "C1", "C2", "Nativ"];
+    const EDU = ["Liceu (în curs)", "Liceu", "Facultate (în curs)", "Licență", "Master", "Școală profesională"];
+
+    const cv = { titlu_profesional: "", competente: [], limbi: [], experienta: [], educatie: [], permis_auto: false, disponibilitate: null, cv_vizibil: false };
+    let availHours = 0, step = 0, xp = 0, dir = 1;
+
+    // ── Pașii quiz-ului ──
+    const STEPS = [
+      { emoji: "🎯", title: "Ce fel de job <em>cauți?</em>", lead: "Alege rolul principal. Îl folosim ca titlu în CV și ca să-ți găsim joburi.",
+        render: () => chips(ROLES, [cv.titlu_profesional], v => { cv.titlu_profesional = v; renderStep(); }, true) +
+          custom("Alt rol…", v => { cv.titlu_profesional = v; renderStep(); }),
+        valid: () => !!cv.titlu_profesional.trim() || "Alege sau scrie un rol." },
+      { emoji: "⚡", title: "Ce <em>știi</em> să faci?", lead: "Bifează tot ce se potrivește. Cu cât mai multe, cu atât găsim joburi mai bune.",
+        render: () => chips([...new Set([...SKILLS, ...cv.competente])], cv.competente, v => toggle(cv.competente, v)) +
+          custom("Adaugă o abilitate…", v => { if (!cv.competente.includes(v)) cv.competente.push(v); renderStep(); }),
+        valid: () => cv.competente.length >= 2 || "Alege cel puțin 2 abilități." },
+      { emoji: "🌍", title: "Ce <em>limbi</em> vorbești?", lead: "Atinge o limbă, apoi alege nivelul.",
+        render: () => chips(LANGS, cv.limbi.map(l => l.limba), v => {
+            const i = cv.limbi.findIndex(l => l.limba === v);
+            if (i >= 0) cv.limbi.splice(i, 1); else cv.limbi.push({ limba: v, nivel: v === "Română" ? "Nativ" : "B1" });
+            renderStep(); }) +
+          cv.limbi.map((l, i) => `<div class="lang"><b>${esc(l.limba)}</b><div class="levels">${LEVELS.map(lv =>
+            `<button type="button" data-lang="${i}" data-lv="${lv}" aria-pressed="${l.nivel === lv}">${lv}</button>`).join("")}</div></div>`).join(""),
+        valid: () => cv.limbi.length >= 1 || "Alege cel puțin o limbă." },
+      { emoji: "💼", title: "Ai mai <em>lucrat</em>?", lead: "Voluntariat, internship, job de vară — totul contează. Poți sări peste dacă e primul tău job!",
+        render: () => cv.experienta.map((e, i) => `<div class="xpcard"><div class="t"><b>${esc(e.pozitie)}</b><br><small>${esc(e.companie)} · ${esc(e.perioada)}</small></div>
+            <button class="x" data-delxp="${i}" aria-label="Șterge">✕</button></div>`).join("") + `
+          <div class="grid2" style="margin-top:1rem">
+            <div class="field"><label for="xPoz">Poziție</label><input id="xPoz" maxlength="150" placeholder="ex. Barista" /></div>
+            <div class="field"><label for="xCo">Unde</label><input id="xCo" maxlength="150" placeholder="ex. Cafeneaua X" /></div>
+          </div>
+          <div class="field"><label for="xPer">Perioada</label><input id="xPer" maxlength="150" placeholder="ex. iunie–august 2025" /></div>
+          <button type="button" class="btn" id="addXp" style="margin-top:.9rem">+ Adaugă experiența</button>`,
+        valid: () => true, skipLabel: () => cv.experienta.length ? "Continuă →" : "Primul meu job →" },
+      { emoji: "🎓", title: "Ce <em>studii</em> ai?", lead: "Alege nivelul și, dacă vrei, școala.",
+        render: () => chips(EDU, cv.educatie[0] ? [cv.educatie[0].nivel] : [], v => { cv.educatie[0] = { ...(cv.educatie[0] || {}), nivel: v }; renderStep(); }, true) + `
+          <div class="grid2"><div class="field"><label for="eInst">Instituția (opțional)</label><input id="eInst" maxlength="150" value="${esc(cv.educatie[0]?.institutie || "")}" placeholder="ex. Universitatea București" /></div>
+          <div class="field"><label for="eDom">Domeniu (opțional)</label><input id="eDom" maxlength="150" value="${esc(cv.educatie[0]?.domeniu || "")}" placeholder="ex. Informatică" /></div></div>`,
+        before: () => { if (cv.educatie[0]) { cv.educatie[0].institutie = $("#eInst")?.value.trim() || ""; cv.educatie[0].domeniu = $("#eDom")?.value.trim() || ""; } },
+        valid: () => true },
+      { emoji: "⏰", title: "Când ești <em>liber?</em>", lead: "Programul e cel mai important pentru joburile part-time. Îl setezi o singură dată.",
+        render: () => `${availHours ? `<div class="xpcard"><div class="t"><b>✅ Ai setat ${availHours} ore libere pe săptămână</b><br><small>Le folosim ca să-ți arătăm doar joburile compatibile.</small></div></div>` : ""}
+          <div class="opts" style="margin-top:1rem">
+            <button class="opt" data-preset="school">🎒 După școală (L–V 15–20)</button>
+            <button class="opt" data-preset="evenings">🌙 Seri (18–23)</button>
+            <button class="opt" data-preset="weekend">🎉 Weekend (9–21)</button>
+          </div>
+          <p style="margin-top:1rem"><a href="/static/disponibilitate.html" style="color:var(--neon);font-weight:700">Vreau să aleg exact orele în calendar →</a></p>
+          <label class="consent" style="margin-top:1.2rem"><input type="checkbox" id="permis" ${cv.permis_auto ? "checked" : ""} /><span><b>Am permis de conducere cat. B</b></span></label>`,
+        before: () => { cv.permis_auto = !!$("#permis")?.checked; }, valid: () => true },
+      { emoji: "👀", title: "Cine îți poate <em>vedea</em> CV-ul?", lead: "Tu decizi. Poți schimba oricând din dashboard.",
+        render: () => `<label class="consent"><input type="checkbox" id="vis" ${cv.cv_vizibil ? "checked" : ""} /><span>
+            <b>Fac CV-ul vizibil angajatorilor înregistrați</b><br><small style="color:var(--muted)">Angajatorii îți pot vedea numele, experiența, abilitățile și datele de contact (email, telefon) și te pot invita la joburi. Dacă nu bifezi, CV-ul ajunge doar la angajatorii la care aplici tu.</small></span></label>`,
+        before: () => { cv.cv_vizibil = !!$("#vis")?.checked; }, valid: () => true, nextLabel: "Generează CV-ul ⚡" },
+    ];
+
+    function chips(list, selected, onPick, single = false) {
+      const id = "c" + Math.random().toString(36).slice(2, 7);
+      setTimeout(() => document.querySelectorAll(`[data-g="${id}"]`).forEach(b => b.onclick = () => {
+        onPick(b.dataset.v);
+        if (!single) { b.setAttribute("aria-pressed", b.getAttribute("aria-pressed") !== "true"); gain(5); }
+        else gain(10);
+      }));
+      return `<div class="opts">${list.map(v => `<button type="button" class="opt" data-g="${id}" data-v="${esc(v)}" aria-pressed="${selected.includes(v)}">${esc(v)}</button>`).join("")}</div>`;
+    }
+    function custom(ph, onAdd) {
+      setTimeout(() => {
+        const inp = $("#customIn"), add = () => { const v = inp.value.trim().slice(0, 60); if (v) { onAdd(v); gain(5); } };
+        $("#customBtn").onclick = add; inp.onkeydown = e => { if (e.key === "Enter") { e.preventDefault(); add(); } };
+      });
+      return `<div class="custom"><input id="customIn" maxlength="60" placeholder="${esc(ph)}" /><button type="button" class="btn" id="customBtn">+</button></div>`;
+    }
+    const toggle = (arr, v) => { const i = arr.indexOf(v); i >= 0 ? arr.splice(i, 1) : arr.push(v); };
+
+    function gain(n) { xp += n; $("#xp").textContent = `${xp} XP`; $("#xp").animate([{ transform: "scale(1.4)" }, { transform: "scale(1)" }], { duration: 300 }); }
+    function levelUp(text) { const d = document.createElement("div"); d.className = "level-up"; d.textContent = text; document.body.appendChild(d); setTimeout(() => d.remove(), 1500); }
+
+    function renderStep() {
+      const s = STEPS[step];
+      $("#bar").style.width = `${(step / STEPS.length) * 100}%`;
+      $("#stepLbl").textContent = `Pasul ${step + 1} din ${STEPS.length}`;
+      $("#stage").innerHTML = `<div class="step ${dir < 0 ? "back-in" : ""}"><span class="emoji">${s.emoji}</span><h1>${s.title}</h1><p class="lead">${s.lead}</p>${s.render()}</div>`;
+      $("#prev").style.visibility = step ? "visible" : "hidden";
+      $("#next").textContent = s.nextLabel || (s.skipLabel ? s.skipLabel() : "Continuă →");
+      wireStep();
+    }
+    function wireStep() {
+      document.querySelectorAll("[data-lv]").forEach(b => b.onclick = () => { cv.limbi[+b.dataset.lang].nivel = b.dataset.lv; gain(2); renderStep(); });
+      document.querySelectorAll("[data-delxp]").forEach(b => b.onclick = () => { cv.experienta.splice(+b.dataset.delxp, 1); renderStep(); });
+      $("#addXp") && ($("#addXp").onclick = () => {
+        const poz = $("#xPoz").value.trim(), co = $("#xCo").value.trim();
+        if (!poz || !co) return toast("Completează poziția și locul.");
+        cv.experienta.push({ pozitie: poz, companie: co, perioada: $("#xPer").value.trim(), descriere: "" }); gain(20); renderStep();
+      });
+      document.querySelectorAll("[data-preset]").forEach(b => b.onclick = async () => {
+        const P = { school: [[0,1,2,3,4], 15, 20], evenings: [[0,1,2,3,4,5,6], 18, 23], weekend: [[5,6], 9, 21] }[b.dataset.preset];
+        const slots = P[0].map(d => ({ weekday: d, start_min: P[1] * 60, end_min: P[2] * 60 }));
+        try {
+          const r = await fetch(`${API_BASE}/v2/availability`, { method: "PUT", headers: H,
+            body: JSON.stringify({ timezone: Intl.DateTimeFormat().resolvedOptions().timeZone || "Europe/Bucharest", slots }) });
+          const d = await r.json(); if (!r.ok) throw 0;
+          availHours = d.weekly_hours; gain(15); levelUp(`⏰ ${availHours} h libere setate!`); renderStep();
+        } catch { toast("Nu am putut salva programul."); }
+      });
+    }
+
+    function go(delta) {
+      const s = STEPS[step];
+      if (delta > 0) {
+        s.before?.();
+        const ok = s.valid(); if (ok !== true) { toast(ok); $("#stage .step").animate([{ transform: "translateX(-8px)" }, { transform: "translateX(8px)" }, { transform: "none" }], { duration: 250 }); return; }
+      } else s.before?.();
+      const el = $("#stage .step"); el?.classList.add("out");
+      dir = delta;
+      setTimeout(() => {
+        if (step + delta >= STEPS.length) return finish();
+        step = Math.max(0, step + delta);
+        if (delta > 0) { gain(10); if ([2, 4].includes(step)) levelUp(step === 2 ? "🔥 Level up! Ești la jumătate" : "🚀 Aproape gata!"); }
+        renderStep(); scrollTo({ top: 0, behavior: "smooth" });
+      }, 200);
+    }
+    $("#next").onclick = () => go(1);
+    $("#prev").onclick = () => go(-1);
+
+    async function finish() {
+      $("#nav").style.display = "none";
+      $("#bar").style.width = "100%";
+      $("#stepLbl").textContent = "Gata!";
+      $("#stage").innerHTML = `<div class="step"><div class="skel" style="height:260px;border-radius:22px"></div>
+        <div class="skel" style="height:22px;width:50%;margin:1.6rem 0 1rem"></div>${'<div class="skel" style="height:86px;border-radius:18px;margin-bottom:.7rem"></div>'.repeat(3)}</div>`;
+      cv.disponibilitate = availHours ? `${availHours} h/săpt.` : null;
+      try {
+        const r = await fetch(`${API_BASE}/candidati/cv`, { method: "PUT", headers: H, body: JSON.stringify(cv) });
+        if (!r.ok) throw 0;
+        const saved = await r.json();
+        gain(50); burst();
+        renderDone(saved);
+      } catch { toast("Nu am putut salva CV-ul. Reîncearcă."); $("#nav").style.display = ""; step = STEPS.length - 1; renderStep(); }
+    }
+
+    async function renderDone(s) {
+      const row = (k, v) => v ? `<div class="cvrow"><b>${k}</b><div>${v}</div></div>` : "";
+      $("#stage").innerHTML = `<div class="step">
+        <span class="emoji">🏆</span><h1>CV-ul tău e <em>gata!</em></h1>
+        <p class="lead">Format standardizat, ușor de citit de angajatori. ${s.cv_vizibil ? "Este vizibil angajatorilor." : "Este privat — îl primesc doar angajatorii la care aplici."}</p>
+        <div class="cvcard">
+          <h2>${esc(s.nume)}</h2><div class="role">${esc(s.titlu_profesional || "")}</div>
+          ${row("Disponibil", esc(s.disponibilitate || "—"))}
+          ${row("Abilități", (s.competente || []).map(c => `<span class="chip" style="margin:0 .25rem .25rem 0">${esc(c)}</span>`).join(""))}
+          ${row("Limbi", (s.limbi || []).map(l => `${esc(l.limba)} <b style="color:var(--neon)">${esc(l.nivel)}</b>`).join(" · "))}
+          ${row("Experiență", (s.experienta || []).map(e => `${esc(e.pozitie)} — ${esc(e.companie)}${e.perioada ? ` <small style="color:var(--muted)">(${esc(e.perioada)})</small>` : ""}`).join("<br>") || "Primul job — gata de învățat 🚀")}
+          ${row("Studii", (s.educatie || []).map(e => [e.nivel, e.institutie, e.domeniu].filter(Boolean).map(esc).join(", ")).join("<br>"))}
+          ${row("Permis B", s.permis_auto ? "Da" : "")}
+          <div style="display:flex;gap:.6rem;margin-top:1.1rem;flex-wrap:wrap">
+            <button class="btn btn-neon" id="pdf" style="flex:1">📄 Descarcă PDF</button>
+            <a class="btn" href="/static/cv-public.html?id=${encodeURIComponent(s.user_id)}" style="flex:1">👁 Vezi cardul</a>
+          </div>
+        </div>
+        <h2 style="margin:2rem 0 .3rem">🎯 Joburi potrivite pentru tine</h2>
+        <p class="lead" style="margin:0">Le găsim automat după CV și orele tale libere. Când apare un job nou potrivit, primești notificare.</p>
+        <div class="jobs" id="jobs">${'<div class="skel" style="height:96px;border-radius:18px"></div>'.repeat(3)}</div>
+      </div>`;
+      $("#pdf").onclick = downloadPdf;
+      try {
+        const r = await fetch(`${API_BASE}/v2/matches?limit=8`, { headers: H }); const d = await r.json();
+        $("#jobs").innerHTML = d.items.length ? d.items.map((j, i) => `
+          <a class="job" href="/static/job-detalii.html?id=${encodeURIComponent(j.id)}" style="animation-delay:${i * 80}ms">
+            <div class="t">${esc(j.title)}</div><div style="color:var(--muted);font-size:.88rem">${esc(j.company)} · ${esc(j.is_remote ? "Remote" : j.city)}</div>
+            <div class="why">${j.reasons.map(r => `<span class="chip ${r.startsWith("Se potrivește cu CV") ? "chip-neon" : ""}">${esc(r)}</span>`).join("")}</div>
+          </a>`).join("")
+          : `<div class="xpcard"><div class="t"><b>Încă nu avem joburi potrivite</b><br><small>Te anunțăm imediat ce apare unul. Între timp, <a href="/static/feed.html" style="color:var(--neon)">explorează feed-ul</a>.</small></div></div>`;
+      } catch { $("#jobs").innerHTML = `<a class="btn" href="/static/feed.html">Vezi joburile →</a>`; }
+    }
+
+    async function downloadPdf() {
+      try {
+        const res = await fetch(`${API_BASE}/export/cv-pdf`, { headers: { Authorization: `Bearer ${token}` } });
+        if (!res.ok) throw 0;
+        const url = URL.createObjectURL(await res.blob()); const a = document.createElement("a");
+        a.href = url; a.download = "CV_JobPart.pdf"; document.body.appendChild(a); a.click(); a.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+      } catch { toast("Nu am putut genera PDF-ul."); }
+    }
+
+    function burst() {
+      if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+      const c = $("#confetti"), x = c.getContext("2d"); c.width = innerWidth; c.height = innerHeight;
+      const colors = ["#B4FF39", "#9D5CFF", "#FF4D9D", "#FFFFFF"];
+      const P = Array.from({ length: 160 }, () => ({ x: c.width / 2, y: c.height * .35, vx: (Math.random() - .5) * 16, vy: -Math.random() * 14 - 4,
+        s: 4 + Math.random() * 6, r: Math.random() * 6, vr: (Math.random() - .5) * .4, c: colors[Math.random() * 4 | 0] }));
+      let f = 0;
+      (function tick() { x.clearRect(0, 0, c.width, c.height);
+        P.forEach(p => { p.vy += .4; p.x += p.vx; p.y += p.vy; p.r += p.vr; x.save(); x.translate(p.x, p.y); x.rotate(p.r); x.fillStyle = p.c; x.fillRect(-p.s / 2, -p.s / 2, p.s, p.s * .6); x.restore(); });
+        if (++f < 130) requestAnimationFrame(tick); else x.clearRect(0, 0, c.width, c.height); })();
+    }
+
+    // ── Pornire: precompletăm din CV-ul existent ──
+    (async () => {
+      try {
+        const [r1, r2] = await Promise.all([fetch(`${API_BASE}/candidati/cv`, { headers: H }), fetch(`${API_BASE}/v2/availability`, { headers: H })]);
+        if (r1.status === 401) return logout();
+        const c = await r1.json();
+        Object.assign(cv, {
+          titlu_profesional: c.titlu_profesional || "", competente: c.competente || [], limbi: c.limbi || [],
+          experienta: c.experienta || [], educatie: c.educatie || [], permis_auto: !!c.permis_auto, cv_vizibil: c.cv_vizibil === true,
+        });
+        if (r2.ok) { const a = await r2.json(); availHours = Math.round(a.slots.reduce((s, x) => s + x.end_min - x.start_min, 0) / 6) / 10; }
+      } catch {}
+      renderStep();
+    })();
+  })();
+  </script>
+</body>
+</html>

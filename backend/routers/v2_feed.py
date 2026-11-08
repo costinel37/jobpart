@@ -120,6 +120,45 @@ def _legacy_pay(job: models.Job) -> tuple[Optional[int], Optional[int], str]:
     return to_minor(job.salariu_min), to_minor(job.salariu_max), period
 
 
+def _norm(text: str) -> str:
+    """Litere mici, fără diacritice (ș→s, ă→a), pentru potrivire robustă CV ↔ job."""
+    import unicodedata
+    t = unicodedata.normalize("NFKD", (text or "").lower())
+    return "".join(c for c in t if not unicodedata.combining(c))
+
+
+_STOP = {"si", "sau", "cu", "de", "la", "in", "pe", "din", "pentru", "the", "and", "for", "with", "part", "time",
+         "full", "job", "lucru", "munca", "bun", "buna", "nivel", "baza", "avansat", "mediu"}
+
+
+def cv_terms(db: Session, user) -> list[str]:
+    """Termenii din CV (titlu, competențe, poziții anterioare) folosiți la potrivirea cu joburile."""
+    if not user or user.rol != "candidat":
+        return []
+    cv = db.query(models.CandidatCV).filter(models.CandidatCV.user_id == user.id).first()
+    if not cv:
+        return []
+    def js(v):
+        try:
+            return json.loads(v) if v else []
+        except Exception:
+            return []
+    phrases = [cv.titlu_profesional or ""] + [str(c) for c in js(cv.competente)] +               [str(e.get("pozitie", "")) for e in js(cv.experienta) if isinstance(e, dict)]
+    terms: list[str] = []
+    for ph in phrases:
+        ph = _norm(ph).strip()
+        if len(ph) >= 3 and ph not in terms:
+            terms.append(ph)                       # expresia întreagă („latte art”)
+        for w in ph.replace("/", " ").replace("-", " ").split():
+            if len(w) >= 4 and w not in _STOP and w not in terms:
+                terms.append(w)                    # cuvinte semnificative („barista”)
+            # rădăcina: „ospătară”/„ospătari” → „ospatar”, „vânzătoare” → „vanzato”
+            stem = w[:-1] if len(w) >= 6 and w[-1] in "aeiu" else (w[:-2] if len(w) >= 8 and w.endswith(("re", "ri")) else None)
+            if stem and stem not in _STOP and stem not in terms:
+                terms.append(stem)
+    return terms[:40]
+
+
 # ─────────────────────────── availability & settings ───────────────────────────
 
 @router.get("/availability")
@@ -271,6 +310,7 @@ def feed(
         models.Review.subiect_id, func.avg(models.Review.rating), func.count(models.Review.id)
     ).filter(models.Review.subiect_id.in_(employer_ids)).group_by(models.Review.subiect_id).all())
     rates = load_rates(db)
+    terms = cv_terms(db, user)
 
     # 3. Scoring în Python (matching orar + navetă exactă)
     scored = []
@@ -301,8 +341,13 @@ def feed(
 
         fresh_at = (meta.refreshed_at if meta and meta.refreshed_at else None) or job.creat_la or now
         age_days = max(0.0, (now - fresh_at).total_seconds() / 86400)
+        hits: list[str] = []
+        if terms:
+            hay = _norm(" ".join(filter(None, [job.titlu, job.categorie, job.cerinte, (job.descriere or "")[:1500]])))
+            hits = [t for t in terms if t in hay]
         score = (
-            (cov if cov is not None else 0.6) * 50
+            min(len(hits), 4) * 9
+            + (cov if cov is not None else 0.6) * 50
             + max(0, 20 - age_days) * 1.0
             + (15 if sponsored else 0)
             + (max(0, max_min - commute) / max_min * 15 if commute is not None else 8)
@@ -345,6 +390,8 @@ def feed(
             "accent_color": meta.accent_color if meta else None,
             "snippet": (job.descriere or "")[:220],
             "created_at": job.creat_la,
+            "cv_hits": hits[:4],
+            "reasons": _reasons(hits, cov, commute, remote_job, req == 0),
         }))
 
     scored.sort(key=lambda x: x[0], reverse=True)
@@ -364,3 +411,43 @@ def _ctx(viewer_tz, viewer_cur, has_availability):
     return {"timezone": viewer_tz, "currency": viewer_cur,
             "schedule_filter_active": has_availability, "currencies": list(SUPPORTED),
             "ranking_disclosure": RANKING_DISCLOSURE}
+
+
+def _reasons(hits, cov, commute, remote_job, flexible) -> list[str]:
+    r = []
+    if hits:
+        r.append("Se potrivește cu CV-ul tău: " + ", ".join(hits[:3]))
+    if cov is not None and cov >= 0.999:
+        r.append("Programul se potrivește 100% cu orele tale libere")
+    elif cov is not None and cov >= 0.5:
+        r.append(f"Programul se potrivește {round(cov * 100)}% cu orele tale")
+    elif flexible:
+        r.append("Program flexibil")
+    if commute is not None:
+        r.append(f"~{commute} min de tine")
+    elif remote_job:
+        r.append("Remote")
+    return r
+
+
+@router.get("/matches")
+def matches(
+    lat: Optional[float] = Query(None, ge=-90, le=90),
+    lng: Optional[float] = Query(None, ge=-180, le=180),
+    limit: int = Query(12, ge=1, le=30),
+    user=Depends(get_user_curent),
+    db: Session = Depends(get_db),
+):
+    """Joburi recomandate automat pe baza CV-ului (+ orele libere + navetă, dacă sunt setate)."""
+    if user.rol != "candidat":
+        raise HTTPException(403, "Recomandările sunt pentru candidați.")
+    data = feed(lat=lat, lng=lng, max_min=None, mode=None, remote="all", min_coverage=0.5,
+                match_schedule=True, currency=None, tz_name=None, categorie=None,
+                cursor=0, limit=100, user=user, db=db)
+    # Potrivit = are legătură cu CV-ul SAU are ture fixe care se potrivesc ≥80% cu orele libere
+    # (joburile „program flexibil” fără legătură cu CV-ul nu sunt recomandări, doar zgomot)
+    items = [i for i in data["items"] if i["cv_hits"] or
+             (i["match"] and i["match"]["coverage"] >= 0.8 and not i["flexible_schedule"])]
+    items.sort(key=lambda i: (len(i["cv_hits"]), (i["match"] or {}).get("coverage", 0)), reverse=True)
+    return {"items": items[:limit], "has_cv": bool(cv_terms(db, user)),
+            "schedule_filter_active": data["context"]["schedule_filter_active"]}

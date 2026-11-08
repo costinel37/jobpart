@@ -14,7 +14,7 @@ from database import engine
 import models
 import models_v2  # noqa: F401 — înregistrează tabelele v2 pentru create_all
 from routers import auth, jobs, applications, admin, upload, reviews, favorite, mesaje, notificari, export, promotii, precontracte, alerts, urgenta, import_rss, candidati
-from routers import v2_feed, v2_billing
+from routers import v2_feed, v2_billing, v2_chat
 from security import (
     limiter, SecurityHeadersMiddleware,
     RequestLoggingMiddleware, eroare_rate_limit
@@ -84,6 +84,7 @@ app.include_router(import_rss.router)
 app.include_router(candidati.router)
 app.include_router(v2_feed.router)
 app.include_router(v2_billing.router)
+app.include_router(v2_chat.router)
 
 frontend_path = os.path.join(os.path.dirname(__file__), "..", "frontend")
 app.mount("/static", StaticFiles(directory=frontend_path), name="static")
@@ -216,6 +217,8 @@ Disallow: /static/confirmare-email.html
 Disallow: /static/plata-succes.html
 Disallow: /static/disponibilitate.html
 Disallow: /static/abonament.html
+Disallow: /static/chat.html
+Disallow: /static/cv-builder.html
 Disallow: /api/
 Sitemap: https://jobpart.ro/sitemap.xml
 """

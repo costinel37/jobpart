@@ -180,3 +180,29 @@ class PaymentEvent(Base):
     currency = Column(String(3), nullable=True)
     payload = Column(Text, nullable=True)
     processed_at = Column(DateTime, default=datetime.utcnow)
+
+
+# ─────────────────────────── 4. CHAT ÎN TIMP REAL ───────────────────────────
+
+class ChatMessage(Base):
+    """
+    Mesaj de chat între angajator și candidat. Conversația = o aplicare (applications.id),
+    deci doar părțile care au deja o legătură (candidatul a aplicat) pot vorbi.
+
+    kind:
+      text               — mesaj normal
+      accept / reject    — acțiune rapidă a angajatorului (schimbă și statusul aplicării)
+      interview          — propunere de interviu (meta: {"when": ISO UTC, "where": "...", "mode": "online|onsite"})
+      interview_yes/no   — răspunsul candidatului la propunere (meta: {"ref": id_propunere})
+    """
+    __tablename__ = "chat_messages"
+    __table_args__ = (Index("ix_chat_app_id", "application_id", "id"),)
+
+    id = Column(Integer, primary_key=True)
+    application_id = Column(Integer, ForeignKey("applications.id", ondelete="CASCADE"), nullable=False)
+    sender_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    kind = Column(String(16), nullable=False, default="text")
+    body = Column(Text, nullable=False)
+    meta = Column(Text, nullable=True)
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    read_at = Column(DateTime, nullable=True)

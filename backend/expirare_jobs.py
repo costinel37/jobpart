@@ -35,6 +35,20 @@ def _ruleaza_verificari():
                 abonamente_sweep(db, now)  # nu face nimic până la BILLING_ENFORCED=1
             except Exception as e:
                 logger.error(f"[ABONAMENTE] Eroare sweep: {e}")
+            try:
+                # Retenție chat: 12 luni (aceeași regulă ca mesajele private)
+                import models_v2
+                db.query(models_v2.ChatMessage).filter(
+                    models_v2.ChatMessage.created_at < now - timedelta(days=365)
+                ).delete(synchronize_session=False)
+                db.commit()
+            except Exception as e:
+                logger.error(f"[CHAT] Eroare curățare: {e}")
+            try:
+                from matching_service import notify_cv_matches
+                notify_cv_matches(db, now)  # „Job nou potrivit cu CV-ul tău”
+            except Exception as e:
+                logger.error(f"[MATCHING] Eroare: {e}")
         finally:
             db.close()
     except Exception as e:

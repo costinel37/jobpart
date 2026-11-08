@@ -15,6 +15,7 @@
     <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
       <a href="/static/index.html" class="text-2xl font-bold text-blue-600">Job<span class="text-gray-800">Part</span></a>
       <div class="flex items-center gap-4">
+        <a href="/static/chat.html" class="relative inline-flex items-center gap-1 font-semibold text-violet-700 hover:text-violet-900">💬 Chat<span id="chat-unread" class="hidden absolute -top-2 -right-4 bg-lime-400 text-gray-900 text-xs font-bold rounded-full px-1.5 min-w-[1.2rem] text-center"></span></a>
         <a href="/static/mesaje.html" class="text-gray-600 hover:text-blue-600">✉️ Mesaje</a>
         <a href="/static/notificari.html" id="nav-notif-bell" class="relative inline-flex items-center text-gray-600 hover:text-blue-600">
           <span class="text-xl">🔔</span>
@@ -171,35 +172,57 @@
       <h2 class="text-xl font-bold text-gray-800 mb-2">⭐ Promovează jobul</h2>
       <p class="text-gray-500 mb-1">Job: <strong id="modal-job-titlu"></strong></p>
       <input type="hidden" id="modal-job-id" />
-      <p class="text-gray-600 text-sm mb-5 mt-3">
-        Jobul promovat apare <strong>primul în lista de căutare</strong> și este marcat cu badge-ul ⭐,
-        atrăgând de 3× mai mulți candidați.
+      <p class="text-gray-600 text-sm mb-4 mt-3">
+        Alege-ți boost-ul! Jobul promovat apare <strong>mai sus în rezultate</strong>, marcat vizibil „Promovat”.
       </p>
-      <div class="space-y-3 mb-5">
-        <label class="flex items-center gap-4 border-2 border-gray-200 rounded-xl p-3 cursor-pointer hover:border-yellow-400 transition">
-          <input type="radio" name="plan-promo" value="7zile" class="accent-yellow-500" />
-          <div class="flex-1">
-            <p class="font-semibold text-gray-800 text-sm">Starter — 7 zile</p>
-            <p class="text-xs text-gray-500">Ideal pentru joburi urgente</p>
-          </div>
-          <span class="font-bold text-yellow-700">25 RON</span>
+      <style>
+        .pw-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:.6rem; margin-bottom:1.1rem; }
+        .pw { position:relative; display:flex; flex-direction:column; align-items:center; gap:.25rem; padding:.9rem .4rem .8rem; cursor:pointer; user-select:none;
+          border-radius:18px; border:3px solid #0A0A0F; background:#fff; box-shadow:0 6px 0 #0A0A0F; transition:transform .12s, box-shadow .12s; text-align:center; }
+        .pw:hover { transform:translateY(-3px) rotate(-1deg); box-shadow:0 9px 0 #0A0A0F; }
+        .pw:active { transform:translateY(5px); box-shadow:0 1px 0 #0A0A0F; }
+        .pw input { position:absolute; opacity:0; pointer-events:none; }
+        .pw .ic { font-size:2rem; line-height:1; transition:transform .3s; }
+        .pw:hover .ic { animation: pw-bob .6s ease-in-out infinite; }
+        .pw .lv { font:800 .8rem 'Unbounded', system-ui, sans-serif; letter-spacing:-.01em; }
+        .pw .days { font-size:.7rem; color:#6b7280; font-weight:600; }
+        .pw .price { font:800 1rem 'Unbounded', system-ui, sans-serif; margin-top:.15rem; }
+        .pw .power { display:flex; gap:2px; margin-top:.25rem; }
+        .pw .power i { width:9px; height:9px; border-radius:2px; background:#e5e7eb; border:1.5px solid #0A0A0F; }
+        .pw .power i.on { background:#B4FF39; }
+        .pw .tag { position:absolute; top:-11px; left:50%; transform:translateX(-50%); background:#9D5CFF; color:#fff; font:800 .6rem system-ui; padding:.15rem .5rem; border-radius:999px; border:2px solid #0A0A0F; white-space:nowrap; }
+        .pw:has(input:checked) { background:#B4FF39; transform:translateY(-4px) scale(1.04); box-shadow:0 8px 0 #9D5CFF, 0 0 0 4px rgba(157,92,255,.25); animation: pw-pick .4s cubic-bezier(.3,1.8,.5,1); }
+        .pw:has(input:checked) .ic { transform:scale(1.15); }
+        .pw:has(input:checked) .power i.on { background:#0A0A0F; }
+        .pw:has(input:checked) .days { color:#0A0A0F; }
+        .pw:has(input:checked)::after { content:"✓ ALES"; position:absolute; bottom:-10px; background:#0A0A0F; color:#B4FF39; font:800 .6rem system-ui; padding:.15rem .45rem; border-radius:6px; }
+        .pw:has(input:focus-visible) { outline:3px solid #9D5CFF; outline-offset:3px; }
+        @keyframes pw-bob { 50% { transform:translateY(-4px) rotate(8deg); } }
+        @keyframes pw-pick { 0% { transform:scale(.92); } 60% { transform:translateY(-6px) scale(1.08) rotate(-2deg); } }
+        #btn-trimite-cerere.go { background:#0A0A0F !important; color:#B4FF39 !important; border:3px solid #0A0A0F; box-shadow:0 5px 0 #9D5CFF; font-weight:800; transition:transform .1s, box-shadow .1s; }
+        #btn-trimite-cerere.go:hover:not(:disabled) { transform:translateY(-2px); box-shadow:0 7px 0 #9D5CFF; }
+        #btn-trimite-cerere.go:active:not(:disabled) { transform:translateY(4px); box-shadow:0 1px 0 #9D5CFF; }
+        @media (prefers-reduced-motion: reduce) { .pw, .pw * { animation:none !important; transition:none !important; } }
+      </style>
+      <div class="pw-grid" role="radiogroup" aria-label="Alege planul de promovare">
+        <label class="pw">
+          <input type="radio" name="plan-promo" value="7zile" />
+          <span class="ic">🥉</span><span class="lv">STARTER</span><span class="days">7 zile</span>
+          <span class="power" aria-hidden="true"><i class="on"></i><i></i><i></i></span>
+          <span class="price">25 RON</span>
         </label>
-        <label class="flex items-center gap-4 border-2 border-yellow-400 rounded-xl p-3 cursor-pointer hover:border-blue-400 transition relative">
-          <span class="absolute -top-2 left-4 bg-yellow-400 text-xs font-bold px-2 py-0.5 rounded-full text-yellow-900">Popular</span>
-          <input type="radio" name="plan-promo" value="14zile" class="accent-yellow-500" checked />
-          <div class="flex-1">
-            <p class="font-semibold text-gray-800 text-sm">Standard — 14 zile</p>
-            <p class="text-xs text-gray-500">Cel mai ales de angajatori</p>
-          </div>
-          <span class="font-bold text-yellow-700">40 RON</span>
+        <label class="pw">
+          <span class="tag">⭐ POPULAR</span>
+          <input type="radio" name="plan-promo" value="14zile" checked />
+          <span class="ic">🥈</span><span class="lv">STANDARD</span><span class="days">14 zile</span>
+          <span class="power" aria-hidden="true"><i class="on"></i><i class="on"></i><i></i></span>
+          <span class="price">40 RON</span>
         </label>
-        <label class="flex items-center gap-4 border-2 border-gray-200 rounded-xl p-3 cursor-pointer hover:border-yellow-400 transition">
-          <input type="radio" name="plan-promo" value="30zile" class="accent-yellow-500" />
-          <div class="flex-1">
-            <p class="font-semibold text-gray-800 text-sm">Premium — 30 zile</p>
-            <p class="text-xs text-gray-500">Vizibilitate maximă</p>
-          </div>
-          <span class="font-bold text-yellow-700">70 RON</span>
+        <label class="pw">
+          <input type="radio" name="plan-promo" value="30zile" />
+          <span class="ic">🥇</span><span class="lv">PREMIUM</span><span class="days">30 zile</span>
+          <span class="power" aria-hidden="true"><i class="on"></i><i class="on"></i><i class="on"></i></span>
+          <span class="price">70 RON</span>
         </label>
       </div>
       <div id="promo-eroare" class="hidden bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3 text-sm mb-4"></div>
@@ -223,8 +246,8 @@
         </div>
         <div class="flex gap-3">
           <button id="btn-trimite-cerere"
-            class="flex-1 bg-blue-600 text-white font-bold px-6 py-3 rounded-xl hover:bg-blue-700 transition">
-            Trimite cererea
+            class="go flex-1 px-6 py-3 rounded-xl">
+            🚀 Lansează boost-ul
           </button>
           <button id="modal-inchide"
             class="border border-gray-300 text-gray-600 px-6 py-3 rounded-xl hover:bg-gray-50 transition">
@@ -541,6 +564,7 @@
                   <option value="acceptata" ${a.status==='acceptata'?'selected':''}>Acceptată</option>
                   <option value="respinsa" ${a.status==='respinsa'?'selected':''}>Respinsă</option>
                 </select>
+                <a href="/static/chat.html?app=${a.id}" class="text-sm font-semibold px-3 py-1.5 rounded-lg bg-violet-600 text-white hover:bg-violet-700 transition">💬 Scrie</a>
               </div>
             </div>
           </div>`).join("");
@@ -593,7 +617,7 @@
       document.getElementById("modal-inchide-dupa").classList.add("hidden");
       const btnTrimite = document.getElementById("btn-trimite-cerere");
       btnTrimite.disabled = false;
-      btnTrimite.textContent = "Trimite cererea";
+      btnTrimite.textContent = "🚀 Lansează boost-ul";
       // Resetăm selecția planului la cel implicit (Standard - Popular)
       const radioDefault = document.querySelector('input[name="plan-promo"][value="14zile"]');
       if (radioDefault) radioDefault.checked = true;
@@ -613,7 +637,7 @@
       document.getElementById("modal-inchide-dupa").classList.add("hidden");
       const btn = document.getElementById("btn-trimite-cerere");
       btn.disabled = false;
-      btn.textContent = "Trimite cererea";
+      btn.textContent = "🚀 Lansează boost-ul";
     }
 
     document.getElementById("modal-inchide").onclick = inchideModalPromovare;
@@ -646,7 +670,7 @@
         eroare.textContent = e.message;
         eroare.classList.remove("hidden");
         btn.disabled = false;
-        btn.textContent = "Trimite cererea";
+        btn.textContent = "🚀 Lansează boost-ul";
       }
     };
 
@@ -665,6 +689,14 @@
 
     incarcaJoburileMele();
     initNotifBell();
+    // Badge mesaje necitite în chat (actualizat la 30 s)
+    (function chatBadge() {
+      const el = document.getElementById("chat-unread");
+      const upd = () => apiFetch("/v2/chat/unread").then(d => {
+        if (!d) return; el.textContent = d.unread > 9 ? "9+" : d.unread; el.classList.toggle("hidden", !d.unread);
+      }).catch(() => {});
+      upd(); setInterval(upd, 30000);
+    })();
 
     // ── RSS IMPORT ──────────────────────────────────────────
     async function incarcaFeedRss() {

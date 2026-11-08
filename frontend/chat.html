@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>JobPart — Chat</title>
+  <meta name="robots" content="noindex" />
+  <meta name="theme-color" content="#0A0A0F" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=Unbounded:wght@600;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/css/neo.css" />
+  <style>
+    body { overflow: hidden; }
+    .app { display: grid; grid-template-columns: 340px minmax(0, 1fr); height: 100dvh; }
+
+    /* ── Lista conversații ── */
+    .side { border-right: 2px solid var(--line); display: flex; flex-direction: column; min-height: 0; background: var(--bg); }
+    .side-head { padding: 1rem; display: flex; align-items: center; gap: .6rem; }
+    .logo { font: 800 1.05rem var(--font-display); color: var(--ink); text-decoration: none; margin-right: auto; }
+    .logo span { color: var(--neon); }
+    .side h1 { font-size: 1.6rem; margin: 0 1rem .6rem; }
+    .search { margin: 0 1rem .8rem; }
+    .search input { width: 100%; font: 600 .9rem var(--font-body); color: var(--ink); background: var(--surface-2);
+      border: 1.5px solid var(--line); border-radius: 12px; padding: .65rem .8rem; }
+    .threads { overflow-y: auto; flex: 1; padding: 0 .6rem 1rem; }
+    .th { display: flex; gap: .75rem; align-items: center; padding: .7rem; border-radius: 16px; cursor: pointer;
+      border: 2px solid transparent; transition: background .2s, border-color .2s, transform .15s; width: 100%;
+      background: none; color: inherit; text-align: left; font: inherit; }
+    .th:hover { background: var(--surface); transform: translateX(3px); }
+    .th.on { background: var(--surface); border-color: var(--violet); }
+    .th .meta { flex: 1; min-width: 0; }
+    .th .name { font-weight: 700; display: flex; gap: .4rem; align-items: center; }
+    .th .name span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .th .sub { font-size: .8rem; color: var(--muted); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .th .time { font-size: .7rem; color: var(--muted); }
+    .badge { min-width: 22px; height: 22px; border-radius: 11px; padding: 0 6px; display: grid; place-items: center;
+      background: var(--neon); color: #0A0A0F; font: 800 .72rem var(--font-body); animation: pop .4s cubic-bezier(.3,1.6,.5,1); }
+    @keyframes pop { from { transform: scale(0); } to { transform: scale(1); } }
+
+    .av { width: 46px; height: 46px; border-radius: 15px; flex: none; position: relative; display: grid; place-items: center;
+      font: 800 1rem var(--font-display); color: #0A0A0F; background: linear-gradient(135deg, var(--neon), var(--violet)); }
+    .av .dot { position: absolute; right: -3px; bottom: -3px; width: 13px; height: 13px; border-radius: 50%;
+      background: var(--neon); border: 3px solid var(--bg); }
+    .av .dot::after { content: ""; position: absolute; inset: -4px; border-radius: 50%; border: 2px solid var(--neon); animation: ping 1.8s ease-out infinite; }
+    @keyframes ping { from { transform: scale(.6); opacity: 1; } to { transform: scale(1.6); opacity: 0; } }
+
+    .pill { font: 700 .66rem var(--font-body); text-transform: uppercase; letter-spacing: .04em; padding: .15rem .45rem; border-radius: 6px; background: var(--surface-2); color: var(--muted); }
+    .pill.acceptata { background: var(--neon); color: #0A0A0F; }
+    .pill.respinsa { background: var(--danger); color: #fff; }
+    .pill.vizualizata { background: var(--violet); color: #fff; }
+
+    /* ── Conversație ── */
+    .conv { display: flex; flex-direction: column; min-height: 0; min-width: 0; position: relative;
+      background: radial-gradient(80% 50% at 100% 0%, color-mix(in srgb, var(--violet) 12%, transparent), transparent 70%), var(--bg); }
+    .conv-head { display: flex; gap: .75rem; align-items: center; padding: .8rem 1rem; border-bottom: 2px solid var(--line); }
+    .conv-head .t { flex: 1; min-width: 0; }
+    .conv-head .t b { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .conv-head .t small { color: var(--muted); }
+    .back { display: none; }
+
+    .msgs { flex: 1; overflow-y: auto; padding: 1.2rem 1rem; display: flex; flex-direction: column; gap: .35rem; scroll-behavior: smooth; }
+    .day { align-self: center; font: 700 .7rem var(--font-body); color: var(--muted); background: var(--surface); padding: .25rem .7rem; border-radius: 999px; margin: .8rem 0 .4rem; }
+    .b { max-width: min(78%, 520px); padding: .6rem .85rem .45rem; border-radius: 18px; line-height: 1.45; position: relative;
+      overflow-wrap: anywhere; white-space: pre-wrap; animation: bin .35s cubic-bezier(.2,1.4,.4,1) both; }
+    @keyframes bin { from { opacity: 0; transform: translateY(12px) scale(.92); } to { opacity: 1; transform: none; } }
+    .b.me { align-self: flex-end; background: var(--neon); color: #0A0A0F; border-bottom-right-radius: 6px; transform-origin: bottom right; }
+    .b.them { align-self: flex-start; background: var(--surface); border: 1.5px solid var(--line); border-bottom-left-radius: 6px; transform-origin: bottom left; }
+    .b.pending { opacity: .55; }
+    .b.failed { outline: 2px solid var(--danger); }
+    .b .ft { display: flex; gap: .3rem; justify-content: flex-end; font-size: .66rem; opacity: .7; margin-top: .15rem; }
+    .tick.read { color: var(--violet); font-weight: 800; }
+    .b.me .tick.read { color: #3b0f8c; }
+
+    /* Carduri de sistem (acceptare / respingere / interviu) */
+    .card { align-self: center; width: min(420px, 96%); border-radius: 20px; padding: 1rem 1.1rem; margin: .5rem 0;
+      border: 2px solid var(--line); background: var(--surface); animation: bin .5s cubic-bezier(.2,1.4,.4,1) both; }
+    .card.accept { border-color: var(--neon); box-shadow: var(--shadow-v); }
+    .card.reject { border-color: var(--danger); }
+    .card.interview { border-color: var(--violet); box-shadow: var(--shadow); }
+    .card h4 { margin: 0 0 .35rem; font: 800 1rem var(--font-display); }
+    .card .when { font: 800 1.25rem var(--font-display); color: var(--neon); }
+    .card .row { display: flex; gap: .5rem; margin-top: .8rem; flex-wrap: wrap; }
+    .card .row .btn { flex: 1; padding: .6rem; }
+    .countdown { font-size: .8rem; color: var(--muted); }
+
+    .typing { align-self: flex-start; display: none; gap: 4px; padding: .7rem .9rem; border-radius: 18px; background: var(--surface); border: 1.5px solid var(--line); }
+    .typing.on { display: flex; animation: bin .25s ease both; }
+    .typing i { width: 7px; height: 7px; border-radius: 50%; background: var(--muted); animation: bounce 1.1s infinite; }
+    .typing i:nth-child(2) { animation-delay: .15s; } .typing i:nth-child(3) { animation-delay: .3s; }
+    @keyframes bounce { 0%, 60%, 100% { transform: translateY(0); opacity: .5; } 30% { transform: translateY(-6px); opacity: 1; } }
+
+    /* Acțiuni rapide + compunere */
+    .quick { display: flex; gap: .45rem; padding: .6rem 1rem 0; overflow-x: auto; scrollbar-width: none; }
+    .quick::-webkit-scrollbar { display: none; }
+    .quick .chip { cursor: pointer; transition: transform .15s, background .2s; }
+    .quick .chip:hover { transform: translateY(-2px); }
+    .compose { display: flex; gap: .5rem; padding: .7rem 1rem; padding-bottom: max(.7rem, env(safe-area-inset-bottom)); align-items: flex-end; }
+    .compose textarea { flex: 1; resize: none; max-height: 140px; min-height: 46px; font: 500 .95rem/1.4 var(--font-body); color: var(--ink);
+      background: var(--surface); border: 2px solid var(--line); border-radius: 16px; padding: .7rem .9rem; transition: border-color .2s; }
+    .compose textarea:focus { outline: none; border-color: var(--violet); }
+    .send { width: 48px; height: 48px; padding: 0; border-radius: 16px; font-size: 1.2rem; }
+    .send:disabled { opacity: .4; transform: none; box-shadow: none; cursor: default; }
+
+    .conn { position: absolute; top: 84px; left: 50%; transform: translateX(-50%) translateY(-12px); z-index: 5; opacity: 0; visibility: hidden;
+      font: 700 .75rem var(--font-body); padding: .35rem .8rem; border-radius: 999px; background: var(--danger); color: #fff;
+      transition: transform .3s, opacity .3s, visibility 0s linear .3s; pointer-events: none; }
+    .conn.show { transform: translateX(-50%) translateY(0); opacity: 1; visibility: visible; transition-delay: 0s; }
+
+    .empty { margin: auto; text-align: center; max-width: 340px; padding: 2rem; }
+    .empty .big { font-size: 3.5rem; animation: float 3s ease-in-out infinite; display: inline-block; }
+    @keyframes float { 50% { transform: translateY(-10px) rotate(-6deg); } }
+
+    /* Modal interviu */
+    dialog { border: 2px solid var(--line); border-radius: 22px; background: var(--surface); color: var(--ink); padding: 1.4rem; width: min(420px, calc(100vw - 32px)); box-shadow: 8px 8px 0 var(--violet); }
+    dialog[open] { animation: bin .35s cubic-bezier(.2,1.4,.4,1); }
+    dialog::backdrop { background: rgba(0,0,0,.6); backdrop-filter: blur(3px); }
+    dialog label { display: block; font-weight: 700; font-size: .85rem; margin: .8rem 0 .35rem; }
+    dialog input, dialog textarea { width: 100%; font: 500 .95rem var(--font-body); color: var(--ink); background: var(--surface-2); border: 1.5px solid var(--line); border-radius: 12px; padding: .6rem .7rem; }
+    .seg { display: flex; gap: .4rem; }
+
+    #confetti { position: fixed; inset: 0; pointer-events: none; z-index: 50; }
+
+    @media (max-width: 760px) {
+      .app { grid-template-columns: 100% 100%; width: 200%; transition: transform .38s cubic-bezier(.3,.9,.3,1); }
+      .app.open { transform: translateX(-50%); }
+      .back { display: inline-flex; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app" id="app">
+    <aside class="side">
+      <div class="side-head">
+        <a class="logo" href="/">JOB<span>PART</span></a>
+        <a class="btn btn-ghost" id="dashLink" href="/static/dashboard-candidat.html" style="padding:.45rem .7rem">Dashboard</a>
+      </div>
+      <h1>Mesaje</h1>
+      <div class="search"><input id="q" type="search" placeholder="Caută după nume sau job…" aria-label="Caută conversații" /></div>
+      <div class="threads" id="threads" role="list"></div>
+    </aside>
+
+    <main class="conv" id="conv">
+      <div class="empty" id="placeholder"><div class="big">💬</div><h2>Alege o conversație</h2>
+        <p class="muted" style="color:var(--muted)">Conversațiile apar automat după ce un candidat aplică la un job.</p></div>
+    </main>
+  </div>
+  <canvas id="confetti"></canvas>
+  <div class="toast" id="toast" role="status"></div>
+
+  <dialog id="ivDlg">
+    <form method="dialog" id="ivForm">
+      <h3 style="margin:0">📅 Propune un interviu</h3>
+      <label for="ivWhen">Data și ora (ora ta locală)</label>
+      <input type="datetime-local" id="ivWhen" required />
+      <label>Tip</label>
+      <div class="seg">
+        <button type="button" class="chip" data-mode="online" aria-pressed="true">💻 Online</button>
+        <button type="button" class="chip" data-mode="onsite" aria-pressed="false">📍 La sediu</button>
+      </div>
+      <label for="ivWhere">Link sau adresă</label>
+      <input id="ivWhere" maxlength="300" placeholder="ex. meet.google.com/… sau Str. Exemplu 10" />
+      <div style="display:flex;gap:.6rem;margin-top:1.2rem">
+        <button type="button" class="btn btn-ghost" id="ivCancel" style="flex:1">Renunță</button>
+        <button class="btn btn-neon" style="flex:1">Trimite invitația</button>
+      </div>
+    </form>
+  </dialog>
+
+  <script src="/static/js/api.js"></script>
+  <script>
+  (() => {
+    const $ = s => document.querySelector(s);
+    const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+    const toast = m => { const e = $("#toast"); e.textContent = m; e.classList.add("show"); clearTimeout(e._t); e._t = setTimeout(() => e.classList.remove("show"), 2600); };
+    const theme = (() => { try { return localStorage.getItem("jp_theme"); } catch { return null; } })();
+    if (theme) document.documentElement.dataset.theme = theme;
+
+    const token = typeof getToken === "function" ? getToken() : null;
+    if (!token) { location.href = "/static/login.html"; return; }
+    const user = typeof getUser === "function" ? getUser() : null;
+    if (user && user.rol === "angajator") $("#dashLink").href = "/static/dashboard-angajator.html";
+    const H = { Authorization: `Bearer ${token}`, "Content-Type": "application/json" };
+    const api = async (path, opt = {}) => {
+      const r = await fetch(`${API_BASE}/v2/chat${path}`, { ...opt, headers: H });
+      if (r.status === 401) { logout("Sesiunea a expirat."); throw new Error("401"); }
+      const d = await r.json().catch(() => ({}));
+      if (!r.ok) throw new Error(typeof d.detail === "string" ? d.detail : "Eroare");
+      return d;
+    };
+
+    const S = { threads: [], cur: null, me: user ? user.id : null, role: null, status: null, msgs: [], ws: null, wsOk: false, retry: 0, typingT: null, oldest: null, hasMore: false };
+    const initials = n => (n || "?").split(/\s+/).map(x => x[0]).slice(0, 2).join("").toUpperCase();
+    const fmtTime = iso => new Date(iso).toLocaleTimeString("ro-RO", { hour: "2-digit", minute: "2-digit" });
+    const fmtDay = iso => { const d = new Date(iso), t = new Date(); const y = new Date(t); y.setDate(t.getDate() - 1);
+      if (d.toDateString() === t.toDateString()) return "Azi"; if (d.toDateString() === y.toDateString()) return "Ieri";
+      return d.toLocaleDateString("ro-RO", { day: "numeric", month: "long" }); };
+    const STATUS = { trimisa: "Nouă", vizualizata: "În discuție", acceptata: "Acceptat", respinsa: "Respins" };
+
+    // ── Lista de conversații (cu skeleton) ──
+    function skelThreads() {
+      $("#threads").innerHTML = Array.from({ length: 6 }, () => `<div class="th"><div class="skel" style="width:46px;height:46px;border-radius:15px"></div>
+        <div class="meta"><div class="skel" style="height:13px;width:60%;margin-bottom:7px"></div><div class="skel" style="height:11px;width:85%"></div></div></div>`).join("");
+    }
+    function preview(m) {
+      if (!m) return "Începe conversația 👋";
+      const mine = m.sender_id === S.me ? "Tu: " : "";
+      return mine + ({ accept: "✅ Acceptat", reject: "Aplicare respinsă", interview: "📅 Invitație la interviu", interview_yes: "👍 Interviu confirmat", interview_no: "Altă dată propusă" }[m.kind] || m.body);
+    }
+    function renderThreads() {
+      const q = $("#q").value.trim().toLowerCase();
+      const list = S.threads.filter(t => !q || (t.other.name + " " + t.job_title).toLowerCase().includes(q));
+      if (!list.length) { $("#threads").innerHTML = `<div class="empty"><div class="big">🛰️</div><p style="color:var(--muted)">${S.threads.length ? "Nimic găsit." : "Nicio conversație încă. Aplică la un job și angajatorul îți poate scrie aici."}</p></div>`; return; }
+      $("#threads").innerHTML = list.map((t, i) => `
+        <button class="th rise ${t.app_id === S.cur ? "on" : ""}" data-app="${t.app_id}" role="listitem" style="animation-delay:${Math.min(i, 10) * 35}ms">
+          <div class="av">${esc(initials(t.other.name))}${t.other.online ? '<span class="dot" title="Online"></span>' : ""}</div>
+          <div class="meta">
+            <div class="name"><span>${esc(t.other.name)}</span><span class="pill ${esc(t.status)}">${esc(STATUS[t.status] || t.status)}</span></div>
+            <div class="sub">${esc(t.job_title)} · ${esc(preview(t.last))}</div>
+          </div>
+          <div style="display:grid;gap:4px;justify-items:end">
+            <span class="time">${t.last ? fmtTime(t.last.created_at) : ""}</span>
+            ${t.unread ? `<span class="badge">${t.unread}</span>` : ""}
+          </div>
+        </button>`).join("");
+    }
+    async function loadThreads() {
+      try { S.threads = await api("/threads"); renderThreads(); } catch (e) { if (e.message !== "401") toast("Nu am putut încărca conversațiile."); }
+    }
+    $("#threads").addEventListener("click", e => { const b = e.target.closest("[data-app]"); if (b) openThread(+b.dataset.app); });
+    $("#q").addEventListener("input", renderThreads);
+
+    // ── Conversație ──
+    function convShell(t) {
+      const emp = t.role === "employer";
+      $("#conv").innerHTML = `
+        <div class="conv-head">
+          <button class="btn btn-ghost back" id="back" aria-label="Înapoi" style="padding:.45rem .7rem">←</button>
+          <div class="av">${esc(initials(t.other.name))}${t.other.online ? '<span class="dot"></span>' : ""}</div>
+          <div class="t"><b>${esc(t.other.name)}</b><small>${esc(t.job_title)} · <span id="stLbl">${esc(STATUS[t.status] || t.status)}</span></small></div>
+          <a class="btn btn-ghost" href="/static/job-detalii.html?id=${encodeURIComponent(t.job_id)}" style="padding:.45rem .7rem" title="Vezi jobul">↗</a>
+        </div>
+        <div class="conn" id="conn">Reconectare…</div>
+        <div class="msgs" id="msgs" aria-live="polite"></div>
+        ${emp ? `<div class="quick" id="quick">
+          <button class="chip chip-neon" data-act="accept">✅ Acceptă</button>
+          <button class="chip" data-act="interview">📅 Propune interviu</button>
+          <button class="chip" data-act="reject">❌ Refuză</button>
+          <button class="chip" data-tpl="Bună! Mulțumim pentru aplicare. Când ai fi disponibil(ă) pentru o discuție scurtă?">💬 Salut rapid</button>
+          <button class="chip" data-tpl="Ne poți trimite programul tău disponibil pentru săptămâna viitoare?">🗓️ Cere program</button>
+        </div>` : `<div class="quick" id="quick">
+          <button class="chip" data-tpl="Bună ziua! Mulțumesc pentru răspuns. Sunt disponibil(ă) oricând săptămâna aceasta.">👋 Sunt disponibil</button>
+          <button class="chip" data-tpl="Aș avea câteva întrebări despre program și locația jobului.">❓ Am o întrebare</button>
+        </div>`}
+        <form class="compose" id="compose">
+          <textarea id="txt" rows="1" maxlength="2000" placeholder="Scrie un mesaj…" aria-label="Mesaj"></textarea>
+          <button class="btn btn-neon send" id="sendBtn" disabled aria-label="Trimite">➤</button>
+        </form>`;
+      $("#back").onclick = () => { $("#app").classList.remove("open"); S.cur = null; history.replaceState(null, "", location.pathname); renderThreads(); };
+      const txt = $("#txt");
+      txt.addEventListener("input", () => {
+        txt.style.height = "auto"; txt.style.height = Math.min(txt.scrollHeight, 140) + "px";
+        $("#sendBtn").disabled = !txt.value.trim();
+        if (S.wsOk && !S.typingT) { wsSend({ type: "typing", app_id: S.cur }); S.typingT = setTimeout(() => S.typingT = null, 2500); }
+      });
+      txt.addEventListener("keydown", e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); $("#compose").requestSubmit(); } });
+      $("#compose").addEventListener("submit", e => { e.preventDefault(); send(txt.value); txt.value = ""; txt.style.height = "auto"; $("#sendBtn").disabled = true; });
+      $("#quick").addEventListener("click", e => {
+        const b = e.target.closest("button"); if (!b) return;
+        if (b.dataset.tpl) { txt.value = b.dataset.tpl; txt.dispatchEvent(new Event("input")); txt.focus(); return; }
+        if (b.dataset.act === "interview") return openInterview();
+        if (b.dataset.act === "reject") { const r = prompt("Motiv (opțional, îl vede candidatul):", ""); if (r === null) return; return doAction({ action: "reject", reason: r }); }
+        if (b.dataset.act === "accept") { if (confirm("Accepți acest candidat?")) doAction({ action: "accept" }); }
+      });
+      $("#msgs").addEventListener("scroll", () => { if ($("#msgs").scrollTop < 40 && S.hasMore && !S.loadingOld) loadOlder(); });
+      $("#msgs").addEventListener("click", e => {
+        const b = e.target.closest("[data-iv]"); if (!b) return;
+        doAction({ action: b.dataset.iv, ref: +b.dataset.ref });
+      });
+    }
+
+    async function openThread(appId) {
+      const t = S.threads.find(x => x.app_id === appId); if (!t) return;
+      S.cur = appId; S.role = t.role; S.status = t.status;
+      history.replaceState(null, "", `?app=${appId}`);
+      $("#app").classList.add("open");
+      convShell(t);
+      $("#msgs").innerHTML = Array.from({ length: 5 }, (_, i) => `<div class="skel" style="height:38px;width:${40 + (i * 13) % 35}%;border-radius:16px;align-self:${i % 2 ? "flex-end" : "flex-start"}"></div>`).join("");
+      try {
+        const d = await api(`/threads/${appId}/messages`);
+        if (S.cur !== appId) return;
+        S.me = d.me; S.msgs = d.messages; S.hasMore = d.has_more; S.status = d.status;
+        renderMsgs(true);
+        t.unread = 0; renderThreads();
+      } catch (e) { $("#msgs").innerHTML = `<div class="empty"><p>Nu am putut încărca mesajele.</p></div>`; }
+      $("#txt")?.focus({ preventScroll: true });
+    }
+
+    async function loadOlder() {
+      S.loadingOld = true;
+      const box = $("#msgs"), h0 = box.scrollHeight;
+      try {
+        const d = await api(`/threads/${S.cur}/messages?before_id=${S.msgs[0].id}`);
+        S.msgs = [...d.messages, ...S.msgs]; S.hasMore = d.has_more;
+        renderMsgs(false); box.style.scrollBehavior = "auto"; box.scrollTop = box.scrollHeight - h0; box.style.scrollBehavior = "";
+      } finally { S.loadingOld = false; }
+    }
+
+    function msgHTML(m, i, all) {
+      const mine = m.sender_id === S.me;
+      const prev = all[i - 1];
+      const day = !prev || new Date(prev.created_at).toDateString() !== new Date(m.created_at).toDateString() ? `<div class="day">${fmtDay(m.created_at)}</div>` : "";
+      if (m.kind === "accept") return day + `<div class="card accept"><h4>🎉 Candidat acceptat</h4><div>${esc(m.body)}</div></div>`;
+      if (m.kind === "reject") return day + `<div class="card reject"><h4>Aplicare închisă</h4><div style="color:var(--muted)">${esc(m.body)}</div></div>`;
+      if (m.kind === "interview") {
+        const when = new Date(m.meta.when);
+        const answered = all.find(x => (x.kind === "interview_yes" || x.kind === "interview_no") && x.meta && x.meta.ref === m.id);
+        const where = m.meta.where ? `<div style="margin-top:.3rem">${m.meta.mode === "online" ? "💻" : "📍"} ${esc(m.meta.where)}</div>` : "";
+        const btns = !answered && S.role === "candidate" && when > new Date()
+          ? `<div class="row"><button class="btn btn-neon" data-iv="interview_yes" data-ref="${m.id}">👍 Confirm</button><button class="btn" data-iv="interview_no" data-ref="${m.id}">Altă dată</button></div>`
+          : answered ? `<div class="row"><span class="chip ${answered.kind === "interview_yes" ? "chip-neon" : ""}">${answered.kind === "interview_yes" ? "✔ Confirmat" : "↺ Se caută altă dată"}</span></div>` : "";
+        return day + `<div class="card interview"><h4>📅 Invitație la interviu ${m.meta.mode === "online" ? "online" : "la sediu"}</h4>
+          <div class="when">${when.toLocaleString("ro-RO", { weekday: "long", day: "numeric", month: "long", hour: "2-digit", minute: "2-digit" })}</div>
+          <div class="countdown" data-cd="${esc(m.meta.when)}"></div>${where}${btns}</div>`;
+      }
+      const tick = mine ? (m.pending ? "🕓" : m.failed ? "⚠" : `<span class="tick ${m.read_at ? "read" : ""}">${m.read_at ? "✓✓" : "✓"}</span>`) : "";
+      return day + `<div class="b ${mine ? "me" : "them"} ${m.pending ? "pending" : ""} ${m.failed ? "failed" : ""}" data-id="${m.id || ""}">${esc(m.body)}<div class="ft">${fmtTime(m.created_at)} ${tick}</div></div>`;
+    }
+    function renderMsgs(scrollEnd = true) {
+      const box = $("#msgs"); if (!box) return;
+      box.innerHTML = (S.msgs.length ? "" : `<div class="empty"><div class="big">👋</div><p style="color:var(--muted)">Spune salut! Mesajele sunt private între tine și ${S.role === "employer" ? "candidat" : "angajator"}.</p></div>`)
+        + S.msgs.map(msgHTML).join("") + `<div class="typing" id="typing"><i></i><i></i><i></i></div>`;
+      // fără animație de intrare pentru istoric (doar mesajele noi animă)
+      box.querySelectorAll(".b, .card").forEach(el => el.style.animation = "none");
+      updateCountdowns();
+      if (scrollEnd) { box.style.scrollBehavior = "auto"; box.scrollTop = box.scrollHeight; box.style.scrollBehavior = ""; }
+    }
+    function appendMsg(m) {
+      S.msgs.push(m);
+      const box = $("#msgs"); if (!box) return;
+      const nearBottom = box.scrollHeight - box.scrollTop - box.clientHeight < 160 || m.sender_id === S.me;
+      box.querySelector(".empty")?.remove();
+      const tmp = document.createElement("div"); tmp.innerHTML = msgHTML(m, S.msgs.length - 1, S.msgs);
+      const typing = $("#typing");
+      [...tmp.children].forEach(el => box.insertBefore(el, typing));
+      updateCountdowns();
+      if (nearBottom) box.scrollTop = box.scrollHeight;
+    }
+    function updateCountdowns() {
+      document.querySelectorAll("[data-cd]").forEach(el => {
+        const ms = new Date(el.dataset.cd) - new Date();
+        if (ms <= 0) { el.textContent = "A trecut"; return; }
+        const d = Math.floor(ms / 864e5), h = Math.floor(ms % 864e5 / 36e5), m = Math.floor(ms % 36e5 / 6e4);
+        el.textContent = `⏳ peste ${d ? d + " z " : ""}${h} h ${m} min`;
+      });
+    }
+    setInterval(updateCountdowns, 30000);
+
+    // ── Trimitere (optimist) ──
+    function send(text) {
+      text = text.trim(); if (!text || !S.cur) return;
+      const cid = "c" + Date.now() + Math.random().toString(16).slice(2, 6);
+      const m = { id: null, client_id: cid, app_id: S.cur, sender_id: S.me, kind: "text", body: text, created_at: new Date().toISOString(), pending: true };
+      appendMsg(m);
+      if (S.wsOk) wsSend({ type: "send", app_id: S.cur, body: text, client_id: cid });
+      else api(`/threads/${S.cur}/messages`, { method: "POST", body: JSON.stringify({ body: text }) })
+        .then(srv => confirmSent(cid, srv)).catch(err => failSent(cid, err.message));
+      setTimeout(() => { const x = S.msgs.find(z => z.client_id === cid && z.pending); if (x) failSent(cid, "Netrimis. Verifică conexiunea."); }, 12000);
+    }
+    function confirmSent(cid, srv) {
+      const i = S.msgs.findIndex(z => z.client_id === cid);
+      if (i >= 0) { S.msgs[i] = { ...srv, client_id: cid }; renderMsgs(false); keepBottom(); }
+      bumpThread(srv);
+    }
+    function failSent(cid, why) { const x = S.msgs.find(z => z.client_id === cid); if (x) { x.pending = false; x.failed = true; renderMsgs(false); } toast(why); }
+    const keepBottom = () => { const b = $("#msgs"); if (b) b.scrollTop = b.scrollHeight; };
+
+    async function doAction(body) {
+      try {
+        const d = await api(`/threads/${S.cur}/actions`, { method: "POST", body: JSON.stringify(body) });
+        if (!S.wsOk) onMessage(d.message, d.status);
+        if (body.action === "accept") burst();
+      } catch (e) { toast(e.message); }
+    }
+
+    function onMessage(m, status) {
+      if (status) setStatus(m.app_id, status);
+      if (m.app_id === S.cur) {
+        if (m.client_id && S.msgs.some(z => z.client_id === m.client_id)) return confirmSent(m.client_id, m);
+        if (S.msgs.some(z => z.id === m.id)) return;
+        $("#typing")?.classList.remove("on");
+        appendMsg(m);
+        if (m.kind === "interview_yes" && m.sender_id !== S.me) burst();
+        if (m.kind === "accept" && m.sender_id !== S.me) burst();
+        if (m.sender_id !== S.me && document.visibilityState === "visible") wsSend({ type: "read", app_id: S.cur }) || api(`/threads/${S.cur}/read`, { method: "POST" }).catch(() => {});
+      } else if (m.sender_id !== S.me) {
+        const t = S.threads.find(x => x.app_id === m.app_id); if (t) t.unread++;
+        else loadThreads();
+        toast("💬 Mesaj nou");
+      }
+      bumpThread(m);
+    }
+    function bumpThread(m) {
+      const t = S.threads.find(x => x.app_id === m.app_id); if (!t) return;
+      t.last = m; S.threads.sort((a, b) => (b.last?.created_at || b.sort).localeCompare(a.last?.created_at || a.sort)); renderThreads();
+    }
+    function setStatus(appId, st) {
+      const t = S.threads.find(x => x.app_id === appId); if (t) t.status = st;
+      if (appId === S.cur) { S.status = st; const l = $("#stLbl"); if (l) l.textContent = STATUS[st] || st; }
+    }
+
+    // ── WebSocket cu reconectare + rezervă REST ──
+    function wsSend(o) { if (S.ws && S.ws.readyState === 1) { S.ws.send(JSON.stringify(o)); return true; } return false; }
+    function connect() {
+      const url = API_BASE.replace(/^http/, "ws") + "/v2/chat/ws";
+      let ws; try { ws = new WebSocket(url); } catch { return scheduleReconnect(); }
+      S.ws = ws;
+      ws.onopen = () => ws.send(JSON.stringify({ type: "auth", token }));
+      ws.onmessage = e => {
+        let ev; try { ev = JSON.parse(e.data); } catch { return; }
+        if (ev.type === "ready") { S.wsOk = true; S.retry = 0; S.me = S.me || ev.me; $("#conn")?.classList.remove("show"); if (S.cur) syncCurrent(); }
+        else if (ev.type === "message") onMessage(ev.message, ev.status);
+        else if (ev.type === "typing" && ev.app_id === S.cur) { const t = $("#typing"); if (t) { t.classList.add("on"); keepBottom(); clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove("on"), 3500); } }
+        else if (ev.type === "read" && ev.app_id === S.cur) { S.msgs.forEach(m => { if (m.sender_id === S.me && !m.read_at) m.read_at = new Date().toISOString(); }); renderMsgs(false); }
+        else if (ev.type === "error") { if (ev.client_id) failSent(ev.client_id, ev.detail); else toast(ev.detail); }
+      };
+      ws.onclose = e => { S.wsOk = false; if (e.code === 4401) return logout("Sesiunea a expirat."); $("#conn")?.classList.add("show"); scheduleReconnect(); };
+      ws.onerror = () => ws.close();
+    }
+    function scheduleReconnect() { const d = Math.min(30000, 1000 * 2 ** S.retry++); setTimeout(connect, d); }
+    setInterval(() => wsSend({ type: "ping" }), 25000);
+    // Rezervă: dacă WebSocket-ul nu merge, actualizăm prin REST la fiecare 6 secunde
+    setInterval(() => { if (!S.wsOk && S.cur && document.visibilityState === "visible") syncCurrent(); }, 6000);
+    async function syncCurrent() {
+      const app = S.cur; if (!app) return;
+      try {
+        const d = await api(`/threads/${app}/messages`);
+        if (app !== S.cur) return;
+        const known = new Set(S.msgs.filter(m => m.id).map(m => m.id));
+        const fresh = d.messages.filter(m => !known.has(m.id) && !S.msgs.some(z => z.pending && z.body === m.body));
+        S.status = d.status; setStatus(app, d.status);
+        if (fresh.length) fresh.forEach(m => appendMsg(m));
+      } catch {}
+    }
+    document.addEventListener("visibilitychange", () => { if (document.visibilityState === "visible" && S.cur) wsSend({ type: "read", app_id: S.cur }); });
+
+    // ── Modal interviu ──
+    const dlg = $("#ivDlg"); let ivMode = "online";
+    function openInterview() {
+      const d = new Date(Date.now() + 864e5); d.setMinutes(0, 0, 0);
+      const pad = n => String(n).padStart(2, "0");
+      $("#ivWhen").value = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:00`;
+      $("#ivWhen").min = new Date().toISOString().slice(0, 16);
+      dlg.showModal();
+    }
+    dlg.querySelectorAll("[data-mode]").forEach(b => b.onclick = () => {
+      ivMode = b.dataset.mode; dlg.querySelectorAll("[data-mode]").forEach(x => x.setAttribute("aria-pressed", x === b));
+      $("#ivWhere").placeholder = ivMode === "online" ? "ex. meet.google.com/…" : "ex. Str. Exemplu 10, București";
+    });
+    $("#ivCancel").onclick = () => dlg.close();
+    $("#ivForm").addEventListener("submit", e => {
+      e.preventDefault();
+      const when = new Date($("#ivWhen").value);
+      if (isNaN(when) || when < new Date()) return toast("Alege o dată din viitor.");
+      dlg.close();
+      doAction({ action: "interview", when: when.toISOString(), mode: ivMode, where: $("#ivWhere").value.trim() });
+    });
+
+    // ── Confetti (la acceptare / confirmare interviu) ──
+    function burst() {
+      if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+      const c = $("#confetti"), x = c.getContext("2d"); c.width = innerWidth; c.height = innerHeight;
+      const colors = ["#B4FF39", "#9D5CFF", "#FF4D9D", "#FFFFFF"];
+      const P = Array.from({ length: 140 }, () => ({ x: c.width / 2, y: c.height * .55, vx: (Math.random() - .5) * 14, vy: -Math.random() * 15 - 5,
+        s: 4 + Math.random() * 6, r: Math.random() * 6, vr: (Math.random() - .5) * .4, c: colors[Math.random() * 4 | 0] }));
+      let f = 0;
+      (function tick() {
+        x.clearRect(0, 0, c.width, c.height);
+        P.forEach(p => { p.vy += .45; p.x += p.vx; p.y += p.vy; p.r += p.vr; x.save(); x.translate(p.x, p.y); x.rotate(p.r); x.fillStyle = p.c; x.fillRect(-p.s / 2, -p.s / 2, p.s, p.s * .6); x.restore(); });
+        if (++f < 120) requestAnimationFrame(tick); else x.clearRect(0, 0, c.width, c.height);
+      })();
+    }
+
+    // ── Start ──
+    (async () => {
+      skelThreads();
+      await loadThreads();
+      const want = +new URLSearchParams(location.search).get("app");
+      if (want && S.threads.some(t => t.app_id === want)) openThread(want);
+      connect();
+    })();
+  })();
+  </script>
+</body>
+</html>
