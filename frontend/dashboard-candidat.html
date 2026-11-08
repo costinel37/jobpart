@@ -42,15 +42,14 @@
         class="tab-btn px-5 py-3 font-semibold text-gray-500 hover:text-gray-700 border-b-2 border-transparent">
         Profilul meu
       </button>
-      <button onclick="deschideModalUrgenta()" id="btn-urgenta"
-        class="ml-auto flex items-center gap-2 px-5 py-3 rounded-t-lg font-semibold transition text-white"
-        style="background:linear-gradient(135deg,#dc2626,#7c3aed)">
-        🚨 Caut job urgent
+      <button onclick="switchTab('cv')" id="tab-cv"
+        class="tab-btn px-5 py-3 font-semibold text-gray-500 hover:text-gray-700 border-b-2 border-transparent">
+        📋 CV-ul meu
       </button>
-      <a href="/api/export/cv-pdf" target="_blank"
-        class="flex items-center gap-2 px-5 py-3 bg-indigo-600 text-white rounded-t-lg font-semibold hover:bg-indigo-700 transition">
+      <button onclick="descarcaCvPdf()"
+        class="ml-auto flex items-center gap-2 px-5 py-3 bg-indigo-600 text-white rounded-t-lg font-semibold hover:bg-indigo-700 transition">
         📄 Export CV PDF
-      </a>
+      </button>
     </div>
 
     <!-- Tab Aplicari -->
@@ -104,6 +103,85 @@
         </div>
       </div>
     </div>
+
+    <!-- Tab CV -->
+    <div id="content-cv" class="hidden">
+      <div class="bg-white rounded-xl shadow-sm p-6 max-w-3xl">
+        <div class="flex justify-between items-start flex-wrap gap-3 mb-6">
+          <div>
+            <h2 class="text-xl font-bold text-gray-800">CV-ul meu</h2>
+            <p class="text-sm text-gray-500 mt-1">Nume, telefon, oraș și „Despre mine” se preiau din tab-ul Profilul meu.</p>
+          </div>
+          <a id="cv-link-public" href="#" target="_blank" class="text-violet-600 hover:underline text-sm font-medium">👁️ Vezi CV-ul public →</a>
+        </div>
+        <div id="cv-mesaj" class="hidden mb-4"></div>
+
+        <form id="cv-form" class="space-y-6">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1">Titlu profesional</label>
+            <input type="text" id="cv-titlu" maxlength="200" placeholder="ex: Student IT, ospătar cu experiență, curier"
+              class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-violet-500" />
+          </div>
+
+          <div class="grid md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-medium text-gray-700 mb-1">Disponibilitate</label>
+              <select id="cv-disponibilitate" class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-violet-500">
+                <option value="">— Alege —</option>
+                <option>Imediat</option>
+                <option>Weekend</option>
+                <option>Seara</option>
+                <option>Dimineața</option>
+                <option>Flexibil</option>
+                <option>Doar vara</option>
+              </select>
+            </div>
+            <div class="flex flex-col justify-end gap-2">
+              <label class="flex items-center gap-2 text-sm text-gray-700">
+                <input type="checkbox" id="cv-permis" class="w-4 h-4 accent-violet-600" /> Am permis auto
+              </label>
+              <label class="flex items-center gap-2 text-sm text-gray-700">
+                <input type="checkbox" id="cv-vizibil" class="w-4 h-4 accent-violet-600" /> Fac CV-ul vizibil angajatorilor înregistrați (nume, experiență, email și telefon). Pot retrage oricând.
+              </label>
+            </div>
+          </div>
+
+          <div>
+            <div class="flex justify-between items-center mb-2">
+              <h3 class="font-semibold text-gray-800">Experiență profesională</h3>
+              <button type="button" onclick="adaugaRand('experienta')" class="text-violet-600 hover:underline text-sm font-medium">+ Adaugă</button>
+            </div>
+            <div id="cv-experienta" class="space-y-3"></div>
+          </div>
+
+          <div>
+            <div class="flex justify-between items-center mb-2">
+              <h3 class="font-semibold text-gray-800">Educație</h3>
+              <button type="button" onclick="adaugaRand('educatie')" class="text-violet-600 hover:underline text-sm font-medium">+ Adaugă</button>
+            </div>
+            <div id="cv-educatie" class="space-y-3"></div>
+          </div>
+
+          <div>
+            <label class="block font-semibold text-gray-800 mb-1">Competențe</label>
+            <input type="text" id="cv-competente" placeholder="Separate prin virgulă: Excel, lucru cu clienții, engleză conversațională"
+              class="w-full border border-gray-300 rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-violet-500" />
+          </div>
+
+          <div>
+            <div class="flex justify-between items-center mb-2">
+              <h3 class="font-semibold text-gray-800">Limbi străine</h3>
+              <button type="button" onclick="adaugaRand('limbi')" class="text-violet-600 hover:underline text-sm font-medium">+ Adaugă</button>
+            </div>
+            <div id="cv-limbi" class="space-y-3"></div>
+          </div>
+
+          <button type="submit" id="cv-btn-salveaza" class="bg-violet-600 text-white px-6 py-3 rounded-xl font-semibold hover:bg-violet-700 transition">
+            Salvează CV-ul
+          </button>
+        </form>
+      </div>
+    </div>
   </div>
 
   <script src="/static/js/api.js"></script>
@@ -118,7 +196,7 @@
     document.getElementById("salut").textContent = `Bun venit, ${user?.nume}! Iată activitatea ta.`;
 
     function switchTab(tab) {
-      ["aplicari", "profil"].forEach(t => {
+      ["aplicari", "profil", "cv"].forEach(t => {
         document.getElementById(`content-${t}`).classList.toggle("hidden", t !== tab);
         const btn = document.getElementById(`tab-${t}`);
         if (t === tab) {
@@ -223,10 +301,125 @@
       }
     }
 
+    // ── CV STRUCTURAT ─────────────────────────────────────────
+    const CV_CAMPURI = {
+      experienta: [
+        { k: "pozitie", ph: "Poziție (ex: Ospătar)" },
+        { k: "companie", ph: "Companie" },
+        { k: "perioada", ph: "Perioadă (ex: 2023 – 2024)" },
+        { k: "descriere", ph: "Ce ai făcut acolo (opțional)", lung: true },
+      ],
+      educatie: [
+        { k: "nivel", ph: "Nivel (ex: Licență, Liceu)" },
+        { k: "domeniu", ph: "Domeniu / specializare" },
+        { k: "institutie", ph: "Instituție" },
+        { k: "an", ph: "An absolvire / în curs" },
+      ],
+      limbi: [
+        { k: "limba", ph: "Limba (ex: Engleză)" },
+        { k: "nivel", ph: "Nivel (ex: B2, avansat)" },
+      ],
+    };
+
+    function adaugaRand(tip, valori = {}) {
+      const rand = document.createElement("div");
+      rand.className = "cv-rand border border-gray-200 rounded-xl p-3 grid md:grid-cols-2 gap-2 relative pr-10";
+      CV_CAMPURI[tip].forEach(c => {
+        const el = document.createElement(c.lung ? "textarea" : "input");
+        if (c.lung) { el.rows = 2; el.className = "md:col-span-2 "; } else { el.type = "text"; el.className = ""; }
+        el.className += "border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-violet-500";
+        el.placeholder = c.ph;
+        el.dataset.k = c.k;
+        el.maxLength = c.lung ? 1000 : 150;
+        el.value = valori[c.k] || "";
+        rand.appendChild(el);
+      });
+      const del = document.createElement("button");
+      del.type = "button";
+      del.textContent = "✕";
+      del.title = "Șterge";
+      del.className = "absolute top-2 right-3 text-gray-400 hover:text-red-500";
+      del.onclick = () => rand.remove();
+      rand.appendChild(del);
+      document.getElementById(`cv-${tip}`).appendChild(rand);
+    }
+
+    function citesteRanduri(tip) {
+      return [...document.querySelectorAll(`#cv-${tip} .cv-rand`)].map(r => {
+        const o = {};
+        r.querySelectorAll("[data-k]").forEach(el => o[el.dataset.k] = el.value.trim());
+        return o;
+      }).filter(o => Object.values(o).some(Boolean));
+    }
+
+    async function incarcaCV() {
+      document.getElementById("cv-link-public").href = `/static/cv-public.html?id=${user.id}`;
+      try {
+        const cv = await apiFetch("/candidati/cv");
+        document.getElementById("cv-titlu").value = cv.titlu_profesional || "";
+        document.getElementById("cv-disponibilitate").value = cv.disponibilitate || "";
+        document.getElementById("cv-permis").checked = !!cv.permis_auto;
+        document.getElementById("cv-vizibil").checked = cv.cv_vizibil === true;
+        document.getElementById("cv-competente").value = (cv.competente || []).join(", ");
+        ["experienta", "educatie", "limbi"].forEach(tip => {
+          document.getElementById(`cv-${tip}`).innerHTML = "";
+          const lista = cv[tip] || [];
+          if (lista.length) lista.forEach(v => adaugaRand(tip, v));
+          else adaugaRand(tip);
+        });
+      } catch (e) {}
+    }
+
+    document.getElementById("cv-form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const mesajEl = document.getElementById("cv-mesaj");
+      const btn = document.getElementById("cv-btn-salveaza");
+      btn.disabled = true;
+      try {
+        await apiFetch("/candidati/cv", {
+          method: "PUT",
+          body: JSON.stringify({
+            titlu_profesional: document.getElementById("cv-titlu").value.trim() || null,
+            disponibilitate: document.getElementById("cv-disponibilitate").value || null,
+            permis_auto: document.getElementById("cv-permis").checked,
+            cv_vizibil: document.getElementById("cv-vizibil").checked,
+            competente: document.getElementById("cv-competente").value.split(",").map(s => s.trim()).filter(Boolean),
+            experienta: citesteRanduri("experienta"),
+            educatie: citesteRanduri("educatie"),
+            limbi: citesteRanduri("limbi"),
+          }),
+        });
+        mesajEl.className = "bg-green-50 border border-green-200 text-green-700 rounded-xl px-4 py-3";
+        mesajEl.textContent = "CV-ul a fost salvat!";
+        mesajEl.classList.remove("hidden");
+        setTimeout(() => mesajEl.classList.add("hidden"), 3000);
+      } catch (err) {
+        mesajEl.className = "bg-red-50 border border-red-200 text-red-700 rounded-xl px-4 py-3";
+        mesajEl.textContent = err.message;
+        mesajEl.classList.remove("hidden");
+      } finally {
+        btn.disabled = false;
+      }
+    });
+
+    async function descarcaCvPdf() {
+      try {
+        const res = await fetch(`${API_BASE}/export/cv-pdf`, { headers: { Authorization: `Bearer ${getToken()}` } });
+        if (!res.ok) throw new Error();
+        const url = URL.createObjectURL(await res.blob());
+        const a = document.createElement("a");
+        a.href = url; a.download = "CV_JobPart.pdf";
+        document.body.appendChild(a); a.click(); a.remove();
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+      } catch (e) {
+        alert("Eroare la generarea PDF-ului.");
+      }
+    }
+
     incarcaAplicari();
     incarcaProfil();
+    incarcaCV();
     initNotifBell();
-    verificaUrgentaActiva();
 
     // ── MODAL URGENTA ─────────────────────────────────────────
     async function verificaUrgentaActiva() {

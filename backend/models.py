@@ -306,6 +306,26 @@ class PartenerAplicatie(Base):
     creat_la = Column(DateTime, default=datetime.utcnow)
 
 
+class CandidatCV(Base):
+    """CV structurat al unui candidat — vizibil angajatorilor."""
+    __tablename__ = "candidat_cv"
+
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), unique=True, nullable=False)
+    titlu_profesional = Column(String(200), nullable=True)
+    experienta = Column(Text, nullable=True)   # JSON: [{companie, pozitie, perioada, descriere}]
+    educatie = Column(Text, nullable=True)     # JSON: [{institutie, nivel, domeniu, an}]
+    competente = Column(Text, nullable=True)   # JSON: ["skill1", "skill2"]
+    limbi = Column(Text, nullable=True)        # JSON: [{limba, nivel}]
+    permis_auto = Column(Boolean, default=False)
+    disponibilitate = Column(String(50), nullable=True)
+    cv_vizibil = Column(Boolean, default=False)  # GDPR art. 25: opt-in, nu vizibil implicit
+    actualizat_la = Column(DateTime, default=datetime.utcnow)
+    creat_la = Column(DateTime, default=datetime.utcnow)
+
+    user = relationship("User")
+
+
 class Precontract(Base):
     __tablename__ = "precontracte"
 

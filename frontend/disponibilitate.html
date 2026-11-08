@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>JobPart — Orele mele</title>
+  <meta name="robots" content="noindex" />
+  <meta name="theme-color" content="#0A0A0F" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=Unbounded:wght@600;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/css/neo.css" />
+  <style>
+    .wrap { max-width: 980px; margin: 0 auto; padding: 24px 16px 120px; }
+    header { display: flex; align-items: center; gap: .75rem; margin-bottom: 1.5rem; }
+    .logo { font: 800 1.05rem var(--font-display); color: var(--ink); text-decoration: none; margin-right: auto; }
+    .logo span { color: var(--neon); }
+    h1 { font-size: clamp(1.8rem, 6vw, 3rem); line-height: 1; margin: 0 0 .5rem; }
+    h1 em { font-style: normal; color: var(--neon); }
+    .lead { color: var(--muted); margin: 0 0 1.5rem; max-width: 60ch; }
+
+    .toolbar { display: flex; flex-wrap: wrap; gap: .5rem; align-items: center; margin-bottom: 1rem; }
+    .stat { margin-left: auto; font: 800 1.1rem var(--font-display); }
+    .stat small { font: 600 .8rem var(--font-body); color: var(--muted); }
+
+    .panel { background: var(--surface); border: 2px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow-v); padding: 12px; }
+    .grid-scroll { max-height: 62vh; overflow: auto; border-radius: 12px; }
+    .grid { display: grid; grid-template-columns: 52px repeat(7, minmax(38px, 1fr)); user-select: none; touch-action: none; min-width: 340px; }
+    .grid .h { position: sticky; top: 0; z-index: 2; background: var(--surface); text-align: center; font: 700 .8rem var(--font-body); padding: .5rem 0; }
+    .grid .h.today { color: var(--neon); }
+    .grid .tm { font-size: .7rem; color: var(--muted); text-align: right; padding-right: 8px; transform: translateY(-.55em); height: 22px; }
+    .cell { height: 22px; border-top: 1px solid var(--line); border-left: 1px solid var(--line); background: var(--surface-2); cursor: pointer; transition: background .08s; }
+    .cell.hr { border-top-color: color-mix(in srgb, var(--line) 40%, var(--muted)); }
+    .cell.on { background: var(--neon); border-color: color-mix(in srgb, var(--neon) 70%, #000); }
+    .cell:hover { outline: 2px solid var(--violet); outline-offset: -2px; }
+
+    .savebar { position: fixed; left: 0; right: 0; bottom: 0; padding: 12px 16px; display: flex; gap: .6rem; justify-content: center;
+      background: linear-gradient(transparent, var(--bg) 35%); z-index: 10; }
+    .legend { display: flex; gap: 1rem; color: var(--muted); font-size: .8rem; margin-top: .75rem; flex-wrap: wrap; }
+    .legend i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: -2px; margin-right: 4px; }
+    .tzline { color: var(--muted); font-size: .85rem; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <a class="logo" href="/">JOB<span>PART</span></a>
+      <a class="btn btn-ghost" href="/static/feed.html" style="padding:.5rem .8rem">Feed →</a>
+    </header>
+
+    <h1>Când ești <em>liber?</em></h1>
+    <p class="lead">Trage cu degetul sau mouse-ul peste orele libere. Îți arătăm doar joburile care se potrivesc cu programul tău de școală sau facultate — inclusiv cele remote din alte fusuri orare.</p>
+
+    <div class="toolbar">
+      <button class="chip" data-preset="school">🎒 După școală</button>
+      <button class="chip" data-preset="evenings">🌙 Seri</button>
+      <button class="chip" data-preset="weekend">🎉 Weekend</button>
+      <button class="chip" data-preset="clear">✕ Golește</button>
+      <label class="tzline">🌐 <select id="tz" aria-label="Fus orar"></select></label>
+      <div class="stat" aria-live="polite"><span id="hours">0</span> h <small>/ săpt.</small></div>
+    </div>
+
+    <div class="panel">
+      <div class="grid-scroll" id="scroller">
+        <div class="grid" id="grid" role="grid" aria-label="Calendar săptămânal, intervale de 30 de minute"></div>
+      </div>
+      <div class="legend"><span><i style="background:var(--neon)"></i>Liber</span><span><i style="background:var(--surface-2);border:1px solid var(--line)"></i>Ocupat</span><span>Interval: 30 min</span></div>
+    </div>
+  </div>
+
+  <div class="savebar">
+    <button class="btn btn-neon" id="save">Salvează și vezi joburi ⚡</button>
+  </div>
+  <div class="toast" id="toast" role="status"></div>
+
+  <script src="/static/js/api.js"></script>
+  <script>
+  (() => {
+    const DAYS = ["Lun", "Mar", "Mie", "Joi", "Vin", "Sâm", "Dum"];
+    const STEP = 30, ROWS = 1440 / STEP;          // 48 rânduri × 7 zile
+    const sel = Array.from({ length: 7 }, () => new Uint8Array(ROWS));
+    const $ = s => document.querySelector(s);
+    const grid = $("#grid");
+    const toast = m => { const e = $("#toast"); e.textContent = m; e.classList.add("show"); clearTimeout(e._t); e._t = setTimeout(() => e.classList.remove("show"), 2400); };
+
+    const token = typeof getToken === "function" ? getToken() : null;
+    if (!token) { location.href = "/static/login.html?next=" + encodeURIComponent(location.pathname); return; }
+
+    // ── Fus orar ──
+    const browserTz = Intl.DateTimeFormat().resolvedOptions().timeZone || "Europe/Bucharest";
+    const zones = Intl.supportedValuesOf ? Intl.supportedValuesOf("timeZone") : [browserTz, "Europe/Bucharest", "Europe/London", "America/New_York"];
+    $("#tz").innerHTML = zones.map(z => `<option${z === browserTz ? " selected" : ""}>${z}</option>`).join("");
+
+    // ── Construire grilă (skeleton cât se încarcă datele) ──
+    const todayIdx = (new Date().getDay() + 6) % 7;
+    function build() {
+      const frag = document.createDocumentFragment();
+      frag.appendChild(Object.assign(document.createElement("div"), { className: "h" }));
+      DAYS.forEach((d, i) => frag.appendChild(Object.assign(document.createElement("div"), { className: "h" + (i === todayIdx ? " today" : ""), textContent: d })));
+      for (let r = 0; r < ROWS; r++) {
+        const tm = document.createElement("div"); tm.className = "tm";
+        if (r % 2 === 0) tm.textContent = String(r / 2).padStart(2, "0") + ":00";
+        frag.appendChild(tm);
+        for (let d = 0; d < 7; d++) {
+          const c = document.createElement("div");
+          c.className = "cell" + (r % 2 === 0 ? " hr" : "");
+          c.dataset.d = d; c.dataset.r = r; c.setAttribute("role", "gridcell");
+          frag.appendChild(c);
+        }
+      }
+      grid.appendChild(frag);
+    }
+
+    const cellAt = (d, r) => grid.children[8 + r * 8 + 1 + d];
+    function paint() {
+      let n = 0;
+      for (let d = 0; d < 7; d++) for (let r = 0; r < ROWS; r++) { cellAt(d, r).classList.toggle("on", !!sel[d][r]); n += sel[d][r]; }
+      $("#hours").textContent = (n * STEP / 60).toFixed(n % 2 ? 1 : 0);
+    }
+
+    // ── Drag-to-select (pointer events = mouse + touch + pen) ──
+    let dragging = false, value = 1, start = null;
+    let snapshot = null;
+    function rect(a, b) {
+      sel.forEach((col, d) => col.set(snapshot[d]));
+      const [d0, d1] = [Math.min(a.d, b.d), Math.max(a.d, b.d)], [r0, r1] = [Math.min(a.r, b.r), Math.max(a.r, b.r)];
+      for (let d = d0; d <= d1; d++) for (let r = r0; r <= r1; r++) sel[d][r] = value;
+      paint();
+    }
+    const pos = el => el?.classList.contains("cell") ? { d: +el.dataset.d, r: +el.dataset.r } : null;
+    grid.addEventListener("pointerdown", e => {
+      const p = pos(e.target); if (!p) return;
+      dragging = true; start = p; value = sel[p.d][p.r] ? 0 : 1;
+      snapshot = sel.map(c => c.slice());
+      grid.setPointerCapture(e.pointerId); rect(p, p);
+    });
+    grid.addEventListener("pointermove", e => {
+      if (!dragging) return;
+      const p = pos(document.elementFromPoint(e.clientX, e.clientY)); if (p) rect(start, p);
+    });
+    const end = () => { dragging = false; };
+    grid.addEventListener("pointerup", end); grid.addEventListener("pointercancel", end);
+
+    // ── Preseturi ──
+    const fill = (days, from, to) => days.forEach(d => { for (let r = from * 2; r < to * 2; r++) sel[d][r] = 1; });
+    document.querySelectorAll("[data-preset]").forEach(b => b.onclick = () => {
+      const p = b.dataset.preset;
+      if (p === "clear") sel.forEach(c => c.fill(0));
+      if (p === "school") fill([0, 1, 2, 3, 4], 15, 20);
+      if (p === "evenings") fill([0, 1, 2, 3, 4, 5, 6], 18, 23);
+      if (p === "weekend") fill([5, 6], 9, 21);
+      paint();
+    });
+
+    // ── Conversie grilă ↔ intervale API ──
+    function toSlots() {
+      const out = [];
+      sel.forEach((col, d) => {
+        let r = 0;
+        while (r < ROWS) {
+          if (!col[r]) { r++; continue; }
+          const s = r; while (r < ROWS && col[r]) r++;
+          out.push({ weekday: d, start_min: s * STEP, end_min: r * STEP });
+        }
+      });
+      return out;
+    }
+    function fromSlots(slots) {
+      sel.forEach(c => c.fill(0));
+      for (const s of slots) for (let r = Math.floor(s.start_min / STEP); r < Math.ceil(s.end_min / STEP); r++) sel[s.weekday][r] = 1;
+    }
+
+    const auth = { Authorization: `Bearer ${token}`, "Content-Type": "application/json" };
+
+    async function init() {
+      // skeleton pentru grilă
+      grid.innerHTML = ""; grid.classList.add("skel"); grid.style.minHeight = "60vh";
+      try {
+        const res = await fetch(`${API_BASE}/v2/availability`, { headers: auth });
+        if (res.status === 401) return logout();
+        const data = await res.json();
+        grid.classList.remove("skel"); grid.style.minHeight = "";
+        build();
+        if (data.slots.length) {
+          fromSlots(data.slots);
+          if (zones.includes(data.timezone)) $("#tz").value = data.timezone;
+        }
+        paint();
+        $("#scroller").scrollTop = cellAt(0, 14).offsetTop - 40;   // pornim de la 07:00
+      } catch {
+        grid.classList.remove("skel"); build(); paint(); toast("Nu am putut încărca orele salvate.");
+      }
+    }
+
+    $("#save").onclick = async () => {
+      const btn = $("#save"); btn.disabled = true; btn.style.opacity = .7;
+      try {
+        const res = await fetch(`${API_BASE}/v2/availability`, { method: "PUT", headers: auth,
+          body: JSON.stringify({ timezone: $("#tz").value, slots: toSlots() }) });
+        if (!res.ok) throw new Error();
+        const d = await res.json();
+        toast(`Salvat: ${d.weekly_hours} h/săpt. Căutăm joburi…`);
+        setTimeout(() => location.href = "/static/feed.html", 700);
+      } catch { toast("Eroare la salvare. Reîncearcă."); }
+      finally { btn.disabled = false; btn.style.opacity = 1; }
+    };
+
+    const theme = (() => { try { return localStorage.getItem("jp_theme"); } catch { return null; } })();
+    if (theme) document.documentElement.dataset.theme = theme;
+    init();
+  })();
+  </script>
+</body>
+</html>

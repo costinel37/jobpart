@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>JobPart — Abonament</title>
+  <meta name="robots" content="noindex" />
+  <meta name="theme-color" content="#0A0A0F" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=Unbounded:wght@600;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/css/neo.css" />
+  <style>
+    .wrap { max-width: 920px; margin: 0 auto; padding: 24px 16px 64px; }
+    header { display: flex; align-items: center; gap: .75rem; margin-bottom: 2rem; }
+    .logo { font: 800 1.05rem var(--font-display); color: var(--ink); text-decoration: none; margin-right: auto; }
+    .logo span { color: var(--neon); }
+    h1 { font-size: clamp(1.8rem, 6vw, 2.8rem); line-height: 1.05; margin: 0 0 .75rem; }
+    h1 em { font-style: normal; color: var(--neon); }
+    .muted { color: var(--muted); }
+    .status { background: var(--surface); border: 2px solid var(--line); border-radius: var(--radius); padding: 1.25rem; box-shadow: var(--shadow-v); margin: 1.5rem 0 2rem; }
+    .plans { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 1.25rem; }
+    .plan { background: var(--surface); border: 2px solid var(--line); border-radius: var(--radius); padding: 1.4rem; display: flex; flex-direction: column; gap: .8rem; }
+    .plan.hl { border-color: var(--neon); box-shadow: var(--shadow); }
+    .plan h2 { margin: 0; font-size: 1.3rem; }
+    .price { font: 800 2.2rem var(--font-display); }
+    .price small { font: 600 .9rem var(--font-body); color: var(--muted); }
+    .plan ul { margin: 0; padding-left: 1.1rem; line-height: 1.7; color: var(--muted); }
+    .plan .btn { margin-top: auto; }
+    .note { font-size: .82rem; color: var(--muted); margin-top: 2rem; line-height: 1.6; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <a class="logo" href="/">JOB<span>PART</span></a>
+      <a class="btn btn-ghost" href="/static/dashboard-angajator.html" style="padding:.5rem .8rem">Dashboard</a>
+    </header>
+
+    <h1>Abonament <em>angajator</em></h1>
+    <p class="muted">Pentru candidați, JobPart este gratuit mereu. Abonamentele se adresează doar firmelor care publică anunțuri.</p>
+
+    <div class="status" id="status" aria-live="polite">
+      <div class="skel" style="height:18px;width:40%;margin-bottom:10px"></div>
+      <div class="skel" style="height:14px;width:70%"></div>
+    </div>
+
+    <div class="plans" id="plans"></div>
+
+    <p class="note">
+      Prețurile sunt afișate fără TVA. Factura se emite pe datele firmei introduse la plată.
+      Abonamentul se reînnoiește lunar și îl poți anula oricând din „Gestionează abonamentul”; accesul rămâne până la finalul perioadei plătite.
+      JobPart este o platformă de intermediere: <strong>nu procesează salarii și nu intermediază plata muncii</strong> — remunerația se plătește direct de angajator către candidat, conform contractului dintre ei.
+      Detalii în <a href="/static/termeni.html" style="color:var(--neon)">Termeni și condiții</a>.
+    </p>
+  </div>
+  <div class="toast" id="toast" role="status"></div>
+
+  <script src="/static/js/api.js"></script>
+  <script>
+  (() => {
+    const $ = s => document.querySelector(s);
+    const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+    const toast = m => { const e = $("#toast"); e.textContent = m; e.classList.add("show"); clearTimeout(e._t); e._t = setTimeout(() => e.classList.remove("show"), 3000); };
+    const theme = (() => { try { return localStorage.getItem("jp_theme"); } catch { return null; } })();
+    if (theme) document.documentElement.dataset.theme = theme;
+
+    const token = typeof getToken === "function" ? getToken() : null;
+    if (!token) { location.href = "/static/login.html"; return; }
+    const H = { Authorization: `Bearer ${token}`, "Content-Type": "application/json" };
+    const date = d => d ? new Date(d.endsWith("Z") ? d : d + "Z").toLocaleDateString("ro-RO") : "";
+
+    const qs = new URLSearchParams(location.search).get("status");
+    if (qs === "success") toast("Mulțumim! Abonamentul se activează în câteva secunde.");
+    if (qs === "cancel") toast("Plata a fost anulată. Nu s-a perceput nimic.");
+
+    const FEATURES = {
+      employer_basic: ["Maximum 3 joburi active simultan", "Anunțuri active 30 de zile", "Aplicări nelimitate"],
+      employer_pro: ["Joburi active nelimitate", "Refresh automat la 7 zile (urcă în feed)", "Acces la CV-urile publice ale candidaților", "Anunțuri active 30 de zile"],
+    };
+
+    async function go(path, body) {
+      const res = await fetch(`${API_BASE}${path}`, { method: "POST", headers: H, body: JSON.stringify(body || {}) });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) return toast(data.detail || "A apărut o eroare.");
+      location.href = data.url;
+    }
+
+    async function init() {
+      const me = await fetch(`${API_BASE}/v2/billing/me`, { headers: H });
+      if (me.status === 401) return logout();
+      const s = await me.json();
+      const st = $("#status");
+
+      if (s.plan.audience === "candidate") {
+        st.innerHTML = `<h2 style="margin:0 0 .4rem">Gratuit, mereu ✨</h2><p class="muted" style="margin:0">Ca și candidat, nu ai nimic de plătit pe JobPart.</p>`;
+        return;
+      }
+      if (!s.billing_enabled) {
+        st.innerHTML = `<h2 style="margin:0 0 .4rem">Acces gratuit în perioada de lansare</h2>
+          <p class="muted" style="margin:0">Postezi joburi fără cost. Te anunțăm din timp înainte ca abonamentele să devină active — nimic nu se taxează automat.</p>`;
+      } else {
+        const lines = {
+          trialing: `Luna gratuită: mai ai <b>${s.trial_days_left}</b> zile (până pe ${date(s.trial_ends_at)}).` +
+                    (s.has_payment_method ? ` Planul ales pornește după această dată.` : ` Alege un plan ca să postezi în continuare.`),
+          active: `Plan activ: <b>${esc(s.plan.name)}</b>. Următoarea reînnoire: ${date(s.current_period_end)}.`,
+          canceled: `Abonament anulat. Ai acces până pe ${date(s.current_period_end)}.`,
+          past_due: `Plata a eșuat. Actualizează cardul ca să nu pierzi accesul.`,
+          free: `Nu ai un abonament activ. Poți vedea aplicările existente, dar nu poți posta joburi noi.`,
+        };
+        st.innerHTML = `<h2 style="margin:0 0 .4rem">${esc(s.plan.name)}</h2><p class="muted" style="margin:0 0 .8rem">${lines[s.status] || ""}</p>
+          <p class="muted" style="margin:0">Joburi active acum: <b>${s.active_jobs ?? 0}</b>${s.plan.max_active_jobs != null ? " / " + s.plan.max_active_jobs : ""}</p>
+          ${s.has_payment_method ? `<button class="btn" id="portal" style="margin-top:1rem">Gestionează abonamentul</button>` : ""}`;
+        $("#portal")?.addEventListener("click", () => go("/v2/billing/portal"));
+      }
+
+      const plans = await (await fetch(`${API_BASE}/v2/billing/plans`, { headers: H })).json();
+      const canBuy = s.billing_enabled && !s.has_payment_method;
+      $("#plans").innerHTML = plans.map(p => `
+        <div class="plan rise ${p.code === "employer_pro" ? "hl" : ""}">
+          <h2>${esc(p.name)}</h2>
+          <div class="price">${p.price_eur} € <small>/ lună ${esc(p.price_note)}</small></div>
+          <ul>${(FEATURES[p.code] || []).map(f => `<li>${esc(f)}</li>`).join("")}</ul>
+          ${canBuy ? `<button class="btn ${p.code === "employer_pro" ? "btn-neon" : ""}" data-plan="${esc(p.code)}">Alege ${esc(p.name)}</button>`
+                   : `<span class="chip" style="align-self:flex-start">${s.billing_enabled ? "Schimbi planul din „Gestionează”" : "Disponibil curând"}</span>`}
+        </div>`).join("");
+      document.querySelectorAll("[data-plan]").forEach(b => b.onclick = () => { b.disabled = true; go("/v2/billing/checkout", { plan_code: b.dataset.plan }).finally(() => b.disabled = false); });
+    }
+    init().catch(() => { $("#status").innerHTML = `<p>Nu am putut încărca abonamentul. <button class="btn" onclick="location.reload()">Reîncearcă</button></p>`; });
+  })();
+  </script>
+</body>
+</html>

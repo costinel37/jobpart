@@ -59,6 +59,17 @@ def get_user_curent(token: str = Depends(oauth2_scheme), db: Session = Depends(g
 
     return user
 
+oauth2_scheme_optional = OAuth2PasswordBearer(tokenUrl="/api/auth/login", auto_error=False)
+
+def get_user_optional(token: Optional[str] = Depends(oauth2_scheme_optional), db: Session = Depends(get_db)):
+    """Ca get_user_curent, dar returnează None pentru vizitatori neautentificați sau token invalid."""
+    if not token:
+        return None
+    try:
+        return get_user_curent(token, db)
+    except HTTPException:
+        return None
+
 def require_rol(*roluri):
     def checker(user=Depends(get_user_curent)):
         if user.rol not in roluri:

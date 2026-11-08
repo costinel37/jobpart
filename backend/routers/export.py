@@ -135,13 +135,25 @@ def export_date_personale(db: Session = Depends(get_db), current_user=Depends(ge
 
 @router.get("/cv-pdf")
 def export_cv_pdf(db: Session = Depends(get_db), current_user=Depends(get_user_curent)):
+    import json as _json
     user = db.query(models.User).filter(models.User.id == current_user.id).first()
-    aplicari = db.query(models.Application).filter(
-        models.Application.candidat_id == current_user.id
-    ).order_by(models.Application.creat_la.desc()).all()
+    cv = db.query(models.CandidatCV).filter(models.CandidatCV.user_id == current_user.id).first()
     rating = db.query(func.avg(models.Review.rating), func.count(models.Review.id)).filter(
         models.Review.subiect_id == current_user.id
     ).first()
+
+    def jp(text, default):
+        if not text:
+            return default
+        try:
+            return _json.loads(text)
+        except Exception:
+            return default
+
+    experienta = jp(cv.experienta if cv else None, [])
+    educatie = jp(cv.educatie if cv else None, [])
+    competente = jp(cv.competente if cv else None, [])
+    limbi = jp(cv.limbi if cv else None, [])
 
     buf = BytesIO()
     doc = SimpleDocTemplate(buf, pagesize=A4,
@@ -149,89 +161,135 @@ def export_cv_pdf(db: Session = Depends(get_db), current_user=Depends(get_user_c
                             topMargin=2*cm, bottomMargin=2*cm)
 
     styles = getSampleStyleSheet()
-    ALBASTRU = colors.HexColor("#2563eb")
+    VIOLET = colors.HexColor("#7c3aed")
     GRI = colors.HexColor("#6b7280")
+    GRI_DESCHIS = colors.HexColor("#f5f3ff")
 
-    stil_titlu = ParagraphStyle("titlu", parent=styles["Title"], textColor=ALBASTRU,
-                                 fontSize=26, spaceAfter=4)
+    stil_titlu = ParagraphStyle("titlu", parent=styles["Title"], textColor=VIOLET,
+                                 fontSize=24, spaceAfter=2)
+    stil_subtitlu = ParagraphStyle("subtitlu", parent=styles["Normal"], textColor=VIOLET,
+                                    fontSize=13, spaceAfter=2, fontName="Helvetica-Oblique")
     stil_sub = ParagraphStyle("sub", parent=styles["Normal"], textColor=GRI,
-                               fontSize=11, spaceAfter=2)
+                               fontSize=10, spaceAfter=2)
     stil_sectiune = ParagraphStyle("sectiune", parent=styles["Heading2"],
-                                    textColor=ALBASTRU, fontSize=13, spaceBefore=14, spaceAfter=6)
-    stil_normal = ParagraphStyle("normal", parent=styles["Normal"], fontSize=10, spaceAfter=4)
+                                    textColor=VIOLET, fontSize=12, spaceBefore=14, spaceAfter=4,
+                                    fontName="Helvetica-Bold")
+    stil_normal = ParagraphStyle("normal", parent=styles["Normal"], fontSize=10, spaceAfter=3)
     stil_bold = ParagraphStyle("bold", parent=styles["Normal"], fontSize=10,
-                                fontName="Helvetica-Bold", spaceAfter=2)
+                                fontName="Helvetica-Bold", spaceAfter=1)
+    stil_italic = ParagraphStyle("italic", parent=styles["Normal"], fontSize=9,
+                                  fontName="Helvetica-Oblique", textColor=GRI, spaceAfter=3)
 
     elemente = []
 
     # Header
     elemente.append(Paragraph(user.nume, stil_titlu))
-    if user.rol == "candidat":
-        elemente.append(Paragraph("Candidat — Profil JobPart", stil_sub))
-    else:
-        elemente.append(Paragraph(f"Angajator — {user.oras or ''}", stil_sub))
+    if cv and cv.titlu_profesional:
+        elemente.append(Paragraph(cv.titlu_profesional, stil_subtitlu))
 
     info_rand = []
-    if user.email: info_rand.append(f"✉ {user.email}")
-    if user.telefon: info_rand.append(f"☎ {user.telefon}")
-    if user.oras: info_rand.append(f"📍 {user.oras}")
-    elemente.append(Paragraph("   |   ".join(info_rand), stil_sub))
-    elemente.append(Spacer(1, 8))
-    elemente.append(HRFlowable(width="100%", thickness=2, color=ALBASTRU))
-    elemente.append(Spacer(1, 8))
+    if user.email: info_rand.append(f"{user.email}")
+    if user.telefon: info_rand.append(f"{user.telefon}")
+    if user.oras: info_rand.append(f"{user.oras}")
+    elemente.append(Paragraph("  |  ".join(info_rand), stil_sub))
+    elemente.append(Spacer(1, 6))
+    elemente.append(HRFlowable(width="100%", thickness=2, color=VIOLET))
+    elemente.append(Spacer(1, 6))
+
+    # Disponibilitate + permis
+    if cv:
+        badges = []
+        if cv.disponibilitate:
+            badges.append(f"Disponibil: {cv.disponibilitate}")
+        if cv.permis_auto:
+            badges.append("Permis auto: DA")
+        if badges:
+            elemente.append(Paragraph("  •  ".join(badges), stil_sub))
+            elemente.append(Spacer(1, 4))
 
     # Rating
     if rating and rating[1] > 0:
         medie = round(float(rating[0]), 1)
         stele = "★" * int(medie) + "☆" * (5 - int(medie))
-        elemente.append(Paragraph("Rating JobPart", stil_sectiune))
-        elemente.append(Paragraph(f"{stele}  {medie}/5 ({rating[1]} recenzii)", stil_normal))
+        elemente.append(Paragraph(f"Rating JobPart: {stele}  {medie}/5 ({rating[1]} recenzii)", stil_sub))
+        elemente.append(Spacer(1, 4))
 
     # Despre
     if user.despre:
         elemente.append(Paragraph("Despre mine", stil_sectiune))
+        elemente.append(HRFlowable(width="100%", thickness=0.5, color=VIOLET))
+        elemente.append(Spacer(1, 4))
         elemente.append(Paragraph(user.despre, stil_normal))
 
-    # Activitate
-    if aplicari:
-        elemente.append(Paragraph("Activitate joburi", stil_sectiune))
-        date_tabel = [["Job", "Companie", "Oraș", "Status", "Data"]]
-        for a in aplicari[:10]:
-            if a.job:
-                from datetime import datetime
-                data_str = a.creat_la.strftime("%d.%m.%Y") if a.creat_la else "-"
-                date_tabel.append([
-                    Paragraph(a.job.titlu[:35], stil_normal),
-                    Paragraph(a.job.companie[:25], stil_normal),
-                    a.job.oras[:15],
-                    a.status.capitalize(),
-                    data_str,
-                ])
-        tabel = Table(date_tabel, colWidths=[5*cm, 4*cm, 3*cm, 2.5*cm, 2.5*cm])
-        tabel.setStyle(TableStyle([
-            ("BACKGROUND", (0, 0), (-1, 0), ALBASTRU),
-            ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
-            ("FONTNAME", (0, 0), (-1, 0), "Helvetica-Bold"),
-            ("FONTSIZE", (0, 0), (-1, -1), 9),
-            ("ROWBACKGROUNDS", (0, 1), (-1, -1), [colors.white, colors.HexColor("#f1f5f9")]),
-            ("GRID", (0, 0), (-1, -1), 0.5, colors.HexColor("#e2e8f0")),
-            ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
-            ("TOPPADDING", (0, 0), (-1, -1), 5),
-            ("BOTTOMPADDING", (0, 0), (-1, -1), 5),
-        ]))
-        elemente.append(tabel)
+    # Experiență
+    if experienta:
+        elemente.append(Paragraph("Experiență profesională", stil_sectiune))
+        elemente.append(HRFlowable(width="100%", thickness=0.5, color=VIOLET))
+        for exp in experienta:
+            elemente.append(Spacer(1, 5))
+            pozitie = exp.get("pozitie", "")
+            companie = exp.get("companie", "")
+            perioada = exp.get("perioada", "")
+            descriere = exp.get("descriere", "")
+            if pozitie:
+                elemente.append(Paragraph(f"{pozitie} — {companie}", stil_bold))
+            elif companie:
+                elemente.append(Paragraph(companie, stil_bold))
+            if perioada:
+                elemente.append(Paragraph(perioada, stil_italic))
+            if descriere:
+                elemente.append(Paragraph(descriere, stil_normal))
+
+    # Educație
+    if educatie:
+        elemente.append(Paragraph("Educație", stil_sectiune))
+        elemente.append(HRFlowable(width="100%", thickness=0.5, color=VIOLET))
+        for edu in educatie:
+            elemente.append(Spacer(1, 5))
+            institutie = edu.get("institutie", "")
+            nivel = edu.get("nivel", "")
+            domeniu = edu.get("domeniu", "")
+            an = edu.get("an", "")
+            linie1 = " — ".join(filter(None, [nivel, domeniu]))
+            if linie1:
+                elemente.append(Paragraph(linie1, stil_bold))
+            if institutie:
+                elemente.append(Paragraph(institutie, stil_normal))
+            if an:
+                elemente.append(Paragraph(str(an), stil_italic))
+
+    # Competențe
+    if competente:
+        elemente.append(Paragraph("Competențe", stil_sectiune))
+        elemente.append(HRFlowable(width="100%", thickness=0.5, color=VIOLET))
+        elemente.append(Spacer(1, 4))
+        elemente.append(Paragraph("  •  ".join(str(c) for c in competente), stil_normal))
+
+    # Limbi
+    if limbi:
+        elemente.append(Paragraph("Limbi străine", stil_sectiune))
+        elemente.append(HRFlowable(width="100%", thickness=0.5, color=VIOLET))
+        elemente.append(Spacer(1, 4))
+        randuri_limbi = []
+        for l in limbi:
+            limba = l.get("limba", "")
+            nivel = l.get("nivel", "")
+            if limba:
+                randuri_limbi.append(f"{limba}: {nivel}" if nivel else limba)
+        elemente.append(Paragraph("  •  ".join(randuri_limbi), stil_normal))
 
     # Footer
     elemente.append(Spacer(1, 20))
     elemente.append(HRFlowable(width="100%", thickness=1, color=GRI))
+    from datetime import datetime as _dt
     elemente.append(Paragraph(
-        f"Generat de JobPart • jobpart.ro • {__import__('datetime').datetime.now().strftime('%d.%m.%Y')}",
+        f"CV generat de JobPart.ro  •  {_dt.now().strftime('%d.%m.%Y')}",
         ParagraphStyle("footer", parent=styles["Normal"], textColor=GRI, fontSize=8, alignment=1)
     ))
 
     doc.build(elemente)
     buf.seek(0)
 
-    nume_fisier = f"profil_{user.nume.replace(' ', '_')}_JobPart.pdf"
+    nume_fisier = f"CV_{user.nume.replace(' ', '_')}_JobPart.pdf"
     return StreamingResponse(buf, media_type="application/pdf",
                              headers={"Content-Disposition": f"attachment; filename={nume_fisier}"})

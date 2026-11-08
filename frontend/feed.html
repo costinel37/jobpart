@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>JobPart — Feed</title>
+  <meta name="description" content="Joburi part-time și micro-joburi care se potrivesc cu programul tău." />
+  <meta name="theme-color" content="#0A0A0F" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700&family=Unbounded:wght@600;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/css/neo.css" />
+  <style>
+    body { overflow: hidden; }
+
+    /* Bara de sus (filtre) */
+    .topbar {
+      position: fixed; inset: 0 0 auto 0; z-index: 20;
+      display: flex; align-items: center; gap: .5rem; padding: .75rem 1rem;
+      padding-top: max(.75rem, env(safe-area-inset-top));
+      background: linear-gradient(var(--bg) 55%, transparent);
+    }
+    .logo { font: 800 1.05rem var(--font-display); color: var(--ink); text-decoration: none; margin-right: auto; }
+    .logo span { color: var(--neon); }
+    .filters { display: flex; gap: .4rem; overflow-x: auto; scrollbar-width: none; padding: 0 1rem .6rem; position: fixed; top: 56px; inset-inline: 0; z-index: 20; }
+    .filters::-webkit-scrollbar { display: none; }
+
+    /* Feed vertical cu snap */
+    .feed { height: 100dvh; overflow-y: auto; scroll-snap-type: y mandatory; overscroll-behavior: contain; scrollbar-width: none; }
+    .feed::-webkit-scrollbar { display: none; }
+    .slide { height: 100dvh; scroll-snap-align: start; scroll-snap-stop: always; display: grid; grid-template-columns: minmax(0, 1fr); place-items: center; padding: 112px 16px 24px; }
+
+    .card {
+      position: relative; width: min(520px, 100%); height: 100%; max-height: 760px;
+      display: flex; flex-direction: column; gap: 1rem; padding: 1.4rem;
+      background: var(--surface); border: 2px solid var(--line); border-radius: 26px;
+      box-shadow: 8px 8px 0 0 var(--accent, var(--violet));
+      overflow: hidden; isolation: isolate;
+    }
+    .card::before {
+      content: ""; position: absolute; inset: 0; z-index: -1; opacity: .9;
+      background:
+        radial-gradient(120% 60% at 100% 0%, color-mix(in srgb, var(--accent, var(--violet)) 35%, transparent), transparent 60%),
+        var(--cover, none) center/cover;
+    }
+    .card.has-cover::after { content: ""; position: absolute; inset: 0; z-index: -1; background: linear-gradient(180deg, transparent 0%, var(--surface) 55%); }
+
+    .match-ring { --p: 0; width: 64px; height: 64px; border-radius: 50%; flex: none; display: grid; place-items: center;
+      background: conic-gradient(var(--neon) calc(var(--p) * 1%), var(--surface-2) 0); }
+    .match-ring b { width: 50px; height: 50px; border-radius: 50%; background: var(--surface); display: grid; place-items: center; font: 800 .85rem var(--font-display); }
+
+    .title { font-size: clamp(1.6rem, 6vw, 2.3rem); line-height: 1.05; margin: 0; overflow-wrap: anywhere; }
+    .company { color: var(--muted); font-weight: 600; }
+    .pay { font: 800 clamp(1.3rem, 5.5vw, 1.7rem) var(--font-display); color: var(--neon); overflow-wrap: anywhere; }
+    .pay small { font: 600 .85rem var(--font-body); color: var(--muted); }
+    .chips { display: flex; flex-wrap: wrap; gap: .4rem; }
+    .snippet { color: var(--muted); line-height: 1.5; margin: 0; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
+
+    .week { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+    .week .d { text-align: center; font-size: .7rem; color: var(--muted); }
+    .week .bar { height: 46px; border-radius: 6px; background: var(--surface-2); position: relative; overflow: hidden; }
+    .week .bar i { position: absolute; left: 0; right: 0; background: var(--neon); border-radius: 3px; }
+
+    .actions { margin-top: auto; display: grid; grid-template-columns: 1fr auto auto; gap: .6rem; }
+    .actions .btn { padding: .9rem; }
+
+    /* Indicator de progres lateral */
+    .rail { position: fixed; right: 10px; top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; gap: 6px; z-index: 20; }
+    .rail i { width: 4px; height: 14px; border-radius: 4px; background: var(--line); transition: all .25s; }
+    .rail i.on { height: 28px; background: var(--neon); }
+
+    .empty { text-align: center; max-width: 380px; }
+    .empty h2 { font-size: 1.5rem; }
+    @media (min-width: 900px) { .rail { right: calc(50% - 300px); } }
+  </style>
+</head>
+<body>
+  <header class="topbar">
+    <a class="logo" href="/">JOB<span>PART</span></a>
+    <a class="btn btn-ghost" href="/static/disponibilitate.html" data-i18n="myHours" style="padding:.5rem .8rem">Orele mele</a>
+    <button class="btn btn-ghost" id="themeBtn" aria-label="Schimbă tema" style="padding:.5rem .7rem">◐</button>
+  </header>
+
+  <nav class="filters" aria-label="Filtre">
+    <button class="chip" id="locBtn" aria-pressed="false">📍 <span data-i18n="nearMe">Lângă mine</span></button>
+    <button class="chip" data-remote="all" aria-pressed="true" data-i18n="all">Toate</button>
+    <button class="chip" data-remote="only" aria-pressed="false">🌍 Remote</button>
+    <button class="chip" data-remote="exclude" aria-pressed="false" data-i18n="local">Local</button>
+    <select id="mode" aria-label="Mod navetă">
+      <option value="transit">🚇 ≤</option>
+      <option value="walk">🚶 ≤</option>
+    </select>
+    <select id="maxMin" aria-label="Minute navetă">
+      <option>10</option><option>15</option><option selected>20</option><option>30</option><option>45</option>
+    </select>
+    <select id="currency" aria-label="Monedă">
+      <option>RON</option><option>EUR</option><option>USD</option><option>GBP</option>
+    </select>
+    <select id="lang" aria-label="Limbă"><option value="ro">RO</option><option value="en">EN</option></select>
+  </nav>
+
+  <main class="feed" id="feed" aria-live="polite"></main>
+  <div class="rail" id="rail" aria-hidden="true"></div>
+  <div class="toast" id="toast" role="status"></div>
+
+  <template id="skeleton">
+    <section class="slide"><div class="card" aria-hidden="true">
+      <div style="display:flex;gap:1rem;align-items:center"><div class="skel" style="width:64px;height:64px;border-radius:50%"></div><div style="flex:1"><div class="skel" style="height:14px;width:40%;margin-bottom:8px"></div><div class="skel" style="height:12px;width:25%"></div></div></div>
+      <div class="skel" style="height:38px;width:85%"></div><div class="skel" style="height:38px;width:60%"></div>
+      <div class="skel" style="height:30px;width:45%"></div>
+      <div style="display:flex;gap:.4rem"><div class="skel" style="height:28px;width:90px;border-radius:999px"></div><div class="skel" style="height:28px;width:110px;border-radius:999px"></div><div class="skel" style="height:28px;width:70px;border-radius:999px"></div></div>
+      <div class="skel" style="height:70px"></div><div class="skel" style="height:66px"></div>
+      <div class="skel" style="height:54px;margin-top:auto;border-radius:14px"></div>
+    </div></section>
+  </template>
+
+  <script src="/static/js/api.js"></script>
+  <script>
+  (() => {
+    const I18N = {
+      ro: { myHours: "Orele mele", nearMe: "Lângă mine", all: "Toate", local: "Local", apply: "Aplică acum",
+        match: "potrivire", flexible: "Program flexibil", remote: "Remote", min: "min", walk: "pe jos", transit: "transport",
+        hour: "/oră", day: "/zi", month: "/lună", task: "/task", tz: "h față de tine", sameTz: "Același fus orar",
+        days: ["L","Ma","Mi","J","V","S","D"], yourTime: "Ture (ora ta)", noPay: "Salariu negociabil",
+        emptyT: "Nimic pe radar încă", emptyD: "Lărgește raza de navetă sau adaugă mai multe ore libere.", setHours: "Setează orele libere",
+        end: "Ai văzut tot. Revino mai târziu ⚡", locOk: "Locație setată", locErr: "Nu am acces la locație", err: "Conexiune pierdută. Reîncearcă.",
+        copied: "Link copiat", hint: "Setează-ți orele libere ca să vezi doar joburile compatibile →",
+        paidBy: "Plătit direct de angajator · JobPart nu intermediază plata", ad: "Promovat",adWhy: "Angajatorul a plătit pentru o poziție mai bună în feed.", est: "Durată estimată, nu traseu exact",
+        ct: { cim_part_time: "CIM part-time", cim_full_time: "CIM full-time", zilier: "Zilier", services_b2b: "PFA / B2B",
+              internship: "Internship", foreign_contract: "Contract extern" } },
+      en: { myHours: "My hours", nearMe: "Near me", all: "All", local: "Local", apply: "Apply now",
+        match: "match", flexible: "Flexible hours", remote: "Remote", min: "min", walk: "walk", transit: "transit",
+        hour: "/hr", day: "/day", month: "/mo", task: "/task", tz: "h from you", sameTz: "Same time zone",
+        days: ["M","Tu","W","Th","F","Sa","Su"], yourTime: "Shifts (your time)", noPay: "Pay negotiable",
+        emptyT: "Nothing on the radar yet", emptyD: "Widen your commute or add more free hours.", setHours: "Set free hours",
+        end: "You're all caught up ⚡", locOk: "Location set", locErr: "Location unavailable", err: "Connection lost. Retry.",
+        copied: "Link copied", hint: "Set your free hours to only see jobs that fit →",
+        paidBy: "Paid directly by the employer · JobPart does not handle payment", ad: "Sponsored",adWhy: "The employer paid for a higher position in the feed.", est: "Estimated time, not an exact route",
+        ct: { cim_part_time: "Part-time contract", cim_full_time: "Full-time contract", zilier: "Day labour", services_b2b: "Freelance / B2B",
+              internship: "Internship", foreign_contract: "Foreign contract" } },
+    };
+    const store = { get: k => { try { return localStorage.getItem(k); } catch { return null; } },
+                    set: (k, v) => { try { localStorage.setItem(k, v); } catch {} } };
+
+    const state = {
+      lang: store.get("jp_lang") || ((navigator.language || "ro").startsWith("en") ? "en" : "ro"),
+      remote: "all", mode: "transit", maxMin: 20, currency: store.get("jp_cur") || "RON",
+      lat: null, lng: null, cursor: 0, done: false, loading: false, count: 0,
+      tz: Intl.DateTimeFormat().resolvedOptions().timeZone,
+    };
+    const t = k => (I18N[state.lang] || I18N.ro)[k];
+    const $ = s => document.querySelector(s);
+    const feed = $("#feed"), rail = $("#rail");
+    const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+    const safeColor = c => /^#[0-9a-f]{6}$/i.test(c || "") ? c : null;
+    const safeUrl = u => { try { const x = new URL(u); return x.protocol === "https:" ? x.href : null; } catch { return null; } };
+
+    function toast(msg) { const el = $("#toast"); el.textContent = msg; el.classList.add("show"); clearTimeout(el._t); el._t = setTimeout(() => el.classList.remove("show"), 2200); }
+
+    // ── Tema ──
+    const theme = store.get("jp_theme"); if (theme) document.documentElement.dataset.theme = theme;
+    $("#themeBtn").onclick = () => {
+      const next = document.documentElement.dataset.theme === "light" ? "dark" : "light";
+      document.documentElement.dataset.theme = next; store.set("jp_theme", next);
+    };
+
+    function applyI18n() {
+      document.documentElement.lang = state.lang;
+      document.querySelectorAll("[data-i18n]").forEach(el => el.textContent = t(el.dataset.i18n));
+    }
+
+    function money(v, cur) {
+      if (v == null) return null;
+      // sume ≥ 10 se rotunjesc (69 RON, nu 69,03 RON); sub 10 păstrăm zecimalele (7,50 €)
+      return new Intl.NumberFormat(state.lang === "en" ? "en-GB" : "ro-RO", { style: "currency", currency: cur, maximumFractionDigits: v >= 1000 || v % 100 === 0 ? 0 : 2 }).format(v / 100);
+    }
+
+    function weekBars(shifts) {
+      const days = t("days");
+      return `<div class="week" aria-label="${esc(t("yourTime"))}">` + days.map((d, i) => {
+        const bars = shifts.filter(s => s.weekday === i).map(s =>
+          `<i style="top:${s.start / 1440 * 100}%;height:${Math.max(4, (s.end - s.start) / 1440 * 100)}%"></i>`).join("");
+        return `<div><div class="bar">${bars}</div><div class="d">${d}</div></div>`;
+      }).join("") + `</div>`;
+    }
+
+    function cardHTML(j) {
+      const accent = safeColor(j.accent_color), cover = safeUrl(j.cover_image_url);
+      const pct = j.match ? Math.round(j.match.coverage * 100) : null;
+      const pmin = money(j.pay.min, j.pay.currency), pmax = money(j.pay.max, j.pay.currency);
+      const approx = j.pay.original && j.pay.original.currency !== j.pay.currency ? "≈ " : "";
+      const pay = pmin || pmax ? `${approx}${pmin || ""}${pmin && pmax && pmin !== pmax ? "–" + pmax : (!pmin ? pmax : "")} <small>${esc(t(j.pay.period))}</small>` : `<small>${esc(t("noPay"))}</small>`;
+      const tz = j.tz_diff_hours ? `🕐 ${j.tz_diff_hours > 0 ? "+" : ""}${j.tz_diff_hours}${t("tz")}` : null;
+      const chips = [
+        j.is_remote ? `<span class="chip chip-violet">🌍 ${esc(t("remote"))} · ${esc(j.country_code)}</span>` : `<span class="chip">📍 ${esc(j.city)}</span>`,
+        j.commute_min != null ? `<span class="chip chip-neon" title="${esc(t("est"))}">${j.commute_mode === "walk" ? "🚶" : "🚇"} ~${j.commute_min} ${t("min")}</span>` : "",
+        j.is_remote && tz ? `<span class="chip">${esc(tz)}</span>` : "",
+        j.flexible_schedule ? `<span class="chip">✨ ${esc(t("flexible"))}</span>` : "",
+        j.category ? `<span class="chip">#${esc(j.category)}</span>` : "",
+        j.contract_type ? `<span class="chip">📄 ${esc(t("ct")[j.contract_type] || j.contract_type)}</span>` : "",
+      ].join("");
+      const sponsored = j.sponsored ? `<span class="chip chip-neon" title="${esc(t("adWhy"))}" style="position:absolute;top:1rem;right:1rem">${esc(t("ad"))}</span>` : "";
+      const rating = j.company_rating ? ` · ★ ${j.company_rating.avg} (${j.company_rating.count})` : "";
+      return `
+        <div class="card rise ${cover ? "has-cover" : ""}" style="${accent ? `--accent:${accent};` : ""}${cover ? `--cover:url('${cover}');` : ""}">
+          ${sponsored}
+          <div style="display:flex;gap:1rem;align-items:center">
+            ${pct != null ? `<div class="match-ring" style="--p:${pct}" title="${pct}% ${esc(t("match"))}"><b>${pct}%</b></div>` : ""}
+            <div><div style="font-weight:700">${esc(j.company)}</div><div class="company">${esc(rating.replace(/^ · /, ""))}</div></div>
+          </div>
+          <h2 class="title">${esc(j.title)}</h2>
+          <div><div class="pay">${pay}</div><div style="font-size:.72rem;color:var(--muted);margin-top:.15rem">${esc(t("paidBy"))}</div></div>
+          <div class="chips">${chips}</div>
+          <p class="snippet">${esc(j.snippet)}</p>
+          ${j.shifts_local.length ? `<div><div style="font-size:.75rem;color:var(--muted);margin-bottom:.35rem">${esc(t("yourTime"))} · ${esc(state.tz)}</div>${weekBars(j.shifts_local)}</div>` : ""}
+          <div class="actions">
+            <a class="btn btn-neon" href="/static/job-detalii.html?id=${encodeURIComponent(j.id)}">${esc(t("apply"))} →</a>
+            <button class="btn" data-share="${encodeURIComponent(j.id)}" aria-label="Share">↗</button>
+            <button class="btn" data-skip aria-label="Next">↓</button>
+          </div>
+        </div>`;
+    }
+
+    function addSkeletons(n) {
+      const tpl = $("#skeleton");
+      for (let i = 0; i < n; i++) { const node = tpl.content.firstElementChild.cloneNode(true); node.dataset.skel = "1"; feed.appendChild(node); }
+    }
+    const clearSkeletons = () => feed.querySelectorAll("[data-skel]").forEach(n => n.remove());
+
+    function renderRail() {
+      const n = Math.min(state.count, 12);
+      rail.innerHTML = Array.from({ length: n }, () => "<i></i>").join("");
+    }
+
+    async function load(reset = false) {
+      if (state.loading || (state.done && !reset)) return;
+      state.loading = true;
+      if (reset) { feed.innerHTML = ""; state.cursor = 0; state.done = false; state.count = 0; feed.scrollTop = 0; }
+      addSkeletons(reset ? 1 : 1);
+
+      const p = new URLSearchParams({ remote: state.remote, mode: state.mode, max_min: state.maxMin,
+        currency: state.currency, tz: state.tz, cursor: state.cursor, limit: 8 });
+      if (state.lat != null) { p.set("lat", state.lat); p.set("lng", state.lng); }
+      const headers = {}; const tok = typeof getToken === "function" ? getToken() : null;
+      if (tok) headers.Authorization = `Bearer ${tok}`;
+
+      try {
+        const res = await fetch(`${API_BASE}/v2/feed?${p}`, { headers });
+        if (!res.ok) throw new Error(res.status);
+        const data = await res.json();
+        clearSkeletons();
+
+        if (reset && !data.items.length) return renderEmpty();
+        if (reset && tok && !data.context.schedule_filter_active) renderHint();
+
+        for (const j of data.items) {
+          const s = document.createElement("section");
+          s.className = "slide"; s.innerHTML = cardHTML(j); feed.appendChild(s);
+          state.count++;
+        }
+        state.cursor = data.next_cursor ?? state.cursor;
+        state.done = data.next_cursor == null;
+        if (state.done && state.count) {
+          const s = document.createElement("section"); s.className = "slide";
+          s.innerHTML = `<div class="empty rise"><h2>${esc(t("end"))}</h2>
+            <p style="color:var(--muted);font-size:.85rem">${esc(data.context.ranking_disclosure || "")}</p></div>`;
+          feed.appendChild(s);
+        }
+        renderRail(); observeTail(); updateRail();
+      } catch {
+        clearSkeletons();
+        const s = document.createElement("section"); s.className = "slide";
+        s.innerHTML = `<div class="empty rise"><h2>${esc(t("err"))}</h2><button class="btn btn-neon" id="retry">↻</button></div>`;
+        feed.appendChild(s); s.querySelector("#retry").onclick = () => { s.remove(); load(); };
+      } finally { state.loading = false; }
+    }
+
+    function renderEmpty() {
+      feed.innerHTML = `<section class="slide"><div class="empty rise"><div style="font-size:3rem">🛰️</div>
+        <h2>${esc(t("emptyT"))}</h2><p style="color:var(--muted)">${esc(t("emptyD"))}</p>
+        <a class="btn btn-neon" href="/static/disponibilitate.html">${esc(t("setHours"))}</a></div></section>`;
+      rail.innerHTML = "";
+    }
+    function renderHint() {
+      const a = document.createElement("a");
+      a.href = "/static/disponibilitate.html"; a.className = "chip chip-neon";
+      a.style.cssText = "position:fixed;bottom:16px;left:50%;transform:translateX(-50%);z-index:30;text-decoration:none;max-width:calc(100vw - 32px);white-space:normal";
+      a.textContent = t("hint"); document.body.appendChild(a); setTimeout(() => a.remove(), 7000);
+    }
+
+    // Încărcare infinită: când penultimul card devine vizibil
+    let tailObs;
+    function observeTail() {
+      tailObs?.disconnect();
+      const slides = feed.querySelectorAll(".slide:not([data-skel])");
+      const target = slides[Math.max(0, slides.length - 2)];
+      if (!target || state.done) return;
+      tailObs = new IntersectionObserver(e => { if (e[0].isIntersecting) load(); }, { root: feed, threshold: .6 });
+      tailObs.observe(target);
+    }
+
+    function updateRail() {
+      const idx = Math.round(feed.scrollTop / feed.clientHeight);
+      [...rail.children].forEach((el, i) => el.classList.toggle("on", i === Math.min(idx, rail.children.length - 1)));
+    }
+    feed.addEventListener("scroll", () => requestAnimationFrame(updateRail), { passive: true });
+
+    // Tastatură: J/K, săgeți, spațiu
+    document.addEventListener("keydown", e => {
+      if (["INPUT", "SELECT", "TEXTAREA"].includes(e.target.tagName)) return;
+      const step = { ArrowDown: 1, j: 1, " ": 1, ArrowUp: -1, k: -1 }[e.key];
+      if (step) { e.preventDefault(); feed.scrollBy({ top: step * feed.clientHeight, behavior: "smooth" }); }
+    });
+
+    feed.addEventListener("click", async e => {
+      if (e.target.closest("[data-skip]")) feed.scrollBy({ top: feed.clientHeight, behavior: "smooth" });
+      const sh = e.target.closest("[data-share]");
+      if (sh) {
+        const url = `${location.origin}/static/job-detalii.html?id=${sh.dataset.share}`;
+        if (navigator.share) navigator.share({ url }).catch(() => {});
+        else { await navigator.clipboard?.writeText(url); toast(t("copied")); }
+      }
+    });
+
+    // ── Filtre ──
+    document.querySelectorAll("[data-remote]").forEach(b => b.onclick = () => {
+      document.querySelectorAll("[data-remote]").forEach(x => x.setAttribute("aria-pressed", x === b));
+      state.remote = b.dataset.remote; load(true);
+    });
+    $("#mode").onchange = e => { state.mode = e.target.value; load(true); };
+    $("#maxMin").onchange = e => { state.maxMin = +e.target.value; load(true); };
+    $("#currency").value = state.currency;
+    $("#currency").onchange = e => { state.currency = e.target.value; store.set("jp_cur", state.currency); load(true); };
+    $("#lang").value = state.lang;
+    $("#lang").onchange = e => { state.lang = e.target.value; store.set("jp_lang", state.lang); applyI18n(); load(true); };
+    $("#locBtn").onclick = () => {
+      if (!navigator.geolocation) return toast(t("locErr"));
+      navigator.geolocation.getCurrentPosition(pos => {
+        // rotunjim la ~100 m: suficient pentru navetă, mai bine pentru confidențialitate
+        state.lat = +pos.coords.latitude.toFixed(3); state.lng = +pos.coords.longitude.toFixed(3);
+        $("#locBtn").setAttribute("aria-pressed", "true"); toast(t("locOk")); load(true);
+      }, () => toast(t("locErr")), { enableHighAccuracy: false, timeout: 8000, maximumAge: 600000 });
+    };
+
+    applyI18n();
+    load(true);
+  })();
+  </script>
+</body>
+</html>

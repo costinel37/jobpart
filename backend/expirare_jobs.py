@@ -30,6 +30,11 @@ def _ruleaza_verificari():
             _curata_cv_expirate(db, now)
             _curata_date_expirate(db, now)
             _trimite_job_alerts(db, now)
+            try:
+                from billing_service import sweep as abonamente_sweep
+                abonamente_sweep(db, now)  # nu face nimic până la BILLING_ENFORCED=1
+            except Exception as e:
+                logger.error(f"[ABONAMENTE] Eroare sweep: {e}")
         finally:
             db.close()
     except Exception as e:

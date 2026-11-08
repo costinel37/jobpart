@@ -10,8 +10,7 @@ from auth import get_user_curent, require_rol
 from geocoding import geocodeaza_oras, distanta_km
 from telegram_service import notifica_job_nou
 from security import limiter
-
-ZILE_GRATUIT = 365
+from billing_service import assert_can_post_job, job_expiry
 
 router = APIRouter(prefix="/api/jobs", tags=["Joburi"])
 
@@ -268,10 +267,11 @@ def creeaza_job(
     db: Session = Depends(get_db),
     current_user=Depends(require_rol("angajator", "admin"))
 ):
+    plan = assert_can_post_job(db, current_user)  # limita abonamentului (inactivă până la BILLING_ENFORCED=1)
     job = models.Job(
         **job_data.model_dump(),
         angajator_id=current_user.id,
-        expira_la=datetime.utcnow() + timedelta(days=ZILE_GRATUIT),
+        expira_la=job_expiry(plan),
     )
     db.add(job)
     db.commit()
@@ -316,11 +316,17 @@ def reinnoire_job(
         raise HTTPException(status_code=404, detail="Jobul nu a fost găsit.")
     if job.angajator_id != current_user.id and current_user.rol != "admin":
         raise HTTPException(status_code=403, detail="Nu ai permisiunea să reînnoiești acest job.")
+    owner = db.get(models.User, job.angajator_id) or current_user
+    if not job.activ:
+        plan = assert_can_post_job(db, owner)  # reactivarea ocupă un loc în limita de joburi active
+    else:
+        from billing_service import get_entitlements
+        plan = get_entitlements(db, owner)[1]
     job.activ = True
-    job.expira_la = datetime.utcnow() + timedelta(days=ZILE_GRATUIT)
+    job.expira_la = job_expiry(plan)
     job.avertisment_job = False
     db.commit()
-    return {"mesaj": f"Anunț reînnoit pentru {ZILE_GRATUIT} de zile.", "expira_la": job.expira_la}
+    return {"mesaj": f"Anunț reînnoit pentru {plan.job_validity_days} de zile.", "expira_la": job.expira_la}
 
 
 @router.post("/{job_id}/promoveaza")

@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="ro">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CV Candidat — JobPart</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%237c3aed'/><text x='50%' y='50%' font-size='20' text-anchor='middle' dominant-baseline='central' fill='white' font-family='Arial'>J</text></svg>" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    @media print { .no-print { display: none !important; } body { background: white; } }
+  </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+
+<div class="no-print bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between sticky top-0 z-10">
+  <a href="/static/index.html" class="flex items-center gap-2">
+    <span class="text-lg font-bold" style="background:linear-gradient(135deg,#7c3aed,#a855f7);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">Job</span><span class="text-lg font-bold text-gray-800">Part</span>
+  </a>
+  <div class="flex gap-2">
+    <button id="btn-pdf" onclick="descarcaCvPdf()"
+      class="hidden flex items-center gap-1 bg-violet-600 hover:bg-violet-700 text-white px-3 py-1.5 rounded-lg text-sm font-medium transition">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
+      Descarcă PDF
+    </button>
+    <button onclick="window.print()" class="no-print flex items-center gap-1 border border-gray-300 hover:bg-gray-50 text-gray-700 px-3 py-1.5 rounded-lg text-sm transition">
+      <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/></svg>
+      Tipărește
+    </button>
+  </div>
+</div>
+
+<div id="loading" class="flex items-center justify-center py-20 text-gray-400">Se încarcă...</div>
+<div id="eroare" class="hidden max-w-lg mx-auto mt-12 bg-red-50 border border-red-200 text-red-700 rounded-xl p-6 text-center"></div>
+
+<div id="cv" class="hidden max-w-3xl mx-auto my-8 px-4">
+  <!-- Header -->
+  <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 mb-4">
+    <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
+      <div>
+        <h1 id="cv-nume" class="text-3xl font-bold text-gray-900"></h1>
+        <p id="cv-titlu" class="text-violet-600 font-medium text-lg mt-1 hidden"></p>
+        <div id="cv-info" class="flex flex-wrap gap-3 mt-3 text-sm text-gray-500"></div>
+      </div>
+      <div id="cv-badges" class="flex flex-wrap gap-2"></div>
+    </div>
+    <div id="cv-despre" class="hidden mt-5 pt-5 border-t border-gray-100 text-gray-700 leading-relaxed"></div>
+  </div>
+
+  <!-- Experiență -->
+  <div id="sec-experienta" class="hidden bg-white rounded-2xl shadow-sm border border-gray-100 p-8 mb-4">
+    <h2 class="text-lg font-bold text-gray-900 mb-5 flex items-center gap-2">
+      <span class="w-7 h-7 bg-violet-100 rounded-lg flex items-center justify-center">
+        <svg class="w-4 h-4 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+      </span>
+      Experiență profesională
+    </h2>
+    <div id="lista-experienta" class="space-y-5"></div>
+  </div>
+
+  <!-- Educație -->
+  <div id="sec-educatie" class="hidden bg-white rounded-2xl shadow-sm border border-gray-100 p-8 mb-4">
+    <h2 class="text-lg font-bold text-gray-900 mb-5 flex items-center gap-2">
+      <span class="w-7 h-7 bg-violet-100 rounded-lg flex items-center justify-center">
+        <svg class="w-4 h-4 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l9-5-9-5-9 5 9 5z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/></svg>
+      </span>
+      Educație
+    </h2>
+    <div id="lista-educatie" class="space-y-5"></div>
+  </div>
+
+  <!-- Competențe + Limbi -->
+  <div id="sec-competente" class="hidden bg-white rounded-2xl shadow-sm border border-gray-100 p-8 mb-4">
+    <div class="grid md:grid-cols-2 gap-8">
+      <div>
+        <h2 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+          <span class="w-7 h-7 bg-violet-100 rounded-lg flex items-center justify-center">
+            <svg class="w-4 h-4 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+          </span>
+          Competențe
+        </h2>
+        <div id="lista-competente" class="flex flex-wrap gap-2"></div>
+      </div>
+      <div id="col-limbi" class="hidden">
+        <h2 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+          <span class="w-7 h-7 bg-violet-100 rounded-lg flex items-center justify-center">
+            <svg class="w-4 h-4 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129"/></svg>
+          </span>
+          Limbi străine
+        </h2>
+        <div id="lista-limbi" class="space-y-2"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <p class="text-center text-xs text-gray-400 mt-6 mb-10 no-print">
+    CV generat pe <a href="https://jobpart.ro" class="text-violet-500 hover:underline">JobPart.ro</a>
+  </p>
+</div>
+
+<script src="/static/js/api.js"></script>
+<script>
+(async () => {
+  const params = new URLSearchParams(window.location.search);
+  const userId = params.get("id");
+
+  if (!userId) {
+    document.getElementById("loading").classList.add("hidden");
+    const err = document.getElementById("eroare");
+    err.textContent = "ID candidat lipsă.";
+    err.classList.remove("hidden");
+    return;
+  }
+
+  try {
+    const cv = await apiFetch(`/candidati/${encodeURIComponent(userId)}`, { skipAuth: true });
+    if (cv.este_titular) document.getElementById("btn-pdf").classList.remove("hidden");
+    const e = escapeHtml;
+
+    document.getElementById("loading").classList.add("hidden");
+    document.getElementById("cv").classList.remove("hidden");
+
+    document.getElementById("cv-nume").textContent = cv.nume || "";
+
+    if (cv.titlu_profesional) {
+      const el = document.getElementById("cv-titlu");
+      el.textContent = cv.titlu_profesional;
+      el.classList.remove("hidden");
+    }
+
+    // Info contact
+    const info = document.getElementById("cv-info");
+    if (cv.oras) info.innerHTML += `<span class="flex items-center gap-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>${e(cv.oras)}</span>`;
+    if (cv.email) info.innerHTML += `<span class="flex items-center gap-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>${e(cv.email)}</span>`;
+    if (cv.telefon) info.innerHTML += `<span class="flex items-center gap-1"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>${e(cv.telefon)}</span>`;
+
+    // Badges
+    const badges = document.getElementById("cv-badges");
+    if (cv.disponibilitate) {
+      badges.innerHTML += `<span class="bg-green-100 text-green-700 text-xs font-semibold px-3 py-1 rounded-full">Disponibil: ${e(cv.disponibilitate)}</span>`;
+    }
+    if (cv.permis_auto) {
+      badges.innerHTML += `<span class="bg-blue-100 text-blue-700 text-xs font-semibold px-3 py-1 rounded-full">Permis auto</span>`;
+    }
+
+    // Despre
+    if (cv.despre) {
+      const el = document.getElementById("cv-despre");
+      el.textContent = cv.despre;
+      el.classList.remove("hidden");
+    }
+
+    // Experiență
+    if (cv.experienta && cv.experienta.length > 0) {
+      document.getElementById("sec-experienta").classList.remove("hidden");
+      const lista = document.getElementById("lista-experienta");
+      cv.experienta.forEach(exp => {
+        lista.innerHTML += `
+          <div class="border-l-2 border-violet-200 pl-4">
+            <div class="font-semibold text-gray-900">${e(exp.pozitie)}${exp.pozitie && exp.companie ? " — " : ""}${e(exp.companie)}</div>
+            ${exp.perioada ? `<div class="text-sm text-gray-500 mt-0.5">${e(exp.perioada)}</div>` : ""}
+            ${exp.descriere ? `<div class="text-gray-700 text-sm mt-1.5 whitespace-pre-line">${e(exp.descriere)}</div>` : ""}
+          </div>`;
+      });
+    }
+
+    // Educație
+    if (cv.educatie && cv.educatie.length > 0) {
+      document.getElementById("sec-educatie").classList.remove("hidden");
+      const lista = document.getElementById("lista-educatie");
+      cv.educatie.forEach(edu => {
+        lista.innerHTML += `
+          <div class="border-l-2 border-violet-200 pl-4">
+            <div class="font-semibold text-gray-900">${e([edu.nivel, edu.domeniu].filter(Boolean).join(" — ") || edu.institutie)}</div>
+            ${edu.institutie && (edu.nivel || edu.domeniu) ? `<div class="text-gray-700 text-sm mt-0.5">${e(edu.institutie)}</div>` : ""}
+            ${edu.an ? `<div class="text-sm text-gray-500 mt-0.5">${e(edu.an)}</div>` : ""}
+          </div>`;
+      });
+    }
+
+    // Competențe + Limbi
+    const areComp = cv.competente && cv.competente.length > 0;
+    const areLimbi = cv.limbi && cv.limbi.length > 0;
+    if (areComp || areLimbi) {
+      document.getElementById("sec-competente").classList.remove("hidden");
+      if (areComp) {
+        const lista = document.getElementById("lista-competente");
+        cv.competente.forEach(c => {
+          lista.innerHTML += `<span class="bg-violet-50 text-violet-700 text-sm px-3 py-1 rounded-full border border-violet-100">${e(c)}</span>`;
+        });
+      }
+      if (areLimbi) {
+        document.getElementById("col-limbi").classList.remove("hidden");
+        const lista = document.getElementById("lista-limbi");
+        cv.limbi.forEach(l => {
+          lista.innerHTML += `<div class="flex justify-between items-center py-1 border-b border-gray-100 last:border-0">
+            <span class="text-gray-800 font-medium">${e(l.limba)}</span>
+            <span class="text-sm text-gray-500">${e(l.nivel)}</span>
+          </div>`;
+        });
+      }
+    }
+
+  } catch (err) {
+    document.getElementById("loading").classList.add("hidden");
+    const el = document.getElementById("eroare");
+    el.textContent = err.message || "CV-ul nu este disponibil.";
+    el.classList.remove("hidden");
+  }
+})();
+
+async function descarcaCvPdf() {
+  const res = await fetch(`${API_BASE}/export/cv-pdf`, { headers: { Authorization: `Bearer ${getToken()}` } });
+  if (!res.ok) { alert("Eroare la generarea PDF-ului."); return; }
+  const url = URL.createObjectURL(await res.blob());
+  const a = document.createElement("a");
+  a.href = url; a.download = "CV_JobPart.pdf";
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+</script>
+</body>
+</html>

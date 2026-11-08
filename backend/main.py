@@ -12,7 +12,9 @@ import os
 
 from database import engine
 import models
-from routers import auth, jobs, applications, admin, upload, reviews, favorite, mesaje, notificari, export, promotii, precontracte, alerts, urgenta, import_rss
+import models_v2  # noqa: F401 — înregistrează tabelele v2 pentru create_all
+from routers import auth, jobs, applications, admin, upload, reviews, favorite, mesaje, notificari, export, promotii, precontracte, alerts, urgenta, import_rss, candidati
+from routers import v2_feed, v2_billing
 from security import (
     limiter, SecurityHeadersMiddleware,
     RequestLoggingMiddleware, eroare_rate_limit
@@ -79,6 +81,9 @@ app.include_router(precontracte.router)
 app.include_router(alerts.router)
 app.include_router(urgenta.router)
 app.include_router(import_rss.router)
+app.include_router(candidati.router)
+app.include_router(v2_feed.router)
+app.include_router(v2_billing.router)
 
 frontend_path = os.path.join(os.path.dirname(__file__), "..", "frontend")
 app.mount("/static", StaticFiles(directory=frontend_path), name="static")
@@ -110,6 +115,18 @@ def startup():
         "partener_aplicatii": [
             ("tara", "VARCHAR(10)"),
             ("cui", "VARCHAR(30)"),
+        ],
+        "candidat_cv": [
+            ("titlu_profesional", "VARCHAR(200)"),
+            ("experienta", "TEXT"),
+            ("educatie", "TEXT"),
+            ("competente", "TEXT"),
+            ("limbi", "TEXT"),
+            ("permis_auto", "BOOLEAN DEFAULT FALSE"),
+            ("disponibilitate", "VARCHAR(50)"),
+            ("cv_vizibil", "BOOLEAN DEFAULT FALSE"),
+            ("actualizat_la", "TIMESTAMP"),
+            ("creat_la", "TIMESTAMP"),
         ],
     }
     insp = inspect(engine)
@@ -197,6 +214,8 @@ Disallow: /static/profil.html
 Disallow: /static/resetare-parola.html
 Disallow: /static/confirmare-email.html
 Disallow: /static/plata-succes.html
+Disallow: /static/disponibilitate.html
+Disallow: /static/abonament.html
 Disallow: /api/
 Sitemap: https://jobpart.ro/sitemap.xml
 """
@@ -211,6 +230,7 @@ def sitemap(db=None):
         urls = [
             "<url><loc>https://jobpart.ro/</loc><changefreq>daily</changefreq><priority>1.0</priority></url>",
             "<url><loc>https://jobpart.ro/static/jobs.html</loc><changefreq>hourly</changefreq><priority>0.9</priority></url>",
+            "<url><loc>https://jobpart.ro/static/feed.html</loc><changefreq>hourly</changefreq><priority>0.9</priority></url>",
             "<url><loc>https://jobpart.ro/static/harta.html</loc><changefreq>daily</changefreq><priority>0.7</priority></url>",
             "<url><loc>https://jobpart.ro/static/register.html</loc><changefreq>monthly</changefreq><priority>0.6</priority></url>",
             "<url><loc>https://jobpart.ro/static/termeni.html</loc><changefreq>monthly</changefreq><priority>0.3</priority></url>",

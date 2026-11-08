@@ -1,0 +1,102 @@
+/* JobPart v2 — „Cyber Neo-Brutalism”. Dark nativ, light opțional (data-theme="light"). */
+:root {
+  --bg: #0A0A0F;
+  --surface: #14141C;
+  --surface-2: #1D1D29;
+  --ink: #F4F4F6;
+  --muted: #9A9AAE;
+  --line: #2C2C3D;
+  --neon: #B4FF39;
+  --violet: #9D5CFF;
+  --pink: #FF4D9D;
+  --danger: #FF5A5A;
+  --shadow: 4px 4px 0 0 var(--neon);
+  --shadow-v: 4px 4px 0 0 var(--violet);
+  --radius: 18px;
+  --font-display: "Unbounded", "Space Grotesk", system-ui, sans-serif;
+  --font-body: "Space Grotesk", system-ui, sans-serif;
+  color-scheme: dark;
+}
+:root[data-theme="light"] {
+  --bg: #F6F5EF;
+  --surface: #FFFFFF;
+  --surface-2: #EFEDE4;
+  --ink: #0A0A0F;
+  --muted: #5B5B6E;
+  --line: #0A0A0F;
+  --neon: #7BD500;
+  --violet: #6D28D9;
+  --shadow: 4px 4px 0 0 #0A0A0F;
+  --shadow-v: 4px 4px 0 0 var(--violet);
+  color-scheme: light;
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+}
+h1, h2, h3, .display { font-family: var(--font-display); letter-spacing: -0.02em; }
+
+/* ── Butoane ── */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: .5rem;
+  font: 700 .95rem var(--font-body);
+  padding: .8rem 1.2rem; border-radius: 14px; cursor: pointer;
+  border: 2px solid var(--ink); background: var(--surface); color: var(--ink);
+  box-shadow: var(--shadow); text-decoration: none;
+  transition: transform .12s ease, box-shadow .12s ease, background .2s;
+}
+.btn:hover { transform: translate(-2px, -2px); box-shadow: 6px 6px 0 0 var(--neon); }
+.btn:active { transform: translate(2px, 2px); box-shadow: 0 0 0 0 var(--neon); }
+.btn-neon { background: var(--neon); color: #0A0A0F; border-color: #0A0A0F; box-shadow: 4px 4px 0 0 var(--violet); }
+.btn-neon:hover { box-shadow: 6px 6px 0 0 var(--violet); }
+.btn-ghost { box-shadow: none; border-color: var(--line); }
+.btn-ghost:hover { box-shadow: none; border-color: var(--neon); transform: none; }
+.btn:focus-visible, .chip:focus-visible, select:focus-visible, input:focus-visible { outline: 3px solid var(--violet); outline-offset: 2px; }
+
+/* ── Chip-uri ── */
+.chip {
+  display: inline-flex; align-items: center; gap: .35rem;
+  font: 600 .8rem var(--font-body); white-space: nowrap;
+  padding: .35rem .7rem; border-radius: 999px;
+  border: 1.5px solid var(--line); background: var(--surface-2); color: var(--ink);
+}
+.chip-neon { background: var(--neon); color: #0A0A0F; border-color: transparent; }
+.chip-violet { background: var(--violet); color: #fff; border-color: transparent; }
+button.chip { cursor: pointer; }
+button.chip[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+
+select, input[type="number"] {
+  font: 600 .85rem var(--font-body); color: var(--ink); background: var(--surface-2);
+  border: 1.5px solid var(--line); border-radius: 10px; padding: .4rem .6rem;
+}
+
+/* ── Skeleton loaders ── */
+.skel {
+  background: linear-gradient(100deg, var(--surface-2) 30%, color-mix(in srgb, var(--surface-2) 60%, var(--violet)) 50%, var(--surface-2) 70%);
+  background-size: 300% 100%;
+  animation: shimmer 1.3s linear infinite;
+  border-radius: 10px;
+}
+@keyframes shimmer { from { background-position: 100% 0; } to { background-position: -200% 0; } }
+
+/* ── Intrări animate ── */
+.rise { animation: rise .45s cubic-bezier(.2, .9, .3, 1.2) both; }
+@keyframes rise { from { opacity: 0; transform: translateY(18px) scale(.98); } to { opacity: 1; transform: none; } }
+
+.toast {
+  position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%) translateY(calc(100% + 48px));
+  background: var(--ink); color: var(--bg); font-weight: 700; padding: .8rem 1.1rem;
+  border-radius: 12px; z-index: 100; visibility: hidden;
+  transition: transform .3s cubic-bezier(.2, .9, .3, 1.2), visibility 0s linear .3s;
+  max-width: calc(100vw - 32px);
+}
+.toast.show { transform: translateX(-50%) translateY(0); visibility: visible; transition-delay: 0s; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; scroll-behavior: auto !important; }
+}

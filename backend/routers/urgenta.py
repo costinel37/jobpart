@@ -35,6 +35,9 @@ def trimite_cerere_urgenta(
     db: Session = Depends(get_db),
     current_user=Depends(require_rol("candidat"))
 ):
+    # DEZACTIVAT: JobPart nu percepe taxe de la persoanele care își caută un loc de muncă.
+    # Cererile existente rămân vizibile în admin (pentru respingere / rambursare).
+    raise HTTPException(status_code=410, detail="Serviciul a fost retras. JobPart este gratuit pentru candidați.")
     if body.zile not in OPTIUNI_ZILE:
         raise HTTPException(status_code=400, detail="Alege 1 sau 3 zile.")
 
