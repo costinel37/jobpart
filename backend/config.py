@@ -8,6 +8,10 @@ DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./joburi.db")
 # Railway livreaza postgres:// dar SQLAlchemy 2.0 necesita postgresql://
 if DATABASE_URL.startswith("postgres://"):
     DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
+# Driver explicit: SQLAlchemy 2.1 a schimbat driverul implicit în „psycopg” (v3),
+# dar noi avem instalat psycopg2-binary. Fără asta, aplicația cade la pornire pe Render.
+if DATABASE_URL.startswith("postgresql://"):
+    DATABASE_URL = DATABASE_URL.replace("postgresql://", "postgresql+psycopg2://", 1)
 FRONTEND_URL = os.getenv("FRONTEND_URL", "https://jobpart.ro")
 
 _SECRET_KEY = os.getenv("SECRET_KEY", "")
